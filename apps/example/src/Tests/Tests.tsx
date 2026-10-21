@@ -25,6 +25,14 @@ const errorEnvelope = (error: unknown) =>
     $$error: error instanceof Error ? error.message : String(error),
   });
 
+// JSON.stringify returns undefined for a result JSON cannot carry: undefined, a function, a symbol.
+const resultMessage = (result: unknown) => {
+  const json: string | undefined = JSON.stringify(result);
+  return json === undefined
+    ? errorEnvelope(`The snippet's result has no JSON form: ${typeof result}`)
+    : json;
+};
+
 // The device Skia renders with, as a GPUDevice. Skia replaces a lost device
 // with a new one: the import is let go of when that happens, so that the next
 // use imports the new device.
@@ -120,10 +128,10 @@ export const Tests = ({ assets }: TestsProps) => {
             });
             if (result instanceof Promise) {
               result
-                .then((r) => client.send(JSON.stringify(r)))
+                .then((r) => client.send(resultMessage(r)))
                 .catch((error) => client.send(errorEnvelope(error)));
             } else {
-              client.send(JSON.stringify(result));
+              client.send(resultMessage(result));
             }
           } catch (error) {
             client.send(errorEnvelope(error));
