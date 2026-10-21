@@ -350,32 +350,22 @@ public:
 
   // Recorders ----------------------------------------------------------------
   //
-  // Every recorder comes from here, so that each is known with the
-  // generation it was made for (see generation()): a recording is only run
+  // The recorders of the threads (see getRecorder) are known with the
+  // generation each was made for (see generation()): a recording is only run
   // on the device it was recorded for (submitRecording), and the recorders
   // of a lost device are kept alive, since a surface made on a recorder
-  // cannot be drawn into once the recorder is gone.
-
-  /** Deletes a recorder made by makeRecorder() and forgets it. */
-  struct RecorderDeleter {
-    void operator()(skgpu::graphite::Recorder *recorder) const noexcept {
-      if (auto *instance = tryGetInstance()) {
-        instance->forgetRecorder(recorder);
-      }
-      delete recorder;
-    }
-  };
-  using RecorderPtr =
-      std::unique_ptr<skgpu::graphite::Recorder, RecorderDeleter>;
+  // cannot be drawn into once the recorder is gone. A view's recorder
+  // (makeRecorder) is tracked by the view instead (RNSkGraphiteRecorder).
 
   /**
    A recorder of its own for a client that records on one thread and replays
    on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
    calling thread. Made for the device in use (see generation()), to be
-   replaced once that device is lost. Creating a recorder is a Context
-   operation, hence the lock.
+   replaced once that device is lost; its recordings go through
+   insertRecordings(), with the generation the client remembers. Creating a
+   recorder is a Context operation, hence the lock.
    */
-  RecorderPtr makeRecorder() {
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
     std::lock_guard<std::mutex> lock(_mutex);
     return makeRecorderLocked();
   }
@@ -392,10 +382,11 @@ public:
   }
 
   /**
-   Snaps what the recorder recorded and runs it on the GPU. A recording made
-   for a lost device (see generation()) is dropped: nothing can run it, and
-   the device in use would refuse its resources. Called on the recorder's
-   thread.
+   Snaps what the recorder recorded and runs it on the GPU. `recorder` is a
+   thread's (see getRecorder), also behind the surfaces made on it; any
+   other submits nothing. A recording made for a lost device (see
+   generation()) is dropped: nothing can run it, and the device in use would
+   refuse its resources. Called on the recorder's thread.
    */
   void submitRecording(
       skgpu::graphite::Recorder *recorder,
@@ -407,10 +398,9 @@ public:
     if (recording == nullptr) {
       return;
     }
-    const auto generation = generationOf(recorder);
     std::lock_guard<std::mutex> lock(_mutex);
     auto *current = _current.load(std::memory_order_acquire);
-    if (generation != current->id ||
+    if (generationOf(recorder) != current->id ||
         current->lost.load(std::memory_order_acquire)) {
       return;
     }
@@ -692,10 +682,21 @@ private:
     std::string recoveryFailure;
   };
 
-  /** The recorder of one thread, with the generation it was made for. */
+  /**
+   The recorder of one thread, with the generation it was made for (see
+   currentRecorder). Forgotten when the thread ends.
+   */
   struct ThreadRecorder {
-    RecorderPtr recorder;
+    std::unique_ptr<skgpu::graphite::Recorder> recorder;
     uint64_t generation = 0;
+    ~ThreadRecorder() {
+      if (recorder == nullptr) {
+        return;
+      }
+      if (auto *instance = tryGetInstance()) {
+        instance->forgetRecorder(recorder.get());
+      }
+    }
   };
 
   struct LossListeners {
@@ -902,55 +903,51 @@ private:
   // Recorders ----------------------------------------------------------------
 
   /** Called with the context lock held. */
-  RecorderPtr makeRecorderLocked() {
-    auto *current = _current.load(std::memory_order_acquire);
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorderLocked() {
     skgpu::graphite::RecorderOptions options;
     options.fImageProvider = ImageProvider::Make();
-    RecorderPtr recorder(current->context->makeRecorder(options).release());
-    if (recorder != nullptr) {
-      std::lock_guard<std::mutex> lock(_recordersMutex);
-      _recorders[recorder.get()] = current->id;
-    }
-    return recorder;
+    return _current.load(std::memory_order_acquire)
+        ->context->makeRecorder(options);
   }
 
   /**
    The recorder in the slot, made for the device in use: one made for a
-   lost device is retired first (see getRecorder). Throws when none can be
-   made.
+   lost device is retired first (see getRecorder), kept alive and known with
+   its generation, so that a recording it snaps from now on is dropped (see
+   submitRecording). Throws when none can be made.
    */
   skgpu::graphite::Recorder *currentRecorder(ThreadRecorder &slot) {
-    const auto current = _current.load(std::memory_order_acquire)->id;
-    if (slot.recorder == nullptr || slot.generation != current) {
-      if (slot.recorder != nullptr) {
-        std::lock_guard<std::mutex> lock(_recordersMutex);
-        // Kept alive, and known with its generation: a recording it snaps
-        // from now on is dropped (see submitRecording).
-        _retiredRecorders.emplace_back(slot.recorder.release());
-      }
-      slot.recorder = makeRecorder();
-      slot.generation = current;
-      if (slot.recorder == nullptr) {
-        throw std::runtime_error("Failed to create graphite context");
-      }
+    if (slot.recorder != nullptr &&
+        slot.generation == _current.load(std::memory_order_acquire)->id) {
+      return slot.recorder.get();
     }
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto *current = _current.load(std::memory_order_acquire);
+    auto recorder = makeRecorderLocked();
+    if (recorder == nullptr) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    if (slot.recorder != nullptr) {
+      _retiredRecorders.push_back(std::move(slot.recorder));
+    }
+    _recorders[recorder.get()] = current->id;
+    slot.recorder = std::move(recorder);
+    slot.generation = current->id;
     return slot.recorder.get();
   }
 
   /**
-   The generation a recorder was made for; the one in use for a recorder
-   not made here (see makeRecorder).
+   The generation a thread's recorder was made for (see currentRecorder); 0
+   for any other recorder. Called with the context lock held.
    */
-  uint64_t generationOf(const skgpu::graphite::Recorder *recorder) {
-    std::lock_guard<std::mutex> lock(_recordersMutex);
+  uint64_t generationOf(const skgpu::graphite::Recorder *recorder) const {
     auto it = _recorders.find(recorder);
-    return it != _recorders.end()
-               ? it->second
-               : _current.load(std::memory_order_acquire)->id;
+    return it != _recorders.end() ? it->second : 0;
   }
 
+  /** The recorder of a thread that ended (see ThreadRecorder). */
   void forgetRecorder(const skgpu::graphite::Recorder *recorder) noexcept {
-    std::lock_guard<std::mutex> lock(_recordersMutex);
+    std::lock_guard<std::mutex> lock(_mutex);
     _recorders.erase(recorder);
   }
 
@@ -1075,9 +1072,8 @@ private:
   static constexpr int kMaxFailedRecoveries = 6;
   static constexpr auto kShortLived = std::chrono::seconds(5);
 
-  // The recorders made here, with the generation each was made for, and the
-  // retired recorders of the threads (see currentRecorder), kept alive.
-  std::mutex _recordersMutex;
+  // The recorders of the threads (see currentRecorder), with the generation
+  // each was made for, and the ones retired, kept alive. Guarded by _mutex.
   std::unordered_map<const skgpu::graphite::Recorder *, uint64_t> _recorders;
   std::vector<std::unique_ptr<skgpu::graphite::Recorder>> _retiredRecorders;
 

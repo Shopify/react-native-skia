@@ -39,7 +39,7 @@ namespace RNSkia {
  * new one, and the recordings of this one are dropped.
  */
 struct RNSkGraphiteRecorder {
-  DawnContext::RecorderPtr recorder;
+  std::unique_ptr<skgpu::graphite::Recorder> recorder;
   uint64_t generation = 0;
 };
 
