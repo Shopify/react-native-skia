@@ -336,7 +336,7 @@ requestDevice(dawn::native::Adapter &nativeAdapter,
       "disable_robustness",
 #endif
   };
-#if !defined(SK_DEBUG)
+#if defined(NDEBUG)
   if (!validate) {
     toggles.push_back("skip_validation");
   }
