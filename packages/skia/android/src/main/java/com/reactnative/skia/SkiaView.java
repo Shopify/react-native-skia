@@ -83,6 +83,26 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         }
     });
 
+    // Main thread: the TextureView's latch, handed to the present thread.
+    private final FrameLatchRelay mFrameLatchRelay = new FrameLatchRelay(new FrameLatchRelay.Host() {
+        @Override
+        public void postBehindDraw(Runnable task) {
+            post(task);
+        }
+
+        @Override
+        public void postToPresentThread(Runnable task) {
+            PresentThread.post(task);
+        }
+
+        @Override
+        public void frameLatched() {
+            if (hasNativeView()) {
+                SkiaView.this.frameLatched();
+            }
+        }
+    });
+
     public SkiaView(Context context) {
         super(context);
         // ReactViewGroup disables clipChildren (RN overflow is handled with canvas
@@ -387,11 +407,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     @Override
     public void onSurfaceTextureUpdated() {
-        PresentThread.post(() -> {
-            if (hasNativeView()) {
-                frameLatched();
-            }
-        });
+        mFrameLatchRelay.onWindowDrewFrame();
     }
 
     // The surface goes away once this returns: the present thread lets go of

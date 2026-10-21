@@ -132,9 +132,10 @@ protected:
   }
 
   /**
-   The TextureView's window drew the frame last presented into it
-   (SkiaTextureView.onSurfaceTextureUpdated), which gave a buffer back to
-   its queue: what waited for it goes now. Present thread.
+   The TextureView's window took the frame last presented into it: it drew
+   it (SkiaTextureView.onSurfaceTextureUpdated) and the draw is done
+   (FrameLatchRelay), which gave a buffer back to its queue. What waited for
+   it goes now. Present thread.
    */
   void frameLatched() {
     if (_framePendingLatch->exchange(false)) {
