@@ -16,6 +16,23 @@ const skiaReconciler = ReactReconciler(sksgHostConfig);
 // @ts-expect-error DefinitelyTyped is not up to date
 skiaReconciler.injectIntoDevTools();
 
+type ErrorCallback = (error: unknown) => void;
+
+// @types/react-reconciler 0.31 still declares React 18's createContainer.
+// The 0.31 runtime takes onUncaughtError, onCaughtError and onRecoverableError.
+const createRoot = skiaReconciler.createContainer as unknown as (
+  containerInfo: Container,
+  tag: number,
+  hydrationCallbacks: null,
+  isStrictMode: boolean,
+  concurrentUpdatesByDefaultOverride: null,
+  identifierPrefix: string,
+  onUncaughtError: ErrorCallback,
+  onCaughtError: ErrorCallback,
+  onRecoverableError: ErrorCallback,
+  transitionCallbacks: null
+) => OpaqueRoot;
+
 export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
@@ -26,7 +43,7 @@ export class SkiaSGRoot {
   ) {
     const strictMode = false;
     this.container = createContainer(Skia, nativeId);
-    this.root = skiaReconciler.createContainer(
+    this.root = createRoot(
       this.container,
       0,
       null,
@@ -34,13 +51,15 @@ export class SkiaSGRoot {
       null,
       "",
       console.error,
+      console.error,
+      console.error,
       null
     );
   }
 
   get sg() {
     const children = this.container.root;
-    return { type: NodeType.Group, props: {}, children, isDeclaration: false };
+    return { type: NodeType.Group, props: {}, children };
   }
 
   private updateContainer(element: ReactNode) {
@@ -51,14 +70,25 @@ export class SkiaSGRoot {
     });
   }
 
+  /**
+   * Commits the element. The container records the scene graph at the end
+   * of every commit (resetAfterCommit), this one included: React runs the
+   * commit effects whenever the root carries one, and the completion
+   * callback updateContainer() is given is one, so an element React bails
+   * out on (the same one again) is recorded too.
+   */
   async render(element: ReactNode) {
     this.container.mount();
     await this.updateContainer(element);
-    this.container.redraw();
   }
 
   drawOnCanvas(canvas: SkCanvas) {
     this.container.drawOnCanvas(canvas);
+  }
+
+  /** See Container.readSharedValues(). */
+  readSharedValues() {
+    this.container.readSharedValues();
   }
 
   getPicture() {

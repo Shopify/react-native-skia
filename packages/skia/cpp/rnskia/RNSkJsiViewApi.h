@@ -95,6 +95,20 @@ public:
     return it != _registry.end() ? it->second->view : nullptr;
   }
 
+  // The views registered right now, for a call on each of them outside of
+  // the registry lock. Any thread.
+  std::vector<std::shared_ptr<RNSkView>> getViews() {
+    std::vector<std::shared_ptr<RNSkView>> views;
+    std::shared_lock<std::shared_mutex> lock(_mutex);
+    views.reserve(_registry.size());
+    for (const auto &entry : _registry) {
+      if (entry.second->view != nullptr) {
+        views.push_back(entry.second->view);
+      }
+    }
+    return views;
+  }
+
   void clear() {
     std::unique_lock<std::shared_mutex> lock(_mutex);
     _registry.clear();
@@ -216,8 +230,9 @@ public:
           // destroys it): the recording waits in the registry and is drawn,
           // with whatever values it holds by then, once a view registers.
           // Keep it current, under the registry lock so that a registration
-          // cannot slip in between; the first frame would otherwise show
-          // the values from recording time until the next change.
+          // cannot slip in between; the recording would otherwise wait,
+          // unready (it reads no value while recording), until the next
+          // change, and the view would show nothing until then.
           auto it = info->props.find("recorder");
           if (it != info->props.end() && it->second.isRecorder()) {
             RNSkGraphiteProducer::applyUpdatesTo(it->second.getRecorder(),

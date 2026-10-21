@@ -31,11 +31,24 @@ RNSkManager::RNSkManager(
   // depending on what the app does first. On a thread of its own: the
   // module installs during JS startup, which does not wait for the GPU.
   DawnContext::probeInBackground();
+  // A lost GPU device is replaced by a new one (see DawnContext), on which
+  // the windows hold nothing yet: every view records its content again for
+  // it. The redraw waits for the main thread, and for the window to be able
+  // to show a frame (the app may be in the background, where the device was
+  // lost); it then configures the window on the new device. The listener
+  // only reaches the registry, which outlives this manager.
+  _lossListener =
+      DawnContext::addLossListener([](const DawnContext::LossInfo &) {
+        for (const auto &view : ViewRegistry::getInstance().getViews()) {
+          view->requestRedraw();
+        }
+      });
   // Install bindings
   installBindings();
 }
 
 RNSkManager::~RNSkManager() {
+  DawnContext::removeLossListener(_lossListener);
   // The runtime that made the Graphite contexts is going away, with the
   // views of its bundle. Native ids start over with the next bundle, and a
   // target kept past this point would be bound by the first view reusing

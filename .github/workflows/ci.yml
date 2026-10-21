@@ -69,6 +69,11 @@ jobs:
         working-directory: packages/skia
         run: yarn test:cpp
 
+      # Builds against the headers the Setup step copies, no Skia binaries.
+      - name: Test the C++ helpers
+        working-directory: packages/skia
+        run: yarn test-cpp
+
   test-web:
     runs-on: ubuntu-latest
     steps:
