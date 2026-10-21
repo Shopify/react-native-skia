@@ -98,8 +98,20 @@ bool RNSkGraphiteProducer::applyUpdatesTo(
     return false;
   }
   // The values are written into the commands by the next replay, which the
-  // caller schedules: the mapper never waits for a draw.
-  recorder->readUpdates(runtime, values);
+  // caller schedules: the mapper never waits for a draw. A value the
+  // recording cannot read (invalid for its prop) leaves its property unset
+  // and is reported here, once: an error escaping into the mapper would be
+  // fatal and take the other mappers of that frame down with it.
+  if (auto error = recorder->readUpdates(runtime, values)) {
+    const auto message = "React Native Skia: a shared value could not be "
+                         "read, its property stays unset: " +
+                         *error;
+    try {
+      RNSkLogger::errorToJavascriptConsole(runtime, message);
+    } catch (const std::exception &) {
+      RNSkLogger::logToConsole(message);
+    }
+  }
   return true;
 }
 

@@ -94,7 +94,9 @@ export interface JsiRecorder extends BaseRecorder {
    * Plays the recording into a picture, on the calling thread, with the
    * current values of the shared values it still holds, read here. On
    * Reanimated 4 each read is a blocking round trip to the UI thread: this
-   * is for a recording that no view and no mapper will update.
+   * is for a recording that no view and no mapper will update. Throws once
+   * `getSharedValues()` has taken the shared values and nothing has passed
+   * their values back through `SkiaViewApi.applyUpdates` yet.
    */
   makePicture(): SkPicture;
   /**

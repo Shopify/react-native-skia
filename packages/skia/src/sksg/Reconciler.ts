@@ -16,6 +16,23 @@ const skiaReconciler = ReactReconciler(sksgHostConfig);
 // @ts-expect-error DefinitelyTyped is not up to date
 skiaReconciler.injectIntoDevTools();
 
+type ErrorCallback = (error: unknown) => void;
+
+// @types/react-reconciler 0.31 still declares React 18's createContainer.
+// The 0.31 runtime takes onUncaughtError, onCaughtError and onRecoverableError.
+const createRoot = skiaReconciler.createContainer as unknown as (
+  containerInfo: Container,
+  tag: number,
+  hydrationCallbacks: null,
+  isStrictMode: boolean,
+  concurrentUpdatesByDefaultOverride: null,
+  identifierPrefix: string,
+  onUncaughtError: ErrorCallback,
+  onCaughtError: ErrorCallback,
+  onRecoverableError: ErrorCallback,
+  transitionCallbacks: null
+) => OpaqueRoot;
+
 export class SkiaSGRoot {
   private root: OpaqueRoot;
   private container: Container;
@@ -26,13 +43,15 @@ export class SkiaSGRoot {
   ) {
     const strictMode = false;
     this.container = createContainer(Skia, nativeId);
-    this.root = skiaReconciler.createContainer(
+    this.root = createRoot(
       this.container,
       0,
       null,
       strictMode,
       null,
       "",
+      console.error,
+      console.error,
       console.error,
       null
     );
@@ -65,6 +84,11 @@ export class SkiaSGRoot {
 
   drawOnCanvas(canvas: SkCanvas) {
     this.container.drawOnCanvas(canvas);
+  }
+
+  /** See Container.readSharedValues(). */
+  readSharedValues() {
+    this.container.readSharedValues();
   }
 
   getPicture() {
