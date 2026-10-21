@@ -34,26 +34,38 @@ namespace RNSkia {
 /**
  * The Graphite recorder of one view. Shared by the view's target and by every
  * recording snapped from it, so that the recorder outlives its recordings
- * whichever of them is released last.
+ * whichever of them is released last. Made for one GPU device (see
+ * DawnContext::generation()): once that device is lost the target makes a
+ * new one, and the recordings of this one are dropped.
  */
 struct RNSkGraphiteRecorder {
   std::unique_ptr<skgpu::graphite::Recorder> recorder;
+  uint64_t generation = 0;
 };
 
 /**
  * A frame snapped from a view's recorder, with the description of the target
  * it was recorded for. Immutable once snapped: it can be replayed any number
- * of times, from any thread.
+ * of times, from any thread, onto the device it was recorded for (see
+ * isCurrent).
  */
 class RNSkGraphiteRecording {
 public:
   RNSkGraphiteRecording(std::shared_ptr<RNSkGraphiteRecorder> recorder,
                         std::unique_ptr<skgpu::graphite::Recording> recording,
                         const RNSkGraphiteTargetInfo &target)
-      : _recorder(std::move(recorder)), _recording(std::move(recording)),
-        _target(target) {}
+      : _generation(recorder->generation), _recorder(std::move(recorder)),
+        _recording(std::move(recording)), _target(target) {}
 
   skgpu::graphite::Recording *get() const { return _recording.get(); }
+
+  /**
+   Whether the recording can be replayed right now: it was recorded for the
+   GPU device in use, and that device is not lost. A recording made for a
+   lost device can never be replayed, and the device replacing it would
+   refuse its resources (see DawnContext).
+   */
+  bool isCurrent() const { return DawnContext::isCurrent(_generation); }
 
   /**
    Whether the recording was made for a texture of the given size. A deferred
@@ -97,6 +109,7 @@ public:
   }
 
 private:
+  uint64_t _generation;
   // Declared before the recording so that the recording is released first.
   std::shared_ptr<RNSkGraphiteRecorder> _recorder;
   std::unique_ptr<skgpu::graphite::Recording> _recording;
@@ -158,9 +171,13 @@ public:
     if (target.width <= 0 || target.height <= 0) {
       throw std::runtime_error("SkiaGraphiteView: the view has no size yet.");
     }
-    if (_recorder == nullptr) {
+    // A recorder made for a GPU device that was lost since is replaced: the
+    // recordings still holding it keep it alive until they are dropped.
+    const auto generation = DawnContext::generation();
+    if (_recorder == nullptr || _recorder->generation != generation) {
       auto recorder = std::make_shared<RNSkGraphiteRecorder>();
       recorder->recorder = DawnContext::getInstance().makeRecorder();
+      recorder->generation = generation;
       if (recorder->recorder == nullptr) {
         throw std::runtime_error(
             "SkiaGraphiteView: could not create a Graphite recorder.");
@@ -206,15 +223,16 @@ public:
    later frame may depend on resources an earlier one uploaded. This holds
    before the view exists too, as the registry owns the target until the
    view is gone (see RNSkGraphiteTargetRegistry). The one exception is a
-   lost GPU device: nothing presents ever again (RNSkWindowSurface), and a
-   client recording on every frame regardless would grow the queue without
-   bound, so the recordings are dropped instead.
+   recording made for a lost GPU device (see RNSkGraphiteRecording::isCurrent):
+   it can never be presented, and a client recording on every frame
+   regardless would grow the queue without bound, so it is dropped, along
+   with whatever waits in the queue, which was made for that device too.
    */
   void submit(std::shared_ptr<RNSkGraphiteRecording> recording) {
     std::function<void()> requestFrame;
     {
       std::lock_guard<std::mutex> lock(_queueMutex);
-      if (DawnContext::isDeviceLost()) {
+      if (!recording->isCurrent()) {
         _queue.clear();
         return;
       }

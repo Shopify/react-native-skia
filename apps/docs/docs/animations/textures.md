@@ -9,6 +9,7 @@ A texture is an image that lives on the GPU.
 React Native Skia provides hooks that create textures off the JS thread and expose them as Reanimated shared values.
 
 With Graphite, textures are shared between threads: a texture created on one thread can be drawn by any canvas and from any runtime.
+A texture belongs to the GPU device, which [can be lost](/docs/webgpu#device-loss) while the app runs: the hooks make theirs again on the new device, and `useGpu()` lets a texture of your own do the same.
 
 ## `useTexture`
 
@@ -157,13 +158,15 @@ const Demo = () => {
 Draw into the surface, flush it, and whatever samples the image on the next frame sees the new content.
 
 ```tsx twoslash
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useSharedValue, useFrameCallback } from "react-native-reanimated";
-import { Skia, Canvas, Image } from "react-native-skia";
+import { Skia, Canvas, Image, useGpu } from "react-native-skia";
 
 const Demo = () => {
-  const surface = useMemo(() => Skia.Surface.MakeOffscreen(200, 200)!, []);
-  // The image is created once and follows the surface.
+  // Both are made again once a lost GPU device has been replaced.
+  const gpu = useGpu();
+  const surface = useMemo(() => Skia.Surface.MakeOffscreen(200, 200)!, [gpu]);
+  // The image is created once per surface and follows it.
   const image = useMemo(() => surface.asImage(), [surface]);
   const t = useSharedValue(0);
   useFrameCallback((frame) => {

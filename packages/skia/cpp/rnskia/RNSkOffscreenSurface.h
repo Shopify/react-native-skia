@@ -56,9 +56,7 @@ public:
     auto image = _surface->makeImageSnapshot();
     // The snapshot is a copy task on the surface's recorder: submitted here,
     // so that the image is complete for whoever draws it next.
-    if (auto *recorder = _surface->recorder()) {
-      DawnContext::getInstance().submitRecording(recorder->snap().get());
-    }
+    DawnContext::getInstance().submitRecording(_surface->recorder());
     return image;
   }
 
@@ -83,9 +81,7 @@ public:
     }
     // The snapshot is a copy task on the surface's recorder: submitted here,
     // so that the image is complete for whoever draws it next.
-    if (auto *recorder = _surface->recorder()) {
-      DawnContext::getInstance().submitRecording(recorder->snap().get());
-    }
+    DawnContext::getInstance().submitRecording(_surface->recorder());
     if (image == nullptr || !_useP3ColorSpace) {
       return image;
     }
@@ -102,7 +98,7 @@ public:
     }
     srgb->getCanvas()->drawImage(image, 0, 0);
     auto converted = srgb->makeImageSnapshot();
-    context.submitRecording(recorder->snap().get());
+    context.submitRecording(recorder);
     return converted;
   }
 
@@ -141,7 +137,7 @@ public:
     // submit it first (the explicit clear makes sure the pass is emitted).
     if (!_cleared) {
       _surface->getCanvas()->clear(SK_ColorTRANSPARENT);
-      DawnContext::getInstance().submitRecording(recorder->snap().get());
+      DawnContext::getInstance().submitRecording(recorder);
       _cleared = true;
     }
     // A rejected recording is logged and dropped (see RNSkWindowSurface).

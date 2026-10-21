@@ -25,15 +25,36 @@ const errorEnvelope = (error: unknown) =>
     $$error: error instanceof Error ? error.message : String(error),
   });
 
+// The device Skia renders with, as a GPUDevice. Skia replaces a lost device
+// with a new one: the import is let go of when that happens, so that the next
+// use imports the new device.
+let sharedDevice: GPUDevice | null = null;
+const getSharedDevice = () => {
+  if (sharedDevice === null) {
+    const device = importDevice(Skia.getNativeDevice());
+    sharedDevice = device;
+    Skia.gpu.lost.then(() => {
+      if (sharedDevice === device) {
+        sharedDevice = null;
+      }
+    });
+  }
+  return sharedDevice;
+};
+
+// Loses the GPU device on purpose (the Gpu spec): the device is shared with
+// react-native-webgpu, whose test hook asks Dawn to lose it.
+const forceGpuDeviceLoss = () => {
+  (
+    getSharedDevice() as GPUDevice & { forceLossForTesting: () => void }
+  ).forceLossForTesting();
+};
+
 // The encoded pixels of a native view: React Native WebGPU rasterizes the view
 // into a texture of the shared device, and Skia wraps that texture. This is
 // the one way to snapshot a view with Skia v3 (see docs/webgpu#view-snapshots).
-let sharedDevice: GPUDevice | null = null;
 const encodeView = async (view: React.RefObject<View | null>) => {
-  if (sharedDevice === null) {
-    sharedDevice = importDevice(Skia.getNativeDevice());
-  }
-  const device = sharedDevice;
+  const device = getSharedDevice();
   const pixels = Math.round(size * PixelRatio.get());
   const texture = device.createTexture({
     size: [pixels, pixels],
@@ -87,8 +108,13 @@ export const Tests = ({ assets }: TestsProps) => {
             ).call({
               Skia,
               // The worklet serializer spec needs app-side worklets (see
-              // workletSerialization.ts); hand them over through the context.
-              ctx: { ...parseProps(tree.ctx, assets), workletSerialization },
+              // workletSerialization.ts), and the Gpu spec a way to lose the
+              // device; hand them over through the context.
+              ctx: {
+                ...parseProps(tree.ctx, assets),
+                workletSerialization,
+                forceGpuDeviceLoss,
+              },
               size: size * PixelRatio.get(),
               scale: s,
             });
