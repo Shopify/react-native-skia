@@ -10,7 +10,10 @@
 #include "RNSkJsiViewApi.h"
 #include "RNSkView.h"
 #include "api/JsiSkApi.h"
+#include "api/JsiSkPicture.h"
+#include "api/recorder/JsiRecorder.h"
 #include "jsi/BoxedNativeObject.h"
+#include "jsi/ViewProperty.h"
 
 namespace RNSkia {
 namespace jsi = facebook::jsi;
@@ -96,3 +99,21 @@ void RNSkManager::installBindings() {
   // implementation detail only.
 }
 } // namespace RNSkia
+
+namespace RNJsi {
+
+// Probing for a recorder needs the complete recorder types. Parsing the
+// recorder headers costs about 1.5 GB of compiler memory, so the probe lives
+// in this translation unit, which parses them already. A separate translation
+// unit would compile in parallel and add to the peak memory of the build.
+ViewProperty::ViewProperty(jsi::Runtime &runtime, const jsi::Value &value) {
+  if (auto picture =
+          RNSkia::tryGetJsiObject<RNSkia::JsiSkPicture>(runtime, value)) {
+    _value = picture->getObject();
+  } else if (auto recorder =
+                 RNSkia::tryGetJsiObject<RNSkia::JsiRecorder>(runtime, value)) {
+    _value = recorder->getObject();
+  }
+}
+
+} // namespace RNJsi
