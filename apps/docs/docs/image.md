@@ -80,15 +80,15 @@ A surface follows the same split: `Skia.Surface.MakeRaster()` draws on the CPU a
 
 | Image | Lives | Drawing it | Reading its pixels |
 | :-- | :-- | :-- | :-- |
-| `useImage()`, `Skia.Image.MakeRasterImage()`, `makeRasterImage()` | CPU | Uploaded once per canvas, then cached | Immediate |
+| `useImage()`, `Skia.Image.MakeRasterImage()`, `makeRasterImage()` | CPU | Uploaded on the first frame that draws it, then cached | Immediate |
 | `surface.makeImageSnapshot()`, `surface.asImage()`, `makeTextureImage()`, `Skia.Image.MakeImageFromGPUTexture()` | GPU | No copy, from any canvas and any thread | Waits for the GPU |
-| `Skia.Image.MakeImageFromEncoded()` | Encoded bytes | Decoded and uploaded by each canvas that draws it, on its first frame, then cached | Decodes |
+| `Skia.Image.MakeImageFromEncoded()` | Encoded bytes | Decoded and uploaded on the first frame that draws it, then cached | Decodes |
 
-A canvas keeps the textures of the CPU images it draws in a cache of its own: 64 MB at most, least recently drawn out first, and a texture not drawn for ten seconds is released the next time the canvas draws a CPU image. Everything is released when the canvas unmounts. The cache is per canvas, so an image drawn by several canvases is uploaded by each of them and held once per canvas: upload it once with `makeTextureImage()` instead.
+The textures of the CPU images the canvases draw are kept in one cache, shared by every canvas: 128 MB at most, least recently drawn out first, and a texture not drawn for ten seconds is released the next time a canvas draws a CPU image. An image drawn by several canvases is uploaded once and held once. The upload happens on the frame that first draws the image, on the thread rendering that frame: to pay it earlier, upload the image with `makeTextureImage()`.
 
 Moving an image from one side to the other is explicit:
 
-- `image.makeTextureImage()` uploads a CPU image (or decodes and uploads an encoded one) now, on the calling thread, and returns the GPU image. Use it for an image drawn by several canvases, or to pay the upload before the first frame: this is what [`useImageAsTexture`](/docs/animations/textures#useimageastexture) does. Pass `{ mipmapped: true }` to also build the mipmaps for the `MipmapMode` sampling options.
+- `image.makeTextureImage()` uploads a CPU image (or decodes and uploads an encoded one) now, on the calling thread, and returns the GPU image. Use it to pay the upload before the first frame, or to hold a texture for longer than the cache would: this is what [`useImageAsTexture`](/docs/animations/textures#useimageastexture) does. Pass `{ mipmapped: true }` to also build the mipmaps for the `MipmapMode` sampling options.
 - `image.makeRasterImage()` resolves to a CPU copy of a GPU image without blocking the JS thread (an encoded image is decoded on a background thread, a CPU image resolves to itself). `encodeToBytes()`, `encodeToBase64()` and `readPixels()` work on a GPU image too, but they wait for the GPU: when the JS thread should not wait, read the image back first.
 
 ```tsx twoslash

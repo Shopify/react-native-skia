@@ -438,8 +438,6 @@ private:
       // existed, with a bit depth the surface did not get) cannot be
       // replayed onto this one.
       if (!recording->hasFormatOf(targetInfo)) {
-        // Its image uploads are dropped with it (see ImageProvider).
-        ImageProvider::invalidateAll();
         RNSkLogger::logToConsole("SkiaView: skipping a recording made for a "
                                  "different surface format");
         continue;
@@ -499,9 +497,7 @@ private:
     RNSkGraphiteTargetInfo info;
     if (!intermediate.getTargetInfo(&info) ||
         !recording->isCompatibleWith(info)) {
-      // No texture of that size and format: the frame is consumed, and its
-      // image uploads with it (see ImageProvider).
-      ImageProvider::invalidateAll();
+      // No texture of that size and format: the frame is consumed.
       RNSkLogger::logToConsole("SkiaView: skipping a %dx%d recording, the "
                                "surface is %dx%d",
                                size.width, size.height, surface.getWidth(),

@@ -5,6 +5,7 @@
 #include <memory>
 #include <utility>
 
+#include "RNDawnContext.h"
 #include "RNSkGraphiteTarget.h"
 #include "RNSkThreadPool.h"
 #include "api/recorder/DrawingCtx.h"
@@ -173,10 +174,13 @@ void RNSkGraphiteProducer::produce() {
   if (target && (recorder || picture)) {
     SkCanvas *canvas = nullptr;
     try {
-      canvas = target->beginRecording();
+      // On the recorder of this pool thread: a view holds no recorder of
+      // its own (see RNSkGraphiteTarget::beginRecording).
+      canvas = target->beginRecording(
+          DawnContext::getInstance().getThreadRecorder());
     } catch (const std::exception &) {
       // No surface and no layout yet: the view asks for a frame once it
-      // has a size.
+      // has a size. Or no GPU at all.
     }
     if (canvas != nullptr) {
       try {

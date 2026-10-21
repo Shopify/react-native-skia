@@ -354,16 +354,19 @@ public:
   // generation each was made for (see generation()): a recording is only run
   // on the device it was recorded for (submitRecording), and the recorders
   // of a lost device are kept alive, since a surface made on a recorder
-  // cannot be drawn into once the recorder is gone. A view's recorder
-  // (makeRecorder) is tracked by the view instead (RNSkGraphiteRecorder).
+  // cannot be drawn into once the recorder is gone. The render thread pool
+  // records the frames of every view on the recorders of its threads (see
+  // getThreadRecorder); a target JS records into has a recorder of its own
+  // (makeRecorder), tracked by the target (RNSkGraphiteRecorder).
 
   /**
-   A recorder of its own for a client that records on one thread and replays
-   on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
-   calling thread. Made for the device in use (see generation()), to be
-   replaced once that device is lost; its recordings go through
-   insertRecordings(), with the generation the client remembers. Creating a
-   recorder is a Context operation, hence the lock.
+   A recorder of its own for a target JS records into across calls
+   (SkiaViewApi.makeGraphiteContext, see RNSkGraphiteTarget::beginRecording):
+   unlike getRecorder() it is not tied to the calling thread. Made for the
+   device in use (see generation()), to be replaced once that device is
+   lost; its recordings go through insertRecordings(), with the generation
+   the target remembers. Creating a recorder is a Context operation, hence
+   the lock.
    */
   std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
     std::lock_guard<std::mutex> lock(_mutex);
@@ -377,8 +380,25 @@ public:
    Throws when no recorder can be made.
    */
   skgpu::graphite::Recorder *getRecorder() {
-    static thread_local ThreadRecorder recorder;
-    return currentRecorder(recorder);
+    return currentRecorder(threadSlot());
+  }
+
+  /** A thread's recorder with the generation it was made for. */
+  struct RecorderRef {
+    skgpu::graphite::Recorder *recorder = nullptr;
+    uint64_t generation = 0;
+  };
+
+  /**
+   The recorder of the calling thread (see getRecorder) with the generation
+   it was made for: what a frame snapped from it on one thread and replayed
+   on another remembers, to be dropped once that device is lost (see
+   RNSkGraphiteTarget). Throws when no recorder can be made.
+   */
+  RecorderRef getThreadRecorder() {
+    auto &slot = threadSlot();
+    auto *recorder = currentRecorder(slot);
+    return {recorder, slot.generation};
   }
 
   /**
@@ -386,31 +406,40 @@ public:
    thread's (see getRecorder), also behind the surfaces made on it; any
    other submits nothing. A recording made for a lost device (see
    generation()) is dropped: nothing can run it, and the device in use would
-   refuse its resources. Called on the recorder's thread.
+   refuse its resources. Called on the recorder's thread. Returns whether
+   the recording runs: false when there was nothing to run, when it was
+   dropped, or when Graphite rejected it (which is logged).
    */
-  void submitRecording(
+  bool submitRecording(
       skgpu::graphite::Recorder *recorder,
       skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
     if (recorder == nullptr) {
-      return;
+      return false;
     }
     auto recording = recorder->snap();
     if (recording == nullptr) {
-      return;
+      return false;
     }
     std::lock_guard<std::mutex> lock(_mutex);
     auto *current = _current.load(std::memory_order_acquire);
     if (generationOf(recorder) != current->id ||
         current->lost.load(std::memory_order_acquire)) {
-      return;
+      return false;
     }
     skgpu::graphite::InsertRecordingInfo info;
     info.fRecording = recording.get();
-    if (!static_cast<bool>(current->context->insertRecording(info))) {
-      // The uploads it carried never ran (see ImageProvider).
-      ImageProvider::invalidateAll();
+    auto status = current->context->insertRecording(info);
+    // InsertStatus converts to true on success.
+    const bool inserted = static_cast<bool>(status);
+    if (!inserted) {
+      RNSkLogger::logToConsole(
+          "Graphite rejected a recording (InsertStatus %d): %s",
+          static_cast<int>(
+              static_cast<skgpu::graphite::InsertStatus::V>(status)),
+          status.message().c_str());
     }
     current->context->submit(syncToCpu);
+    return inserted;
   }
 
   /**
@@ -435,8 +464,6 @@ public:
       auto status = current->context->insertRecording(info);
       // InsertStatus converts to true on success.
       if (!static_cast<bool>(status)) {
-        // The uploads it carried never ran (see ImageProvider).
-        ImageProvider::invalidateAll();
         RNSkLogger::logToConsole(
             "Graphite rejected a recording (InsertStatus %d): %s",
             static_cast<int>(
@@ -454,7 +481,8 @@ public:
    and submitted, so that any recorder can draw it once this returns. The image
    itself when it already is one (with mipmaps when asked for). An encoded
    image is decoded on the calling thread first. nullptr when the upload
-   failed.
+   failed, or did not run (the device is lost). The image provider of every
+   recorder uploads through here (see ImageProvider).
    */
   sk_sp<SkImage> MakeTextureImage(const sk_sp<SkImage> &image, bool mipmapped) {
     if (image->isTextureBacked() && (!mipmapped || image->hasMipmaps())) {
@@ -462,8 +490,8 @@ public:
     }
     // A recorder of its own: snapping the recorder of this thread would also
     // submit what the offscreen surfaces of this thread recorded so far. It
-    // only uploads, so it keeps Skia's default image provider rather than an
-    // image cache it would never use.
+    // only uploads, so it keeps Skia's default image provider rather than
+    // the image cache, which uploads through here.
     static thread_local ThreadRecorder uploadRecorder;
     auto *recorder = currentRecorder(uploadRecorder, false);
     auto texture =
@@ -471,7 +499,10 @@ public:
     if (texture == nullptr) {
       return nullptr;
     }
-    submitRecording(recorder);
+    if (!submitRecording(recorder)) {
+      // The upload never ran: the texture holds nothing.
+      return nullptr;
+    }
     return texture;
   }
 
@@ -849,6 +880,11 @@ private:
                                  e.what());
       }
     }
+    if (next != nullptr) {
+      // The textures cached for the lost device are good for nothing on the
+      // new one (see ImageProvider).
+      ImageProvider::invalidateAll();
+    }
     if (next == nullptr) {
       scheduleRecovery(lost, /* failedAttempt= */ true);
     } else if (next->lost.load(std::memory_order_acquire)) {
@@ -917,7 +953,12 @@ private:
       return current->context->makeRecorder();
     }
     skgpu::graphite::RecorderOptions options;
-    options.fImageProvider = ImageProvider::Make();
+    // The provider uploads through MakeTextureImage (see ImageProvider). The
+    // context is never destroyed, so the capture is safe.
+    options.fImageProvider =
+        ImageProvider::Make([this](const SkImage *image, bool mipmapped) {
+          return MakeTextureImage(sk_ref_sp(image), mipmapped);
+        });
     return current->context->makeRecorder(options);
   }
 
@@ -955,6 +996,12 @@ private:
   uint64_t generationOf(const skgpu::graphite::Recorder *recorder) const {
     auto it = _recorders.find(recorder);
     return it != _recorders.end() ? it->second : 0;
+  }
+
+  /** The slot of the calling thread's recorder (see getRecorder). */
+  static ThreadRecorder &threadSlot() {
+    static thread_local ThreadRecorder slot;
+    return slot;
   }
 
   /** The recorder of a thread that ended (see ThreadRecorder). */
