@@ -18,9 +18,77 @@ Textures created on that device can be used by both libraries without any copy:
 
 :::info
 
-The APIs on this page are only available on native platforms. On the Web, Skia runs on WebGL through CanvasKit.
+The interop APIs on this page are only available on native platforms. On the Web, Skia runs on WebGL through CanvasKit.
 
 :::
+
+## The GPU device
+
+`Skia.gpu` describes the GPU device Skia renders with: Vulkan on Android, Metal on iOS, WebGL on the web.
+
+```tsx twoslash
+import { Skia } from "react-native-skia";
+
+const { isAvailable, backend, device, description, error } = Skia.gpu;
+```
+
+| Property | Description |
+|:--|:--|
+| `isAvailable` | Whether Skia can render on this device, right now |
+| `backend` | `"Vulkan"`, `"Metal"` or `"WebGL"`; empty when unavailable |
+| `vendor`, `architecture`, `device`, `description` | The adapter, in the terms of WebGPU's `GPUAdapterInfo` (native only) |
+| `error` | Why the GPU is unavailable; `null` when it is |
+| `lost` | The promise of the loss of the device, see [device loss](#device-loss) |
+
+### Availability
+
+On a device without a GPU Skia can render with (on Android, one without Vulkan 1.1, see [the Vulkan section of the installation guide](/docs/getting-started/installation#vulkan)), the app still runs.
+`Skia.gpu.isAvailable` is false and `Skia.gpu.error` says why: every canvas stays blank, CPU work (paths, decoding, raster images) still runs, and the APIs that need the GPU (offscreen surfaces, snapshots, texture images) throw an error with the same message.
+
+### Device loss
+
+The device can be lost while the app runs: a driver reset, the GPU out of memory, or GPU work refused while the app was in the background on iOS.
+React Native Skia then replaces it with a new device, and canvases render again on their own.
+Everything made on the lost device is gone for good, though safe to use (it draws nothing): offscreen surfaces and the images taken from them, texture images, snapshots of views, and the device `Skia.getNativeDevice()` returned.
+
+`Skia.gpu.lost` is the promise of the loss of the device in use, like WebGPU's `GPUDevice.lost`.
+It resolves once React Native Skia has replaced the device; `Skia.gpu` then describes the new device, with a `lost` promise of its own for the next loss.
+
+```tsx twoslash
+import { Skia } from "react-native-skia";
+
+Skia.gpu.lost.then(({ reason, message }) => {
+  console.log(`GPU device lost (${reason}): ${message}`);
+  // Skia.gpu now describes the new device: make your GPU objects again.
+});
+```
+
+`Skia.gpu.isAvailable` is false between the loss and the replacement, and stays false, with `Skia.gpu.error` saying why, if no replacement could be made.
+
+In React, `useGpu()` returns `Skia.gpu` as state and renders the component again once a lost device has been replaced: make your GPU objects with its value as a dependency and they are made again too.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Canvas, Image, Skia, useGpu } from "react-native-skia";
+
+const Demo = () => {
+  const gpu = useGpu();
+  // Made again on the new device after a loss.
+  const image = useMemo(() => {
+    const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+    surface.getCanvas().drawColor(Skia.Color("cyan"));
+    surface.flush();
+    return surface.makeImageSnapshot();
+  }, [gpu]);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image image={image} x={0} y={0} width={256} height={256} />
+    </Canvas>
+  );
+};
+```
+
+Code sharing the device with React Native WebGPU imports it again the same way, see [sharing the device](#sharing-the-device).
 
 ## Installation
 
@@ -66,35 +134,28 @@ Everything you create with this device (textures, buffers, pipelines) lives on t
 A few things to know about it:
 
 - The device is owned by Skia, which keeps it alive for as long as it renders with it.
-- The device can be lost: a driver reset, the GPU out of memory, GPU work refused while the app was in the background on iOS. Skia then replaces it with a new device (see [GPU device loss](/docs/getting-started/installation#gpu-device-loss)). The imported `GPUDevice` does not learn of the loss (its `lost` promise never settles) and everything created on it is gone: watch `Skia.gpu.lost` instead, import the new device there and create your resources again.
+- The device can be lost: a driver reset, the GPU out of memory, GPU work refused while the app was in the background on iOS. Skia then replaces it with a new device (see [device loss](#device-loss)). The imported `GPUDevice` does not learn of the loss (its `lost` promise never settles) and everything created on it is gone: import the new device and create your resources again, with `useGpu()` in React or `Skia.gpu.lost` elsewhere.
 - `navigator.gpu.requestAdapter()` and `requestDevice()` still work as usual. Use a device of your own when you want your GPU work isolated from Skia's command queue, but keep in mind that a texture created on another device cannot be shared with Skia.
 
 ```tsx
-import { Skia } from "react-native-skia";
+import { useMemo } from "react";
+import { Skia, useGpu } from "react-native-skia";
 import { importDevice } from "react-native-webgpu";
 
-let device = importDevice(Skia.getNativeDevice());
-let texture = device.createTexture({
-  size: [256, 256],
-  format: "rgba8unorm",
-  usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-});
-
-const watchDevice = () => {
-  Skia.gpu.lost.then(() => {
-    // The lost device and its texture are gone: Skia has a new device,
-    // import it and create the texture again on it.
-    device = importDevice(Skia.getNativeDevice());
-    texture = device.createTexture({
+// A texture on Skia's device. Once a lost device has been replaced, the new
+// one is imported and the texture created again on it.
+const useSharedTexture = () => {
+  const gpu = useGpu();
+  return useMemo(() => {
+    const device = importDevice(Skia.getNativeDevice());
+    return device.createTexture({
       size: [256, 256],
       format: "rgba8unorm",
       usage:
         GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
-    watchDevice();
-  });
+  }, [gpu]);
 };
-watchDevice();
 ```
 
 The shared device works like any other device, for instance to configure a WebGPU canvas:

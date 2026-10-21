@@ -68,8 +68,9 @@ export interface SkGpuLostInfo {
  * images (`makeTextureImage`, `MakeImageFromGPUTexture`), snapshots of views,
  * and the device `Skia.getNativeDevice()` returned, which WebGPU code
  * imports again. An app that keeps such objects makes them again when `lost`
- * resolves. `isAvailable` is false between the loss and the replacement, and
- * stays false, with `error` saying why, if no replacement could be made.
+ * resolves, or with the `useGpu` hook in React. `isAvailable` is false
+ * between the loss and the replacement, and stays false, with `error` saying
+ * why, if no replacement could be made.
  */
 export interface SkGpuInfo {
   /** Whether Skia can render on this device, right now. */
