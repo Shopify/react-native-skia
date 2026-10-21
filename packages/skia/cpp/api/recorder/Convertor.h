@@ -76,6 +76,7 @@ public:
            ConversionFunction conversion) {
     _conversions[slotFor(runtime, sharedValue)].push_back(
         std::move(conversion));
+    _conversionCount++;
   }
 
   bool empty() const { return _conversions.empty(); }
@@ -86,13 +87,7 @@ public:
   }
 
   /** The number of conversions over all the slots. */
-  size_t conversionCount() const {
-    size_t count = 0;
-    for (const auto &conversions : _conversions) {
-      count += conversions.size();
-    }
-    return count;
-  }
+  size_t conversionCount() const { return _conversionCount; }
 
   /** The shared value of a slot, or nullptr once they have been let go of. */
   const jsi::Object *sharedValue(size_t slot) const {
@@ -163,6 +158,7 @@ private:
   std::vector<jsi::Object> _sharedValues;
   std::optional<Slots> _slots;
   std::vector<std::vector<ConversionFunction>> _conversions;
+  size_t _conversionCount = 0;
 };
 
 using Patch = std::array<SkPoint, 12>;

@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cmath>
 #include <cstdint>
+#include <exception>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -62,16 +63,23 @@ private:
   // The pending writes, one per conversion function, in slot order: a value
   // read several times between two replays is written once (the last read
   // wins), and the memory stays bounded whatever the ratio of updates to
-  // replays. They are laid out on the first read, once the recording, and
-  // thus `variables`, is complete.
+  // replays. They are laid out on the first read and grown by a later one
+  // when the recording went on in between (makePicture() reads, and a
+  // recording can resume after it).
   std::mutex _pendingMutex;
   std::vector<PendingWrite> _pendingWrites;
   bool _hasPendingWrites = false;
+  // The error of the last read, when a shared value could not be read (a
+  // value invalid for its prop), until a read succeeds, and whether that
+  // read returned it to its caller. Under _pendingMutex.
+  std::optional<std::string> _readError;
+  bool _readErrorReported = false;
 
   /** Under _pendingMutex. */
   void layoutPendingWritesLocked() {
-    if (_pendingWrites.empty()) {
-      _pendingWrites.resize(variables.conversionCount());
+    const auto count = variables.conversionCount();
+    if (_pendingWrites.size() < count) {
+      _pendingWrites.resize(count);
     }
   }
 
@@ -508,17 +516,23 @@ public:
    * pending writes. The writes do not need the runtime: the next replay
    * (play, on whichever thread owns the commands) writes them into the
    * commands first, so the caller never waits for a replay.
+   *
+   * A value that cannot be read (invalid for its prop) leaves that property
+   * unset, and the recording is not ready before a read of every value
+   * succeeds. The error is returned once, for the caller to report: the
+   * same failure, read after read, is returned again only once a read has
+   * succeeded in between (the mapper reads at every change).
    */
-  void readUpdates(jsi::Runtime &runtime, const jsi::Array &values) {
-    std::vector<std::pair<size_t, PendingWrite>> writes;
+  std::optional<std::string> readUpdates(jsi::Runtime &runtime,
+                                         const jsi::Array &values) {
+    Read read;
     const auto count = std::min(values.size(runtime), variables.size());
-    size_t index = 0;
     for (size_t slot = 0; slot < count; slot++) {
       auto sharedValue =
           values.getValueAtIndex(runtime, slot).asObject(runtime);
-      index = readSlot(runtime, slot, sharedValue, index, writes);
+      readSlot(runtime, slot, sharedValue, read);
     }
-    filePendingWrites(std::move(writes));
+    return filePendingWrites(std::move(read), count == variables.size());
   }
 
   /**
@@ -526,55 +540,94 @@ public:
    * not taken them), on the recording runtime. For a recording played on the
    * JS thread, which no mapper updates: on Reanimated 4, each read is a
    * blocking round trip to the UI thread, so a view's recording gets its
-   * values from the mapper instead.
+   * values from the mapper instead. Errors as readUpdates().
    */
-  void readSharedValues(jsi::Runtime &runtime) {
-    std::vector<std::pair<size_t, PendingWrite>> writes;
-    size_t index = 0;
+  std::optional<std::string> readSharedValues(jsi::Runtime &runtime) {
+    Read read;
+    size_t count = 0;
     for (size_t slot = 0; slot < variables.size(); slot++) {
       if (const auto *sharedValue = variables.sharedValue(slot)) {
-        index = readSlot(runtime, slot, *sharedValue, index, writes);
+        readSlot(runtime, slot, *sharedValue, read);
+        count++;
       } else {
-        index += variables.conversions(slot).size();
+        read.index += variables.conversions(slot).size();
       }
     }
-    filePendingWrites(std::move(writes));
+    return filePendingWrites(std::move(read), count == variables.size());
+  }
+
+  /** The error of the last read, while a shared value cannot be read. */
+  std::optional<std::string> readError() {
+    std::lock_guard<std::mutex> lock(_pendingMutex);
+    return _readError;
   }
 
 private:
+  /** What a read gathers, outside the lock, before filing it. */
+  struct Read {
+    std::vector<std::pair<size_t, PendingWrite>> writes;
+    /** The pending write of the next conversion (flat, in slot order). */
+    size_t index = 0;
+    /** The first conversion that failed. */
+    std::optional<std::string> error;
+  };
+
   /**
    * Reads one shared value through the conversions of its slot, outside the
    * lock: a conversion calls into the runtime, and the render thread must not
-   * wait on that to replay. `index` is the pending write of the slot's first
-   * conversion; the one past its last is returned.
+   * wait on that to replay. A conversion that throws (a value invalid for
+   * its prop) files no write; the others of the slot still run.
    */
-  size_t readSlot(jsi::Runtime &runtime, size_t slot,
-                  const jsi::Object &sharedValue, size_t index,
-                  std::vector<std::pair<size_t, PendingWrite>> &writes) {
+  void readSlot(jsi::Runtime &runtime, size_t slot,
+                const jsi::Object &sharedValue, Read &read) {
     for (const auto &conversion : variables.conversions(slot)) {
-      if (auto write = conversion(runtime, sharedValue)) {
-        writes.emplace_back(index, std::move(write));
+      try {
+        if (auto write = conversion(runtime, sharedValue)) {
+          read.writes.emplace_back(read.index, std::move(write));
+        }
+      } catch (const std::exception &error) {
+        if (!read.error) {
+          read.error = error.what();
+        }
       }
-      index++;
+      read.index++;
     }
-    return index;
   }
 
-  /** Files the writes, taking the lock once, and marks the values as read. */
-  void filePendingWrites(std::vector<std::pair<size_t, PendingWrite>> writes) {
-    if (!writes.empty()) {
-      std::lock_guard<std::mutex> lock(_pendingMutex);
+  /**
+   * Files the writes, taking the lock once. `everySlot` says whether the read
+   * covered every shared value: only a read of every value, without a
+   * failure, makes the recording ready (a slot skipped for lack of its value,
+   * or failed, leaves that property unset). Returns the error to report.
+   */
+  std::optional<std::string> filePendingWrites(Read read, bool everySlot) {
+    std::lock_guard<std::mutex> lock(_pendingMutex);
+    if (!read.writes.empty()) {
       layoutPendingWritesLocked();
-      for (auto &[i, write] : writes) {
+      for (auto &[i, write] : read.writes) {
         _pendingWrites[i] = std::move(write);
       }
       _hasPendingWrites = true;
     }
-    _hasReadValues.store(true, std::memory_order_release);
+    if (read.error) {
+      _readError = std::move(read.error);
+      if (_readErrorReported) {
+        return std::nullopt;
+      }
+      _readErrorReported = true;
+      return _readError;
+    }
+    _readError.reset();
+    _readErrorReported = false;
+    if (everySlot) {
+      _hasReadValues.store(true, std::memory_order_release);
+    }
+    return std::nullopt;
   }
 
-  // Set once by the first read, on whichever runtime performs it, and checked
-  // by the producer before it replays (another thread), hence atomic.
+  // Set by the first read of every shared value, on whichever runtime
+  // performs it, and checked by the producer before it replays (another
+  // thread), hence atomic.
   std::atomic<bool> _hasReadValues{false};
 };
 

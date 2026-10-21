@@ -69,6 +69,13 @@ export abstract class Container {
     this.drawFrame(canvas);
   }
 
+  /**
+   * Reads the shared values of the frame on screen on this thread, so that a
+   * snapshot taken now draws their current values. Only the native container
+   * defers their reads (see Container.native.ts).
+   */
+  readSharedValues() {}
+
   /** Draws the last recorded frame. */
   protected abstract drawFrame(canvas: SkCanvas): void;
 
