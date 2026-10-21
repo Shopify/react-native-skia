@@ -189,10 +189,16 @@ private:
   // Returns false without a context or a surface. Main thread.
   bool ensureDevice();
   // Lets go of the Dawn surface of every window configured on the given
-  // generation, and of the frame each holds, before its device is destroyed
-  // (see ensureDevice). The windows keep their target description and get a
-  // surface again on their next frame. Main thread.
+  // generation, before its device is destroyed (see ensureDevice). The
+  // windows keep their target description and get a surface again on their
+  // next frame. Main thread.
   static void releaseSurfacesOn(uint64_t generation);
+  // The window's Dawn surface, or none. A frame held for the surface it
+  // replaces goes with that surface: nothing can present it anymore.
+  void replaceSurface(wgpu::Surface surface) {
+    _presentHold.dropFrames();
+    _surface = std::move(surface);
+  }
   // Configures the swapchain for the current size, format and usage.
   void configureSurface();
   // Copies the window's target description where any thread can read it.

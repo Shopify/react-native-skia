@@ -78,7 +78,7 @@ void RNSkWindowSurface::attach(void *nativeHandle, int width, int height,
   _device = context->getWGPUDevice();
   _generation = DawnContext::generation();
   _recorder = context->getRecorder();
-  _surface = context->MakeWGPUSurface(nativeHandle);
+  replaceSurface(context->MakeWGPUSurface(nativeHandle));
   if (!_surface) {
     RNSkLogger::logToConsole("Could not create a surface over the window");
     detach();
@@ -120,9 +120,8 @@ void RNSkWindowSurface::resize(int width, int height) {
 }
 
 void RNSkWindowSurface::detach() {
-  _presentHold.dropFrames();
   // The surface goes before the window it draws into.
-  _surface = nullptr;
+  replaceSurface(nullptr);
   _recorder = nullptr;
   updateTargetInfo();
   if (_releaser && _nativeHandle != nullptr) {
@@ -275,9 +274,7 @@ void RNSkWindowSurface::releaseSurfacesOn(uint64_t generation) {
   std::lock_guard<std::mutex> lock(windowsMutex());
   for (auto *window : windows()) {
     if (window->_generation == generation) {
-      // A frame held for the surface goes with it: no device can show it.
-      window->_presentHold.dropFrames();
-      window->_surface = nullptr;
+      window->replaceSurface(nullptr);
     }
   }
 }
@@ -307,7 +304,7 @@ bool RNSkWindowSurface::ensureDevice() {
   _device = context->getWGPUDevice();
   _generation = generation;
   _recorder = context->getRecorder();
-  _surface = context->MakeWGPUSurface(_nativeHandle);
+  replaceSurface(context->MakeWGPUSurface(_nativeHandle));
   if (!_surface) {
     RNSkLogger::logToConsole("Could not create a surface over the window");
     return false;
@@ -377,7 +374,7 @@ bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
 
 HeldFrame RNSkWindowSurface::presentHeldFrame() {
   // A device replaced since the frame was held takes the frame with the
-  // surface it was replayed into (see releaseSurfacesOn).
+  // surface it was replayed into (see replaceSurface).
   if (!ensureDevice()) {
     return HeldFrame::kNone;
   }
