@@ -50,7 +50,108 @@ struct Radius {
 using PendingWrite = std::function<void()>;
 using ConversionFunction = std::function<PendingWrite(
     jsi::Runtime &runtime, const jsi::Object &object)>;
-using Variables = std::map<std::string, std::vector<ConversionFunction>>;
+
+/**
+ * The shared values a recording reads. Each one gets a slot, in the order
+ * they are first seen while recording, and the conversions that write its
+ * value into the command properties. JsiRecorder.getSharedValues() hands the
+ * slot order to JS, and the Reanimated mapper passes the values back in that
+ * order (see Recorder::readUpdates).
+ *
+ * The shared values themselves, and the Map that finds their slot, are
+ * objects of the recording runtime and are only kept until getSharedValues()
+ * takes them, on the JS thread: the recording lives on in the view, on other
+ * threads, without them.
+ */
+class Variables {
+public:
+  void add(jsi::Runtime &runtime, const jsi::Object &sharedValue,
+           ConversionFunction conversion) {
+    _conversions[slotFor(runtime, sharedValue)].push_back(
+        std::move(conversion));
+  }
+
+  bool empty() const { return _conversions.empty(); }
+  size_t size() const { return _conversions.size(); }
+
+  const std::vector<ConversionFunction> &conversions(size_t slot) const {
+    return _conversions[slot];
+  }
+
+  /** The number of conversions over all the slots. */
+  size_t conversionCount() const {
+    size_t count = 0;
+    for (const auto &conversions : _conversions) {
+      count += conversions.size();
+    }
+    return count;
+  }
+
+  /** The shared values in slot order; this lets go of them. */
+  jsi::Array takeSharedValues(jsi::Runtime &runtime) {
+    auto array = jsi::Array(runtime, _sharedValues.size());
+    for (size_t i = 0; i < _sharedValues.size(); i++) {
+      array.setValueAtIndex(runtime, i, jsi::Value(runtime, _sharedValues[i]));
+    }
+    releaseSharedValues();
+    return array;
+  }
+
+  /** Lets go of the shared values without reading them (JS thread). */
+  void releaseSharedValues() {
+    _sharedValues.clear();
+    _slots.reset();
+  }
+
+private:
+  /**
+   * The slot of a shared value, given on its first sight. The shared values
+   * are keyed by identity in a Map of the recording runtime: JSI has no
+   * identity hash of its own, and comparing against every shared value seen
+   * so far would make recording quadratic in their number.
+   */
+  size_t slotFor(jsi::Runtime &runtime, const jsi::Object &sharedValue) {
+    if (_sharedValues.size() != _conversions.size()) {
+      // takeSharedValues() let go of the shared values: a new one could not
+      // get the slot its conversions would be filed under.
+      throw std::runtime_error(
+          "Cannot record a shared value after getSharedValues()");
+    }
+    if (!_slots) {
+      _slots.emplace(runtime);
+    }
+    auto slot = _slots->get.callWithThis(runtime, _slots->map, sharedValue);
+    if (slot.isNumber()) {
+      return static_cast<size_t>(slot.asNumber());
+    }
+    auto index = _sharedValues.size();
+    _slots->set.callWithThis(runtime, _slots->map, sharedValue,
+                             static_cast<double>(index));
+    _sharedValues.push_back(
+        jsi::Value(runtime, sharedValue).getObject(runtime));
+    _conversions.emplace_back();
+    return index;
+  }
+
+  /** A Map from shared value to slot, with its get and set. */
+  struct Slots {
+    explicit Slots(jsi::Runtime &runtime)
+        : map(runtime.global()
+                  .getPropertyAsFunction(runtime, "Map")
+                  .callAsConstructor(runtime)
+                  .asObject(runtime)),
+          get(map.getPropertyAsFunction(runtime, "get")),
+          set(map.getPropertyAsFunction(runtime, "set")) {}
+
+    jsi::Object map;
+    jsi::Function get;
+    jsi::Function set;
+  };
+
+  std::vector<jsi::Object> _sharedValues;
+  std::optional<Slots> _slots;
+  std::vector<std::vector<ConversionFunction>> _conversions;
+};
 
 using Patch = std::array<SkPoint, 12>;
 
@@ -106,8 +207,6 @@ bool convertSelectorProperty(jsi::Runtime &runtime, const jsi::Value &prop,
   }
   auto sharedValue = svVal.asObject(runtime);
   auto key = keyVal.asString(runtime).utf8(runtime);
-  auto name =
-      sharedValue.getProperty(runtime, "name").asString(runtime).utf8(runtime);
 
   auto conv = [target = &target, key](jsi::Runtime &runtime,
                                       const jsi::Object &val) -> PendingWrite {
@@ -132,7 +231,7 @@ bool convertSelectorProperty(jsi::Runtime &runtime, const jsi::Value &prop,
         };
   };
 
-  variables[name].push_back(conv);
+  variables.add(runtime, sharedValue, conv);
   if (auto write = conv(runtime, sharedValue)) {
     write();
   }
@@ -155,9 +254,6 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
 
   if (isSharedValue(runtime, prop)) {
     auto sharedValue = prop.asObject(runtime);
-    auto name = sharedValue.getProperty(runtime, "name")
-                    .asString(runtime)
-                    .utf8(runtime);
     auto conv = [target = &target](jsi::Runtime &runtime,
                                    const jsi::Object &val) -> PendingWrite {
       auto value = val.getProperty(runtime, "value");
@@ -166,7 +262,7 @@ void convertPropertyImpl(jsi::Runtime &runtime, const jsi::Object &object,
             *target = std::move(converted);
           };
     };
-    variables[name].push_back(conv);
+    variables.add(runtime, sharedValue, conv);
     if (auto write = conv(runtime, sharedValue)) {
       write();
     }

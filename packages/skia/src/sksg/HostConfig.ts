@@ -87,14 +87,16 @@ export const sksgHostConfig: SkiaHostConfig = {
   },
 
   createTextInstance(
-    _text,
+    text,
     _rootContainerInstance,
     _hostContext,
     _internalInstanceHandle
   ) {
     debug("createTextInstance");
-    // return SpanNode({}, text) as SkNode;
-    throw new Error("Text nodes are not supported yet");
+    throw new Error(
+      `Text strings cannot be rendered directly inside a <Canvas> ("${text}"). ` +
+        "Use the <Text> or <Paragraph> component instead."
+    );
   },
 
   createInstance(
@@ -144,7 +146,7 @@ export const sksgHostConfig: SkiaHostConfig = {
 
   resetAfterCommit(container: Container) {
     debug("resetAfterCommit");
-    container.redraw();
+    container.recordAfterCommit();
   },
 
   getPublicInstance(node: Instance) {
