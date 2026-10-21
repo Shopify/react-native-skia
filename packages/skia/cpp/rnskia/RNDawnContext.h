@@ -406,7 +406,10 @@ public:
     }
     skgpu::graphite::InsertRecordingInfo info;
     info.fRecording = recording.get();
-    current->context->insertRecording(info);
+    if (!static_cast<bool>(current->context->insertRecording(info))) {
+      // The uploads it carried never ran (see ImageProvider).
+      ImageProvider::invalidateAll();
+    }
     current->context->submit(syncToCpu);
   }
 
@@ -432,6 +435,8 @@ public:
       auto status = current->context->insertRecording(info);
       // InsertStatus converts to true on success.
       if (!static_cast<bool>(status)) {
+        // The uploads it carried never ran (see ImageProvider).
+        ImageProvider::invalidateAll();
         RNSkLogger::logToConsole(
             "Graphite rejected a recording (InsertStatus %d): %s",
             static_cast<int>(
@@ -456,9 +461,11 @@ public:
       return image;
     }
     // A recorder of its own: snapping the recorder of this thread would also
-    // submit what the offscreen surfaces of this thread recorded so far.
+    // submit what the offscreen surfaces of this thread recorded so far. It
+    // only uploads, so it keeps Skia's default image provider rather than an
+    // image cache it would never use.
     static thread_local ThreadRecorder uploadRecorder;
-    auto *recorder = currentRecorder(uploadRecorder);
+    auto *recorder = currentRecorder(uploadRecorder, false);
     auto texture =
         SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
     if (texture == nullptr) {
@@ -903,11 +910,15 @@ private:
   // Recorders ----------------------------------------------------------------
 
   /** Called with the context lock held. */
-  std::unique_ptr<skgpu::graphite::Recorder> makeRecorderLocked() {
+  std::unique_ptr<skgpu::graphite::Recorder>
+  makeRecorderLocked(bool useImageProvider = true) {
+    auto *current = _current.load(std::memory_order_acquire);
+    if (!useImageProvider) {
+      return current->context->makeRecorder();
+    }
     skgpu::graphite::RecorderOptions options;
     options.fImageProvider = ImageProvider::Make();
-    return _current.load(std::memory_order_acquire)
-        ->context->makeRecorder(options);
+    return current->context->makeRecorder(options);
   }
 
   /**
@@ -916,14 +927,15 @@ private:
    its generation, so that a recording it snaps from now on is dropped (see
    submitRecording). Throws when none can be made.
    */
-  skgpu::graphite::Recorder *currentRecorder(ThreadRecorder &slot) {
+  skgpu::graphite::Recorder *currentRecorder(ThreadRecorder &slot,
+                                             bool useImageProvider = true) {
     if (slot.recorder != nullptr &&
         slot.generation == _current.load(std::memory_order_acquire)->id) {
       return slot.recorder.get();
     }
     std::lock_guard<std::mutex> lock(_mutex);
     auto *current = _current.load(std::memory_order_acquire);
-    auto recorder = makeRecorderLocked();
+    auto recorder = makeRecorderLocked(useImageProvider);
     if (recorder == nullptr) {
       throw std::runtime_error("Failed to create graphite context");
     }
@@ -959,9 +971,7 @@ private:
     });
     // Taken so that a poller between its predicate check and its wait cannot
     // miss the notification.
-    {
-      std::lock_guard<std::mutex> lock(_pollerMutex);
-    }
+    { std::lock_guard<std::mutex> lock(_pollerMutex); }
     _pollerCondition.notify_one();
   }
 
