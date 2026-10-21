@@ -52,7 +52,7 @@ const reportUnsupportedReanimated = () => {
 
 /**
  * Records the scene graph into the native recorder, on the JS thread, once
- * per React commit.
+ * per React commit that changes it and once per render() (Reconciler.ts).
  *
  * On screen, the recorder is handed to the view, which owns it and replays it
  * on the render thread pool. The Reanimated mapper only pushes the shared
