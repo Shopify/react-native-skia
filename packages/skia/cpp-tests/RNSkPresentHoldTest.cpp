@@ -1,3 +1,6 @@
+// Host-side checks of RNSkia::RNSkPresentHold, which holds a window's present
+// for the GPU and gives it one frame a tick (see run.sh).
+
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -8,9 +11,9 @@
 #include <utility>
 #include <vector>
 
-#include <gtest/gtest.h>
+#include "Expect.h"
 
-#include "RNSkPresentHold.h"
+#include "rnskia/RNSkPresentHold.h"
 
 namespace RNSkia {
 namespace {
@@ -212,106 +215,106 @@ void forEachSequence(PresentHold hold, const Check &check) {
   forEachSequence(hold, 10, check, sequence);
 }
 
-TEST(RNSkPresentHoldTest, PresentsEveryFrameAtOnceWithoutHolding) {
+TEST_CASE(PresentsEveryFrameAtOnceWithoutHolding) {
   Window window(PresentHold::kNone);
-  ASSERT_TRUE(window.replay());
-  ASSERT_TRUE(window.replay());
-  EXPECT_FALSE(window.hasHeldFrame());
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2}));
-  EXPECT_EQ(window.tracked(), 0);
+  REQUIRE(window.replay());
+  REQUIRE(window.replay());
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
+  EXPECT(window.tracked() == 0);
 }
 
-TEST(RNSkPresentHoldTest, TicksChangeNothingWithoutHolding) {
+TEST_CASE(TicksChangeNothingWithoutHolding) {
   Window window(PresentHold::kNone);
-  ASSERT_TRUE(window.replay());
+  REQUIRE(window.replay());
   window.tick();
-  ASSERT_TRUE(window.replay());
-  ASSERT_TRUE(window.replay());
-  EXPECT_FALSE(window.hasHeldFrame());
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2, 3}));
+  REQUIRE(window.replay());
+  REQUIRE(window.replay());
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presented() == (std::vector<int>{1, 2, 3}));
 }
 
-TEST(RNSkPresentHoldTest, PresentsTheFirstFrameAtOnce) {
+TEST_CASE(PresentsTheFirstFrameAtOnce) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
-  EXPECT_FALSE(window.hasHeldFrame());
-  EXPECT_EQ(window.presented(), (std::vector<int>{1}));
+  REQUIRE(window.replay());
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presented() == (std::vector<int>{1}));
 }
 
-TEST(RNSkPresentHoldTest, HoldsAFrameWhileTheGpuIsOnThePreviousOne) {
+TEST_CASE(HoldsAFrameWhileTheGpuIsOnThePreviousOne) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
+  REQUIRE(window.replay());
   window.tick();
-  ASSERT_TRUE(window.replay());
-  EXPECT_TRUE(window.hasHeldFrame());
-  EXPECT_FALSE(window.replay());
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kWaiting);
-  EXPECT_EQ(window.presented(), (std::vector<int>{1}));
+  REQUIRE(window.replay());
+  EXPECT(window.hasHeldFrame());
+  EXPECT(!window.replay());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kWaiting);
+  EXPECT(window.presented() == (std::vector<int>{1}));
 }
 
-TEST(RNSkPresentHoldTest, PresentsTheHeldFrameOnceTheGpuIsDone) {
+TEST_CASE(PresentsTheHeldFrameOnceTheGpuIsDone) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
+  REQUIRE(window.replay());
   window.tick();
-  ASSERT_TRUE(window.replay());
-  ASSERT_TRUE(window.finishGpuFrame());
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kPresented);
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2}));
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kNone);
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2}));
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kPresented);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
+  EXPECT(window.presentHeldFrame() == HeldFrame::kNone);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
 }
 
-TEST(RNSkPresentHoldTest, PresentsAFrameAtOnceOnceTheGpuIsDoneAfterATick) {
+TEST_CASE(PresentsAFrameAtOnceOnceTheGpuIsDoneAfterATick) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
-  ASSERT_TRUE(window.finishGpuFrame());
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
   window.tick();
-  ASSERT_TRUE(window.replay());
-  EXPECT_FALSE(window.hasHeldFrame());
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2}));
+  REQUIRE(window.replay());
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
 }
 
-TEST(RNSkPresentHoldTest, HoldsASecondFrameInATickWhateverTheGpu) {
+TEST_CASE(HoldsASecondFrameInATickWhateverTheGpu) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
-  ASSERT_TRUE(window.finishGpuFrame());
-  ASSERT_TRUE(window.replay());
-  EXPECT_TRUE(window.hasHeldFrame());
-  ASSERT_TRUE(window.finishGpuFrame());
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kWaiting);
-  EXPECT_EQ(window.presented(), (std::vector<int>{1}));
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
+  REQUIRE(window.replay());
+  EXPECT(window.hasHeldFrame());
+  REQUIRE(window.finishGpuFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kWaiting);
+  EXPECT(window.presented() == (std::vector<int>{1}));
 
   window.tick();
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kPresented);
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2}));
+  EXPECT(window.presentHeldFrame() == HeldFrame::kPresented);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
 }
 
-TEST(RNSkPresentHoldTest, ATickPresentsTheHeldFrameOnlyOnceTheGpuIsDone) {
+TEST_CASE(ATickPresentsTheHeldFrameOnlyOnceTheGpuIsDone) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
+  REQUIRE(window.replay());
   window.tick();
-  ASSERT_TRUE(window.replay());
+  REQUIRE(window.replay());
   window.tick();
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kWaiting);
-  ASSERT_TRUE(window.finishGpuFrame());
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kPresented);
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 2}));
+  EXPECT(window.presentHeldFrame() == HeldFrame::kWaiting);
+  REQUIRE(window.finishGpuFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kPresented);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
 }
 
-TEST(RNSkPresentHoldTest, DropsTheHeldFrameWithItsSwapchain) {
+TEST_CASE(DropsTheHeldFrameWithItsSwapchain) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
-  ASSERT_TRUE(window.replay());
-  ASSERT_TRUE(window.replay());
+  REQUIRE(window.replay());
+  REQUIRE(window.replay());
   window.reconfigure();
-  EXPECT_FALSE(window.hasHeldFrame());
-  EXPECT_EQ(window.presentHeldFrame(), HeldFrame::kNone);
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kNone);
   window.reconfigure();
-  EXPECT_EQ(window.dropped(), (std::vector<int>{2}));
-  ASSERT_TRUE(window.replay());
-  EXPECT_EQ(window.presented(), (std::vector<int>{1, 3}));
+  EXPECT(window.dropped() == (std::vector<int>{2}));
+  REQUIRE(window.replay());
+  EXPECT(window.presented() == (std::vector<int>{1, 3}));
 }
 
-TEST(RNSkPresentHoldTest, NeverPresentsOverABusyGpuInEverySequence) {
+TEST_CASE(NeverPresentsOverABusyGpuInEverySequence) {
   for (PresentHold hold : kHolds) {
     bool presentedOverBusyGpu = false;
     forEachSequence(hold, [&presentedOverBusyGpu](const std::vector<Event> &,
@@ -319,17 +322,17 @@ TEST(RNSkPresentHoldTest, NeverPresentsOverABusyGpuInEverySequence) {
       presentedOverBusyGpu =
           presentedOverBusyGpu || window.presentedOverBusyGpu();
     });
-    EXPECT_EQ(presentedOverBusyGpu, hold == PresentHold::kNone);
+    EXPECT(presentedOverBusyGpu == (hold == PresentHold::kNone));
   }
 }
 
-TEST(RNSkPresentHoldTest, PresentsOrDropsEveryFrameOnceInOrderInEverySequence) {
+TEST_CASE(PresentsOrDropsEveryFrameOnceInOrderInEverySequence) {
   for (PresentHold hold : kHolds) {
     size_t mostDropped = 0;
     forEachSequence(
         hold, [&mostDropped](const std::vector<Event> &, const Window &window) {
           const auto &presented = window.presented();
-          EXPECT_TRUE(std::is_sorted(presented.begin(), presented.end()));
+          EXPECT(std::is_sorted(presented.begin(), presented.end()));
           std::vector<int> settled = presented;
           settled.insert(settled.end(), window.dropped().begin(),
                          window.dropped().end());
@@ -337,15 +340,14 @@ TEST(RNSkPresentHoldTest, PresentsOrDropsEveryFrameOnceInOrderInEverySequence) {
           std::vector<int> expected(window.replayed().size() -
                                     (window.hasHeldFrame() ? 1 : 0));
           std::iota(expected.begin(), expected.end(), 1);
-          EXPECT_EQ(settled, expected);
+          EXPECT(settled == expected);
           mostDropped = std::max(mostDropped, window.dropped().size());
         });
-    EXPECT_EQ(mostDropped > 0,
-              hold == PresentHold::kOncePerTickAfterPreviousFrame);
+    EXPECT((mostDropped > 0) == (hold == PresentHold::kOncePerTickAfterPreviousFrame));
   }
 }
 
-TEST(RNSkPresentHoldTest, PresentsAtMostOneFrameATickInEverySequence) {
+TEST_CASE(PresentsAtMostOneFrameATickInEverySequence) {
   for (PresentHold hold : kHolds) {
     int mostPresentedInATick = 0;
     forEachSequence(hold, [&mostPresentedInATick](const std::vector<Event> &,
@@ -353,11 +355,11 @@ TEST(RNSkPresentHoldTest, PresentsAtMostOneFrameATickInEverySequence) {
       mostPresentedInATick =
           std::max(mostPresentedInATick, window.mostPresentedInATick());
     });
-    EXPECT_EQ(mostPresentedInATick > 1, hold == PresentHold::kNone);
+    EXPECT((mostPresentedInATick > 1) == (hold == PresentHold::kNone));
   }
 }
 
-TEST(RNSkPresentHoldTest, TakesAFrameAfterTheGpuAndATickInEverySequence) {
+TEST_CASE(TakesAFrameAfterTheGpuAndATickInEverySequence) {
   for (PresentHold hold : kHolds) {
     size_t held = 0;
     forEachSequence(hold, [hold, &held](const std::vector<Event> &sequence,
@@ -367,13 +369,15 @@ TEST(RNSkPresentHoldTest, TakesAFrameAfterTheGpuAndATickInEverySequence) {
       while (window->finishGpuFrame()) {
       }
       window->tick();
-      EXPECT_NE(window->presentHeldFrame(), HeldFrame::kWaiting);
-      EXPECT_FALSE(window->hasHeldFrame());
-      EXPECT_TRUE(window->replay());
+      EXPECT(window->presentHeldFrame() != HeldFrame::kWaiting);
+      EXPECT(!window->hasHeldFrame());
+      EXPECT(window->replay());
     });
-    EXPECT_EQ(held > 0, hold == PresentHold::kOncePerTickAfterPreviousFrame);
+    EXPECT((held > 0) == (hold == PresentHold::kOncePerTickAfterPreviousFrame));
   }
 }
 
 } // namespace
 } // namespace RNSkia
+
+int main() { return expect::runTestCases("RNSkPresentHoldTest"); }

@@ -1,12 +1,15 @@
+// Host-side checks of RNSkia::RNSkReplaySchedule, which paces a view's replays
+// by its presents (see run.sh).
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <optional>
 #include <type_traits>
 
-#include <gtest/gtest.h>
+#include "Expect.h"
 
-#include "RNSkReplaySchedule.h"
+#include "rnskia/RNSkReplaySchedule.h"
 
 namespace RNSkia {
 namespace {
@@ -418,20 +421,16 @@ struct Reached {
  drained, every recording reached a target, and a job starts.
  */
 void checkInvariants(const View &view, Reached &reached) {
-  EXPECT_EQ(view.schedule().pacing(), view.expectedPacing())
-      << "a pacing the replays did not call for";
-  EXPECT_EQ(view.schedule().hasJobInFlight(), view.jobRunning());
-  EXPECT_FALSE(view.overlappingJobs()) << "two jobs at once";
-  EXPECT_FALSE(view.startedEarly()) << "a job started before its pacing";
-  EXPECT_LE(view.ownRecordingsOnTarget(), 1u)
-      << "two of the view's recordings on its target";
-  EXPECT_LE(view.deferred(), 1u) << "more than one deferred recording";
-  EXPECT_TRUE(view.finished().startsWith(view.submitted()))
-      << "a recording handed over out of order, twice, or never";
+  EXPECT(view.schedule().pacing() == view.expectedPacing());
+  EXPECT(view.schedule().hasJobInFlight() == view.jobRunning());
+  EXPECT(!view.overlappingJobs());
+  EXPECT(!view.startedEarly());
+  EXPECT(view.ownRecordingsOnTarget() <= 1u);
+  EXPECT(view.deferred() <= 1u);
+  EXPECT(view.finished().startsWith(view.submitted()));
   View settled = drained(view);
-  EXPECT_EQ(settled.submitted(), settled.finished())
-      << "a recording never reached a target";
-  EXPECT_TRUE(settled.startJob()) << "no job starts once drained";
+  EXPECT(settled.submitted() == settled.finished());
+  EXPECT(settled.startJob());
   reached.mostFinished = std::max(reached.mostFinished, view.finished().size());
   reached.pipelined =
       reached.pipelined || view.schedule().pacing() == ReplayPacing::kPipelined;
@@ -460,7 +459,7 @@ void checkEverySequence(const View &view, size_t depth,
       continue;
     }
     checkInvariants(next, reached);
-    if (::testing::Test::HasFailure()) {
+    if (expect::hasFailure()) {
       return;
     }
     checkEverySequence(next, depth - 1, events, reached);
@@ -471,183 +470,182 @@ void checkEverySequence(const View &view, size_t depth,
  */
 Schedule scheduleWithRecordingOnTarget() {
   Schedule schedule(kReplaysToKeepUp);
-  EXPECT_TRUE(schedule.tryStartJob());
-  EXPECT_EQ(schedule.finishJob(1), std::optional<int>(1));
+  EXPECT(schedule.tryStartJob());
+  EXPECT(schedule.finishJob(1) == std::optional<int>(1));
   return schedule;
 }
 
 /** Makes the schedule pipeline: its job runs past its second tick. */
 void outlastAFrame(Schedule &schedule, int recording) {
-  ASSERT_TRUE(schedule.tryStartJob());
+  REQUIRE(schedule.tryStartJob());
   schedule.presentTick();
   schedule.presentTick();
-  ASSERT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+  REQUIRE(schedule.pacing() == ReplayPacing::kPipelined);
   (void)schedule.finishJob(recording);
 }
 
-TEST(RNSkReplayScheduleTest, StartsOneJobAtATime) {
+TEST_CASE(StartsOneJobAtATime) {
   Schedule schedule(kReplaysToKeepUp);
-  EXPECT_TRUE(schedule.tryStartJob());
-  EXPECT_TRUE(schedule.hasJobInFlight());
-  EXPECT_FALSE(schedule.tryStartJob());
+  EXPECT(schedule.tryStartJob());
+  EXPECT(schedule.hasJobInFlight());
+  EXPECT(!schedule.tryStartJob());
   schedule.endJob();
-  EXPECT_FALSE(schedule.hasJobInFlight());
-  EXPECT_TRUE(schedule.tryStartJob());
+  EXPECT(!schedule.hasJobInFlight());
+  EXPECT(schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest, HandsAFinishedRecordingBackToSubmit) {
+TEST_CASE(HandsAFinishedRecordingBackToSubmit) {
   Schedule schedule(kReplaysToKeepUp);
-  ASSERT_TRUE(schedule.tryStartJob());
-  EXPECT_EQ(schedule.finishJob(7), std::optional<int>(7));
+  REQUIRE(schedule.tryStartJob());
+  EXPECT(schedule.finishJob(7) == std::optional<int>(7));
 }
 
-TEST(RNSkReplayScheduleTest, StartsTheNextJobOnceTheRecordingIsPresented) {
+TEST_CASE(StartsTheNextJobOnceTheRecordingIsPresented) {
   Schedule schedule = scheduleWithRecordingOnTarget();
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
-  EXPECT_FALSE(schedule.tryStartJob());
-  EXPECT_EQ(schedule.recordingPresented(1), std::nullopt);
-  EXPECT_TRUE(schedule.tryStartJob());
+  EXPECT(schedule.pacing() == ReplayPacing::kAfterPresent);
+  EXPECT(!schedule.tryStartJob());
+  EXPECT(schedule.recordingPresented(1) == std::nullopt);
+  EXPECT(schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest, WaitsForPresentsWhileReplaysKeepUp) {
+TEST_CASE(WaitsForPresentsWhileReplaysKeepUp) {
   Schedule schedule = scheduleWithRecordingOnTarget();
   for (int recording = 2; recording < 10; recording++) {
-    ASSERT_EQ(schedule.recordingPresented(recording - 1), std::nullopt);
-    ASSERT_TRUE(schedule.tryStartJob());
+    REQUIRE((schedule.recordingPresented(recording - 1)) == std::nullopt);
+    REQUIRE(schedule.tryStartJob());
     schedule.presentTick();
-    ASSERT_EQ(schedule.finishJob(recording), std::optional<int>(recording));
-    EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+    REQUIRE(schedule.finishJob(recording) == std::optional<int>(recording));
+    EXPECT(schedule.pacing() == ReplayPacing::kAfterPresent);
   }
 }
 
-TEST(RNSkReplayScheduleTest, PipelinesOnceAReplayOutlastsAFrame) {
+TEST_CASE(PipelinesOnceAReplayOutlastsAFrame) {
   Schedule schedule(kReplaysToKeepUp);
-  ASSERT_TRUE(schedule.tryStartJob());
+  REQUIRE(schedule.tryStartJob());
   schedule.presentTick();
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+  EXPECT(schedule.pacing() == ReplayPacing::kAfterPresent);
   schedule.presentTick();
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
-  ASSERT_EQ(schedule.finishJob(1), std::optional<int>(1));
-  EXPECT_TRUE(schedule.tryStartJob());
+  EXPECT(schedule.pacing() == ReplayPacing::kPipelined);
+  REQUIRE(schedule.finishJob(1) == std::optional<int>(1));
+  EXPECT(schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest, CountsNoTickWithoutAJob) {
+TEST_CASE(CountsNoTickWithoutAJob) {
   Schedule schedule(kReplaysToKeepUp);
   schedule.presentTick();
   schedule.presentTick();
-  ASSERT_TRUE(schedule.tryStartJob());
+  REQUIRE(schedule.tryStartJob());
   schedule.presentTick();
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
+  EXPECT(schedule.pacing() == ReplayPacing::kAfterPresent);
 }
 
-TEST(RNSkReplayScheduleTest,
-     DefersARecordingFinishedWhileThePreviousOneWaitsForItsVsync) {
-  Schedule schedule(kReplaysToKeepUp);
-  outlastAFrame(schedule, 1);
-  ASSERT_TRUE(schedule.tryStartJob());
-  EXPECT_EQ(schedule.finishJob(2), std::nullopt);
-  EXPECT_FALSE(schedule.tryStartJob());
-  EXPECT_EQ(schedule.recordingPresented(1), std::optional<int>(2));
-  EXPECT_TRUE(schedule.tryStartJob());
-}
-
-TEST(RNSkReplayScheduleTest,
-     WaitsForPresentsAgainOnceReplaysStartedAtPresentsKeepUp) {
+TEST_CASE(DefersARecordingFinishedWhileThePreviousOneWaitsForItsVsync) {
   Schedule schedule(kReplaysToKeepUp);
   outlastAFrame(schedule, 1);
-  ASSERT_EQ(schedule.recordingPresented(1), std::nullopt);
-  ASSERT_TRUE(schedule.tryStartJob());
-  schedule.presentTick();
-  ASSERT_EQ(schedule.finishJob(2), std::optional<int>(2));
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
-  ASSERT_EQ(schedule.recordingPresented(2), std::nullopt);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(3), std::optional<int>(3));
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kAfterPresent);
-  EXPECT_FALSE(schedule.tryStartJob());
+  REQUIRE(schedule.tryStartJob());
+  EXPECT(schedule.finishJob(2) == std::nullopt);
+  EXPECT(!schedule.tryStartJob());
+  EXPECT(schedule.recordingPresented(1) == std::optional<int>(2));
+  EXPECT(schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest, KeepsPipeliningForReplaysNotStartedAtAPresent) {
+TEST_CASE(WaitsForPresentsAgainOnceReplaysStartedAtPresentsKeepUp) {
+  Schedule schedule(kReplaysToKeepUp);
+  outlastAFrame(schedule, 1);
+  REQUIRE(schedule.recordingPresented(1) == std::nullopt);
+  REQUIRE(schedule.tryStartJob());
+  schedule.presentTick();
+  REQUIRE(schedule.finishJob(2) == std::optional<int>(2));
+  EXPECT(schedule.pacing() == ReplayPacing::kPipelined);
+  REQUIRE(schedule.recordingPresented(2) == std::nullopt);
+  REQUIRE(schedule.tryStartJob());
+  REQUIRE(schedule.finishJob(3) == std::optional<int>(3));
+  EXPECT(schedule.pacing() == ReplayPacing::kAfterPresent);
+  EXPECT(!schedule.tryStartJob());
+}
+
+TEST_CASE(KeepsPipeliningForReplaysNotStartedAtAPresent) {
   Schedule schedule(kReplaysToKeepUp);
   outlastAFrame(schedule, 1);
   for (int recording = 2; recording < 6; recording++) {
     schedule.presentTick();
-    ASSERT_EQ(schedule.recordingPresented(recording - 1), std::nullopt);
+    REQUIRE((schedule.recordingPresented(recording - 1)) == std::nullopt);
     schedule.presentTick();
-    ASSERT_TRUE(schedule.tryStartJob());
-    ASSERT_EQ(schedule.finishJob(recording), std::optional<int>(recording));
+    REQUIRE(schedule.tryStartJob());
+    REQUIRE(schedule.finishJob(recording) == std::optional<int>(recording));
   }
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+  EXPECT(schedule.pacing() == ReplayPacing::kPipelined);
 }
 
-TEST(RNSkReplayScheduleTest, CountsAJobWithoutARecordingAsNeither) {
+TEST_CASE(CountsAJobWithoutARecordingAsNeither) {
   Schedule schedule(kReplaysToKeepUp);
   outlastAFrame(schedule, 1);
   for (int round = 0; round < 3; round++) {
-    ASSERT_TRUE(schedule.tryStartJob());
+    REQUIRE(schedule.tryStartJob());
     schedule.endJob();
   }
-  EXPECT_EQ(schedule.pacing(), ReplayPacing::kPipelined);
+  EXPECT(schedule.pacing() == ReplayPacing::kPipelined);
 }
 
-TEST(RNSkReplayScheduleTest, WaitsOnlyForItsOwnRecording) {
+TEST_CASE(WaitsOnlyForItsOwnRecording) {
   Schedule schedule(kReplaysToKeepUp);
   outlastAFrame(schedule, 1);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(2), std::nullopt);
-  EXPECT_EQ(schedule.recordingPresented(kClientRecording), std::nullopt);
-  EXPECT_FALSE(schedule.tryStartJob());
+  REQUIRE(schedule.tryStartJob());
+  REQUIRE(schedule.finishJob(2) == std::nullopt);
+  EXPECT(schedule.recordingPresented(kClientRecording) == std::nullopt);
+  EXPECT(!schedule.tryStartJob());
 }
 
-TEST(RNSkReplayScheduleTest, HandsTheDeferredRecordingOverOnce) {
+TEST_CASE(HandsTheDeferredRecordingOverOnce) {
   Schedule schedule(kReplaysToKeepUp);
   outlastAFrame(schedule, 1);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(2), std::nullopt);
-  EXPECT_EQ(schedule.recordingPresented(1), std::optional<int>(2));
-  EXPECT_EQ(schedule.recordingPresented(1), std::nullopt);
-  EXPECT_EQ(schedule.retarget(), std::nullopt);
+  REQUIRE(schedule.tryStartJob());
+  REQUIRE(schedule.finishJob(2) == std::nullopt);
+  EXPECT(schedule.recordingPresented(1) == std::optional<int>(2));
+  EXPECT(schedule.recordingPresented(1) == std::nullopt);
+  EXPECT(schedule.retarget() == std::nullopt);
 }
 
-TEST(RNSkReplayScheduleTest,
-     HandsTheDeferredRecordingToThePreviousTargetOnRetarget) {
+TEST_CASE(HandsTheDeferredRecordingToThePreviousTargetOnRetarget) {
   Schedule schedule(kReplaysToKeepUp);
   outlastAFrame(schedule, 1);
-  ASSERT_TRUE(schedule.tryStartJob());
-  ASSERT_EQ(schedule.finishJob(2), std::nullopt);
-  EXPECT_EQ(schedule.retarget(), std::optional<int>(2));
-  EXPECT_EQ(schedule.retarget(), std::nullopt);
-  EXPECT_EQ(schedule.recordingPresented(1), std::nullopt);
+  REQUIRE(schedule.tryStartJob());
+  REQUIRE(schedule.finishJob(2) == std::nullopt);
+  EXPECT(schedule.retarget() == std::optional<int>(2));
+  EXPECT(schedule.retarget() == std::nullopt);
+  EXPECT(schedule.recordingPresented(1) == std::nullopt);
 }
 
-TEST(RNSkReplayScheduleTest, StopsWaitingForARecordingOfAPreviousTarget) {
+TEST_CASE(StopsWaitingForARecordingOfAPreviousTarget) {
   Schedule schedule = scheduleWithRecordingOnTarget();
-  EXPECT_EQ(schedule.retarget(), std::nullopt);
-  ASSERT_TRUE(schedule.tryStartJob());
-  EXPECT_EQ(schedule.finishJob(2), std::optional<int>(2));
+  EXPECT(schedule.retarget() == std::nullopt);
+  REQUIRE(schedule.tryStartJob());
+  EXPECT(schedule.finishJob(2) == std::optional<int>(2));
 }
 
-TEST(RNSkReplayScheduleTest, KeepsItsInvariantsInEverySequence) {
+TEST_CASE(KeepsItsInvariantsInEverySequence) {
   Reached reached;
   checkEverySequence(View(1), 11, kEveryEvent, reached);
-  EXPECT_GE(reached.mostFinished, 3u);
-  EXPECT_TRUE(reached.pipelined);
-  EXPECT_TRUE(reached.caughtUp);
-  EXPECT_TRUE(reached.overlapped);
-  EXPECT_TRUE(reached.deferred);
-  EXPECT_TRUE(reached.clientPresentedWhileOwnWaits);
-  EXPECT_TRUE(reached.retargetedWhileDeferred);
+  EXPECT(reached.mostFinished >= 3u);
+  EXPECT(reached.pipelined);
+  EXPECT(reached.caughtUp);
+  EXPECT(reached.overlapped);
+  EXPECT(reached.deferred);
+  EXPECT(reached.clientPresentedWhileOwnWaits);
+  EXPECT(reached.retargetedWhileDeferred);
 }
 
-TEST(RNSkReplayScheduleTest, PacesByTheReplaysInEverySequence) {
+TEST_CASE(PacesByTheReplaysInEverySequence) {
   Reached reached;
   checkEverySequence(View(kReplaysToKeepUp), 17, kPacingEvents, reached);
-  EXPECT_GE(reached.mostFinished, 4u);
-  EXPECT_TRUE(reached.pipelined);
-  EXPECT_TRUE(reached.caughtUp);
-  EXPECT_TRUE(reached.overlapped);
-  EXPECT_TRUE(reached.deferred);
+  EXPECT(reached.mostFinished >= 4u);
+  EXPECT(reached.pipelined);
+  EXPECT(reached.caughtUp);
+  EXPECT(reached.overlapped);
+  EXPECT(reached.deferred);
 }
 
 } // namespace
 } // namespace RNSkia
+
+int main() { return expect::runTestCases("RNSkReplayScheduleTest"); }
