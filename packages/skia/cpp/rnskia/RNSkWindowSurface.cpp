@@ -28,8 +28,9 @@ namespace {
 
 // The windows alive, so that every surface made on a lost GPU device can be
 // let go of at once before the device is destroyed (see
-// RNSkWindowSurface::ensureDevice). Windows live on the main thread; the
-// mutex only guards the list itself.
+// RNSkWindowSurface::ensureDevice). Windows live on the present thread (see
+// RNSkPlatformContext::runOnPresentThread); the mutex only guards the list
+// itself.
 std::mutex &windowsMutex() {
   static std::mutex mutex;
   return mutex;
@@ -50,7 +51,7 @@ RNSkWindowSurface::RNSkWindowSurface(PresentHold presentHold)
 
 RNSkWindowSurface::~RNSkWindowSurface() {
   // Out of the list before letting go of the surface: the destructor may run
-  // on any thread, and the list is swept on the main thread (see
+  // on any thread, and the list is swept on the present thread (see
   // releaseSurfacesOn).
   {
     std::lock_guard<std::mutex> lock(windowsMutex());

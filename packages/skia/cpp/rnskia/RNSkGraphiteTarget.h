@@ -123,8 +123,8 @@ private:
  * RNSkGraphiteTargetRegistry) and kept alive by both.
  *
  * Recording happens on the producer's thread (the JS thread, a worklet
- * runtime or the render thread pool), presenting on the main thread; the
- * queue is the hand-off. A recorder serves one thread at a time, which is
+ * runtime or the render thread pool), presenting on the present thread (see
+ * RNSkPlatformContext::runOnPresentThread); the queue is the hand-off. A recorder serves one thread at a time, which is
  * enforced by allowing a single open recording.
  */
 class RNSkGraphiteTarget {
@@ -385,7 +385,7 @@ private:
   bool _opaque = false;
   bool _highBitDepth = false;
 
-  // Hand-off to the main thread.
+  // Hand-off to the present thread.
   std::mutex _queueMutex;
   std::deque<std::shared_ptr<RNSkGraphiteRecording>> _queue;
   std::function<void()> _requestFrame;

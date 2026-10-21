@@ -31,8 +31,8 @@ class RNSkGraphiteTarget;
  * pending writes: that is the only step that needs a JS runtime, and it never
  * waits for a replay. A pool thread replays the commands (the recorder writes
  * the pending values into them first) into a deferred canvas of the view's
- * target and submits the recording; the main thread presents it on the next
- * vsync.
+ * target and submits the recording; the present thread presents it on the
+ * next vsync.
  *
  * A recording with shared values arrives without their values (recording
  * reads none, see Variables) and is not replayed before the mapper has read
@@ -100,14 +100,14 @@ public:
 
   /**
    The view is done with these recordings, taken off its target: presented,
-   or skipped as ones it cannot replay. Main thread.
+   or skipped as ones it cannot replay. Present thread.
    */
   void onRecordingsPresented(
       const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings);
 
   /**
    The view's present tick ended: the platform asked it to present, once a
-   frame, while a frame of it was waiting or coming. Main thread.
+   frame, while a frame of it was waiting or coming. Present thread.
    */
   void onPresentTick();
 
@@ -135,7 +135,8 @@ private:
   /**
    Swaps the content under the lock and releases the previous one outside of
    it: a pool thread still replaying it keeps it alive until it is done, and
-   the last owner, whichever thread that is, releases its resources. Pending
+   the recorder's destructor, on whichever thread drops it last, hands its
+   commands to the present thread. Pending
    writes go away with their recorder.
    */
   void replaceContent(std::shared_ptr<Recorder> recorder,

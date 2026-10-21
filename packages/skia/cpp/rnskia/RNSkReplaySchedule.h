@@ -28,7 +28,7 @@ enum class ReplayPacing {
  * The pacing follows the replays, counted in the view's present ticks. A
  * replay that started at a present and finished before the next tick keeps up
  * with the display when the next one starts at the following present, which
- * leaves the main thread alone between presents. A replay still running at
+ * leaves the present thread alone between presents. A replay still running at
  * the second tick after it started outlasted a frame: the next one then
  * starts as soon as it finishes, so that the replay of one frame overlaps the
  * present of the other, and a view that only started its replays at presents

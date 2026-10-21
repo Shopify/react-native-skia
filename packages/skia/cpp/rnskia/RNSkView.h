@@ -41,12 +41,13 @@ namespace jsi = facebook::jsi;
  * (SkiaViewApi.makeGraphiteContext), or <Canvas> hands over a recorder (or a
  * picture) that the render thread pool records for the view. Either way the
  * recordings are queued on the target; the view presents them onto its window
- * surface on the main thread, once the platform view's surface can show a new
- * frame (see setFrameScheduler).
+ * surface on the present thread (RNSkPlatformContext::runOnPresentThread: a
+ * thread of its own on Android, the main thread elsewhere), once the platform
+ * view's surface can show a new frame (see setFrameScheduler).
  *
  * Threading: the registry side (RNSkJsiViewApi) runs on the JS thread, except
  * applyUpdates() which a Reanimated mapper calls on the UI runtime; snapshots
- * replay on the calling thread. Presenting runs on the main thread.
+ * replay on the calling thread. Presenting runs on the present thread.
  */
 class RNSkView : public std::enable_shared_from_this<RNSkView> {
 public:
@@ -100,17 +101,17 @@ public:
     }
     std::weak_ptr<RNSkView> weakThis = weak_from_this();
     auto context = _platformContext;
-    auto scheduleOnMainThread = [weakThis, context]() {
-      context->runOnMainThread([weakThis]() {
+    auto scheduleOnPresentThread = [weakThis, context]() {
+      context->runOnPresentThread([weakThis]() {
         if (auto view = weakThis.lock()) {
           view->scheduleFrame();
         }
       });
     };
-    target->attach(_surface, scheduleOnMainThread);
+    target->attach(_surface, scheduleOnPresentThread);
     _producer->setTarget(target);
     if (target->hasQueued()) {
-      scheduleOnMainThread();
+      scheduleOnPresentThread();
     }
   }
 
@@ -141,7 +142,7 @@ public:
   }
 
   /**
-   Schedules redraw() on the main thread, once. A redraw the window could not
+   Schedules redraw() on the present thread, once. A redraw the window could not
    show (the app in the background) stays requested until onCanPresent()
    schedules it again.
    */
@@ -153,7 +154,7 @@ public:
   }
 
   /**
-   Main thread. Presents everything submitted since the last frame; with
+   Present thread. Presents everything submitted since the last frame; with
    nothing queued, presents the last frame again (a redraw after a resize or
    on a new surface). Without a surface the queue is left alone: the surface
    presents it when it appears. While the window cannot show a frame (the
@@ -222,15 +223,16 @@ public:
    Installed by the platform view, which calls presentFrame() once its surface
    can show a new frame, and again a frame later until it returns
    NextFrame::kNone: on the display link on iOS, straight away and then a
-   frame apart on macOS, and on Android as its FrameScheduler decides. Main
-   thread. Without one, frames are presented as soon as the main thread gets
-   to them, and one the window could not take waits for the next redraw.
+   frame apart on macOS, and on Android as its FrameScheduler decides.
+   Present thread. Without one, frames are presented as soon as the present
+   thread gets to them, and one the window could not take waits for the next
+   redraw.
    */
   void setFrameScheduler(std::function<void()> scheduler) {
     _frameScheduler = std::move(scheduler);
   }
 
-  /** Main thread: a recording is waiting. */
+  /** Present thread: a recording is waiting. */
   void scheduleFrame() {
     if (_frameScheduler) {
       _frameScheduler();
@@ -286,7 +288,7 @@ public:
   }
 
   /**
-   Main thread. The window can show frames again (the app came back to the
+   Present thread. The window can show frames again (the app came back to the
    foreground, see RNSkWindowSurface::setCanPresent): a redraw it could not
    show is scheduled again, else the frames waiting meanwhile are handed to
    the frame scheduler. Nothing is replayed on the spot. A GPU device lost
@@ -337,7 +339,7 @@ private:
 
   /**
    Whether a frame waits to be shown or is coming: queued on the target, held
-   by the window for the GPU, or being replayed. Main thread.
+   by the window for the GPU, or being replayed. Present thread.
    */
   bool hasFrameToShow() {
     auto target = getTarget();
@@ -398,10 +400,10 @@ private:
            1;
   }
 
-  /** Runs redraw() on the main thread, when it gets to it. */
+  /** Runs redraw() on the present thread, when it gets to it. */
   void postRedraw() {
     std::weak_ptr<RNSkView> weakThis = weak_from_this();
-    _platformContext->runOnMainThread([weakThis]() {
+    _platformContext->runOnPresentThread([weakThis]() {
       if (auto view = weakThis.lock()) {
         if (view->_redrawRequested) {
           view->redraw();
@@ -605,9 +607,9 @@ private:
   std::function<void()> _frameScheduler;
   std::atomic<bool> _redrawRequested = {false};
 
-  // The target is bound on the JS thread and read on the main thread and by
-  // snapshots; the last presented frame is written by the main thread and
-  // read by snapshots.
+  // The target is bound on the JS thread and read on the present thread and
+  // by snapshots; the last presented frame is written by the present thread
+  // and read by snapshots.
   std::mutex _mutex;
   std::shared_ptr<RNSkGraphiteTarget> _target;
   std::shared_ptr<RNSkGraphiteRecording> _lastPresented;

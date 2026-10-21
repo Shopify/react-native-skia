@@ -3,7 +3,6 @@
 #include <atomic>
 #include <memory>
 
-#include <android/api-level.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <fbjni/fbjni.h>
@@ -20,7 +19,10 @@ namespace jni = facebook::jni;
 /**
  * The JNI side of SkiaView: owns the native view and the window surface it
  * presents into, and relays the surface callbacks of the backing SurfaceView
- * or TextureView, whose ANativeWindow it acquires for the surface.
+ * or TextureView, whose ANativeWindow it acquires for the surface. The
+ * surface callbacks, the latch and the presents run on the present thread
+ * (PresentThread.java); the layout size, the bit depth and the registry calls
+ * on the main thread.
  */
 class JniSkiaView : public jni::HybridClass<JniSkiaView> {
 public:
@@ -132,7 +134,7 @@ protected:
   /**
    The TextureView's window drew the frame last presented into it
    (SkiaTextureView.onSurfaceTextureUpdated), which gave a buffer back to
-   its queue: what waited for it goes now. Main thread.
+   its queue: what waited for it goes now. Present thread.
    */
   void frameLatched() {
     if (_framePendingLatch->exchange(false)) {
@@ -147,23 +149,23 @@ private:
                        jni::alias_ref<JniSkiaManager::javaobject> skiaManager)
       : _manager(skiaManager->cthis()->getSkiaManager()) {
     auto context = skiaManager->cthis()->getPlatformContext();
-    // A window's present waits, on the main thread that presents, until the
-    // GPU has finished the frame presented before it (libgui's queueBuffer,
-    // for every Vulkan swapchain), and its compositor takes one frame a vsync:
-    // a frame replayed that early, or a second one in a tick, is held.
+    // A window's present waits, on the thread that presents, until the GPU
+    // has finished the frame presented before it (libgui's queueBuffer, for
+    // every Vulkan swapchain), and holds Dawn's device lock meanwhile; its
+    // compositor takes one frame a vsync: a frame replayed that early, or a
+    // second one in a tick, is held.
     _surface = std::make_shared<RNSkWindowSurface>(
         PresentHold::kOncePerTickAfterPreviousFrame);
     // The Java view's frame callback and its refresh-rate vote. Weak: the
     // Java view owns this object through its hybrid data.
     jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);
     // A TextureView takes a frame only when its window draws, on the main
-    // thread that also presents. A present before that draw replaces the
-    // frame still queued, and on Android 11 waits up to 4.29 s for a buffer
-    // only that draw gives back: its Vulkan loader gives the queue a
-    // dequeue timeout where it means none. So from Android 11 the next
-    // frame waits until the window has drawn the last one (frameLatched);
-    // Android 10's queue never waits, and holding frames back there only
-    // adds jank.
+    // thread. A present before that draw replaces the frame still queued,
+    // and on Android 11 waits up to 4.29 s for a buffer only that draw gives
+    // back: its Vulkan loader gives the queue a dequeue timeout where it
+    // means none. Presents come from the present thread, in no order with
+    // the window's draws, so the next frame waits until the window has drawn
+    // the last one (frameLatched), on every release.
     // The vote counts the frames that went to the window, not the frames the
     // view was asked to present: it asks on every frame while one is coming.
     _surface->setDidPresent([latchesOnWindowDraw = _latchesOnWindowDraw,
@@ -232,9 +234,7 @@ private:
       releaseWindow(nullptr, ownedSurface);
       return;
     }
-    const bool latchesOnWindowDraw =
-        !isSurface && android_get_device_api_level() >= __ANDROID_API_R__;
-    _latchesOnWindowDraw->store(latchesOnWindowDraw);
+    _latchesOnWindowDraw->store(!isSurface);
     _framePendingLatch->store(false);
     _surface->attach(window, width, height, highBitDepth,
                      /* useP3ColorSpace= */ false,
