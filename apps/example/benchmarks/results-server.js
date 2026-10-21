@@ -15,7 +15,7 @@ const { execFileSync } = require("child_process");
 const dir = path.join(__dirname, "results");
 fs.mkdirSync(dir, { recursive: true });
 const port = Number(process.env.PORT || 4299);
-const pkg = process.env.ANDROID_PACKAGE || "com.microsoft.reacttestapp";
+const pkg = process.env.ANDROID_PACKAGE || "com.reactnativeskia.example";
 
 // One queue per device: Android reaches us over adb reverse (loopback), the
 // iPhone over the network.
@@ -95,7 +95,8 @@ const cpuByRole = (delta) => {
       roles.hwui += ms;
     } else if (n === "mqt_js" || n === "mqt_v_js") {
       roles.js += ms;
-    } else if (n === "main" || n.endsWith("reacttestapp") || n === "osoft.reacttestapp") {
+    } else if (n === "main" || (n.length >= 8 && pkg.endsWith(n))) {
+      // The main thread is named after the package, cut to a suffix.
       roles.main += ms;
     } else {
       roles.other += ms;

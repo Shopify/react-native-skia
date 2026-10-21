@@ -4,7 +4,7 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 TAG="$1"
-PKG=com.microsoft.reacttestapp
+PKG=${ANDROID_PACKAGE:-com.reactnativeskia.example}
 touch "$HERE/results/.dirty-marker"
 adb shell setprop debug.hwui.show_dirty_regions true
 adb shell am force-stop $PKG
