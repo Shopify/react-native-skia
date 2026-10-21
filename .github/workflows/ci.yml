@@ -162,7 +162,7 @@ jobs:
           swap-storage: false
 
       - name: Install JDK
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -315,7 +315,7 @@ jobs:
             nohup adb logcat > logcat.txt 2>&1 &
             # Right after "Emulator booted" adb can still answer "device offline" for a moment, so wait and retry the install.
             ok=0; for i in 1 2 3 4 5; do adb wait-for-device install -r apps/example/android/app/build/outputs/apk/debug/app-debug.apk && ok=1 && break; echo "adb install failed (attempt $i)"; sleep 5; done; [ "$ok" = 1 ]
-            adb wait-for-device shell monkey -p com.microsoft.reacttestapp 1
+            adb wait-for-device shell monkey -p com.reactnativeskia.example 1
             cd packages/skia && CI=true yarn e2e --testPathIgnorePatterns Paragraphs
 
       # The *.test.png images of failed checks: a failed comparison's, and
