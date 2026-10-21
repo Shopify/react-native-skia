@@ -114,6 +114,10 @@ const useCanvasRoot = ({
     ref,
     (): CanvasRef => ({
       makeImageSnapshot: (rect?: SkRect) => {
+        // The snapshot draws the current values of the shared values, read
+        // here: the mapper may not have read them yet (a snapshot in the
+        // commit that installed the recording), or not since they changed.
+        root.readSharedValues();
         return SkiaViewApi.makeImageSnapshot(nativeId, rect);
       },
 
@@ -134,7 +138,7 @@ const useCanvasRoot = ({
         return view ? measureLayout(view) : { width: 0, height: 0 };
       },
     }),
-    [nativeId, viewRef]
+    [nativeId, root, viewRef]
   );
   return { nativeId, viewRef };
 };
