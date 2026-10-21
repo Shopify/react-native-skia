@@ -18,25 +18,87 @@ Textures created on that device can be used by both libraries without any copy:
 
 :::info
 
-The APIs on this page are only available on native platforms. On the Web, Skia runs on WebGL through CanvasKit.
+The interop APIs on this page are only available on native platforms. On the Web, Skia runs on WebGL through CanvasKit.
 
 :::
 
-## Installation
+## The GPU device
+
+`Skia.gpu` describes the GPU device Skia renders with: Vulkan on Android, Metal on iOS, WebGL on the web.
+
+```tsx twoslash
+import { Skia } from "react-native-skia";
+
+const { isAvailable, backend, device, description, error } = Skia.gpu;
+```
+
+| Property | Description |
+|:--|:--|
+| `isAvailable` | Whether Skia can render on this device, right now |
+| `backend` | `"Vulkan"`, `"Metal"` or `"WebGL"`; empty when unavailable |
+| `vendor`, `architecture`, `device`, `description` | The adapter, in the terms of WebGPU's `GPUAdapterInfo` (native only) |
+| `error` | Why the GPU is unavailable; `null` when it is |
+| `lost` | The promise of the loss of the device, see [device loss](#device-loss) |
+
+### Availability
+
+On a device without a GPU Skia can render with (on Android, one without Vulkan 1.1, see [the Vulkan section of the installation guide](/docs/getting-started/installation#vulkan)), the app still runs.
+`Skia.gpu.isAvailable` is false and `Skia.gpu.error` says why: every canvas stays blank, CPU work (paths, decoding, raster images) still runs, and the APIs that need the GPU (offscreen surfaces, snapshots, texture images) throw an error with the same message.
+
+### Device loss
+
+The device can be lost while the app runs: a driver reset, the GPU out of memory, or GPU work refused while the app was in the background on iOS.
+React Native Skia then replaces it with a new device, and canvases render again on their own.
+Everything made on the lost device is gone for good, though safe to use (it draws nothing): offscreen surfaces and the images taken from them, texture images, snapshots of views, and the device `Skia.getNativeDevice()` returned.
+
+`Skia.gpu.lost` is the promise of the loss of the device in use, like WebGPU's `GPUDevice.lost`.
+It resolves once React Native Skia has replaced the device; `Skia.gpu` then describes the new device, with a `lost` promise of its own for the next loss.
+
+```tsx twoslash
+import { Skia } from "react-native-skia";
+
+Skia.gpu.lost.then(({ reason, message }) => {
+  console.log(`GPU device lost (${reason}): ${message}`);
+  // Skia.gpu now describes the new device: make your GPU objects again.
+});
+```
+
+`Skia.gpu.isAvailable` is false between the loss and the replacement, and stays false, with `Skia.gpu.error` saying why, if no replacement could be made.
+
+In React, `useGpu()` returns `Skia.gpu` as state and renders the component again once a lost device has been replaced: make your GPU objects with its value as a dependency and they are made again too.
+
+```tsx twoslash
+import { useMemo } from "react";
+import { Canvas, Image, Skia, useGpu } from "react-native-skia";
+
+const Demo = () => {
+  const gpu = useGpu();
+  // Made again on the new device after a loss.
+  const image = useMemo(() => {
+    const surface = Skia.Surface.MakeOffscreen(256, 256)!;
+    surface.getCanvas().drawColor(Skia.Color("cyan"));
+    surface.flush();
+    return surface.makeImageSnapshot();
+  }, [gpu]);
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Image image={image} x={0} y={0} width={256} height={256} />
+    </Canvas>
+  );
+};
+```
+
+Code sharing the device with React Native WebGPU imports it again the same way, see [sharing the device](#sharing-the-device).
+
+## Sharing the device
+
+Install React Native WebGPU next to React Native Skia, and follow its [installation instructions](https://wcandillon.github.io/react-native-webgpu/docs/getting-started/installation) for the rest of the setup:
 
 ```sh
 yarn add react-native-webgpu
 ```
 
-Follow the [installation instructions](https://wcandillon.github.io/react-native-webgpu/docs/getting-started/installation) of React Native WebGPU for the rest of the setup.
-
-Both packages depend on the same `react-native-webgpu-dawn` package, which ships the Dawn build they link, so that only one copy of Dawn exists in the app.
-The native build verifies that the two resolve the same version of it and fails with a `Dawn version mismatch` error otherwise.
-If you see that error, upgrade `react-native-skia` and `react-native-webgpu` together.
-
-## Compatibility
-
-Pick one row and install versions from it; the [React Native WebGPU documentation](https://wcandillon.github.io/react-native-webgpu/docs/integrations/react-native-skia) keeps the reference copy of this table.
+Pick the versions of the two packages from one row of this table; the [React Native WebGPU documentation](https://wcandillon.github.io/react-native-webgpu/docs/integrations/react-native-skia) keeps the reference copy of it.
 
 | react-native-skia | react-native-webgpu |
 | --- | --- |
@@ -46,14 +108,13 @@ Pick one row and install versions from it; the [React Native WebGPU documentatio
 | 3.0.6 to 3.0.8 | 0.12.1, or 0.13.0 and later with react-native-skia 3.0.8 |
 | 3.0.0 to 3.0.5 | 0.10.0 to 0.11.2 |
 
-From react-native-skia 3.1.0 and react-native-webgpu 0.13.0 both libraries depend on `react-native-webgpu-dawn`, and the native build checks that they resolve the same version of it.
-The mixed rows work because the older release vendors the same Dawn commit: react-native-skia 3.1.0 accepts a react-native-webgpu 0.12.1 whose `dawnCommit` matches, and react-native-skia 3.0.8 defers to react-native-webgpu's Dawn.
+From react-native-skia 3.1.0 and react-native-webgpu 0.13.0, both packages depend on the same `react-native-webgpu-dawn` package, which ships the Dawn build they link, so that only one copy of Dawn exists in the app.
+The native build verifies that the two resolve the same version of it and fails with a `Dawn version mismatch` error otherwise: upgrade `react-native-skia` and `react-native-webgpu` together.
+The mixed rows work because the older release vendors the same Dawn commit (react-native-skia 3.1.0 accepts a react-native-webgpu 0.12.1 whose `dawnCommit` matches, and react-native-skia 3.0.8 defers to react-native-webgpu's Dawn).
 On Android, react-native-skia 3.0.6 and 3.0.7 cannot pair with react-native-webgpu 0.13.0 and later: they still package their own `libwebgpu_dawn.so` next to the one from the package and the build fails merging the two.
 
-## Sharing the device
-
-`Skia.getNativeDevice()` returns a pointer to the device Skia renders with.
-`importDevice()` from React Native WebGPU wraps it into a `GPUDevice`:
+Once installed, the device Skia renders with is yours to use from WebGPU.
+`Skia.getNativeDevice()` returns a pointer to it, and `importDevice()` from React Native WebGPU wraps it into a `GPUDevice`:
 
 ```tsx
 import { Skia } from "react-native-skia";
@@ -65,9 +126,30 @@ const device = importDevice(Skia.getNativeDevice());
 Everything you create with this device (textures, buffers, pipelines) lives on the same device as Skia's own resources, which is what makes sharing textures possible.
 A few things to know about it:
 
-- The device is owned by Skia and is valid for the lifetime of the process.
-- Skia treats the loss of its device as fatal: there is no point in requesting a replacement when it is lost.
+- The device is owned by Skia, which keeps it alive for as long as it renders with it.
+- The device can be lost: a driver reset, the GPU out of memory, GPU work refused while the app was in the background on iOS. Skia then replaces it with a new device (see [device loss](#device-loss)). The imported `GPUDevice` does not learn of the loss (its `lost` promise never settles) and everything created on it is gone: import the new device and create your resources again, with `useGpu()` in React or `Skia.gpu.lost` elsewhere.
 - `navigator.gpu.requestAdapter()` and `requestDevice()` still work as usual. Use a device of your own when you want your GPU work isolated from Skia's command queue, but keep in mind that a texture created on another device cannot be shared with Skia.
+
+```tsx
+import { useMemo } from "react";
+import { Skia, useGpu } from "react-native-skia";
+import { importDevice } from "react-native-webgpu";
+
+// A texture on Skia's device. Once a lost device has been replaced, the new
+// one is imported and the texture created again on it.
+const useSharedTexture = () => {
+  const gpu = useGpu();
+  return useMemo(() => {
+    const device = importDevice(Skia.getNativeDevice());
+    return device.createTexture({
+      size: [256, 256],
+      format: "rgba8unorm",
+      usage:
+        GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+    });
+  }, [gpu]);
+};
+```
 
 The shared device works like any other device, for instance to configure a WebGPU canvas:
 

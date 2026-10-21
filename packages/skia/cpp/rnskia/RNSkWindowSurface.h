@@ -144,6 +144,11 @@ public:
   bool presentImage(const sk_sp<SkImage> &image) override;
 
 private:
+  // Configures the window on the GPU device in use when the one it was
+  // configured on was lost and replaced since (see DawnContext): the
+  // swapchain is made again on the new device, the window itself stays.
+  // Returns false without a context. Main thread.
+  bool ensureDevice();
   // Configures the swapchain for the current size, format and usage.
   void configureSurface();
   // Copies the window's target description where any thread can read it.
@@ -164,7 +169,11 @@ private:
     }
   }
 
+  // The device the window is configured on, and its generation (see
+  // DawnContext::generation()): a lost device is replaced, and the window
+  // configured again on the new one (see ensureDevice).
   wgpu::Device _device;
+  uint64_t _generation = 0;
   wgpu::Surface _surface;
   // The recorder of the thread the window is attached on (the main thread):
   // presentImage() draws on it, presentRecordings() only wraps the swapchain

@@ -82,7 +82,9 @@ A surface follows the same split: `Skia.Surface.MakeRaster()` draws on the CPU a
 | :-- | :-- | :-- | :-- |
 | `useImage()`, `Skia.Image.MakeRasterImage()`, `makeRasterImage()` | CPU | Uploaded once per canvas, then cached | Immediate |
 | `surface.makeImageSnapshot()`, `surface.asImage()`, `makeTextureImage()`, `Skia.Image.MakeImageFromGPUTexture()` | GPU | No copy, from any canvas and any thread | Waits for the GPU |
-| `Skia.Image.MakeImageFromEncoded()` | Encoded bytes | Decoded and uploaded by the first canvas that draws it, on that frame | Decodes |
+| `Skia.Image.MakeImageFromEncoded()` | Encoded bytes | Decoded and uploaded by each canvas that draws it, on its first frame, then cached | Decodes |
+
+A canvas keeps the textures of the CPU images it draws in a cache of its own: 64 MB at most, least recently drawn out first, and a texture not drawn for ten seconds is released the next time the canvas draws a CPU image. Everything is released when the canvas unmounts. The cache is per canvas, so an image drawn by several canvases is uploaded by each of them and held once per canvas: upload it once with `makeTextureImage()` instead.
 
 Moving an image from one side to the other is explicit:
 
