@@ -64,6 +64,14 @@ const reportUnsupportedReanimated = () => {
  * collector gets around to a wrapper. A recording without shared values is
  * turned into a picture by the view.
  *
+ * Recording reads no shared value: on Reanimated 4, a read on the JS thread
+ * is a blocking round trip to the UI thread, and reading a picture held by a
+ * shared value wraps it for the JS runtime (a wrapper per commit, charged to
+ * the garbage collector). The mapper runs once as it starts and reads every
+ * shared value on the UI thread, at the same moment; the view draws the
+ * recording from that first read on (see RNSkGraphiteProducer) and keeps
+ * showing the previous frame until then.
+ *
  * Unmounting does not clear the view: the native view can outlive the React
  * tree (exit animations, screen transitions) and keeps showing its last frame
  * until it is torn down, which is when the recording is released.
@@ -74,6 +82,11 @@ const reportUnsupportedReanimated = () => {
 class NativeContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture | null = null;
+  /** The recording the view owns and its shared values, if any. */
+  private installed: {
+    recorderId: number;
+    sharedValues: ReturnType<JsiRecorder["getSharedValues"]>;
+  } | null = null;
 
   private stopMapper() {
     if (this.mapperId !== null) {
@@ -85,6 +98,7 @@ class NativeContainer extends Container {
   unmount() {
     super.unmount();
     this.stopMapper();
+    this.installed = null;
     this.picture?.dispose();
     this.picture = null;
   }
@@ -98,6 +112,7 @@ class NativeContainer extends Container {
 
   redraw() {
     this.stopMapper();
+    this.installed = null;
     if (this.unmounted) {
       // The unmount commit triggers a last redraw: recording it would
       // resurrect a recording for a container that has just let go of it.
@@ -107,7 +122,10 @@ class NativeContainer extends Container {
     try {
       visit(recorder, this.root);
       if (this.nativeId === -1) {
-        // The previous frame stays until the new one is recorded.
+        // No mapper will update the picture: it is played with the current
+        // values of the shared values, which makePicture() reads on this
+        // thread (it needs the recorder to still hold them). The previous
+        // frame stays until the new one is recorded.
         const picture = recorder.makePicture();
         this.picture?.dispose();
         this.picture = picture;
@@ -132,20 +150,42 @@ class NativeContainer extends Container {
     // mapper can still fire after the new recording is installed. Tagging the
     // updates with the recording id lets the view ignore them.
     const recorderId = recorder.getId();
-    // The view takes ownership of the recorder and draws the first frame.
+    // The view takes ownership of the recorder and draws it (right away for a
+    // static scene, from the first update on otherwise).
     SkiaViewApi.setJsiProperty(nativeId, "recorder", recorder);
     if (sharedValues.length === 0) {
       return;
     }
+    this.installed = { recorderId, sharedValues };
     if (!HAS_REANIMATED_4) {
-      // The scene was recorded with the current values of the shared values
-      // and nothing will update them: createContainer() reported it.
+      // No mapper will read the shared values (createContainer() reported
+      // it): read them once, here, so that the view can draw the scene with
+      // their current values.
+      SkiaViewApi.applyUpdates(nativeId, recorderId, sharedValues);
       return;
     }
+    // A mapper runs once when it starts: that run reads every shared value on
+    // the UI thread and draws the first frame of this recording.
     this.mapperId = Rea.startMapper(() => {
       "worklet";
       SkiaViewApi.applyUpdates(nativeId, recorderId, sharedValues);
     }, sharedValues);
+  }
+
+  /**
+   * Reads the shared values of the recording the view owns, on this thread:
+   * a snapshot taken before the mapper's first run (in the commit that
+   * installed the recording) would otherwise draw the previous frame, and
+   * one taken later draws the values as of now rather than as of the last
+   * mapper run. Snapshots are rare, so the Reanimated 4 round trips to the
+   * UI thread are affordable here.
+   */
+  readSharedValues() {
+    if (this.installed === null) {
+      return;
+    }
+    const { recorderId, sharedValues } = this.installed;
+    SkiaViewApi.applyUpdates(this.nativeId, recorderId, sharedValues);
   }
 }
 

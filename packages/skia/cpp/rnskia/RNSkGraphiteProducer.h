@@ -30,6 +30,12 @@ class RNSkGraphiteTarget;
  * target and submits the recording; the main thread presents it on the next
  * vsync.
  *
+ * A recording with shared values arrives without their values (recording
+ * reads none, see Variables) and is not replayed before the mapper has read
+ * them once (Recorder::isReady): the view keeps showing its previous frame
+ * until then, one UI frame at most, rather than a frame with unset
+ * properties.
+ *
  * Pacing: a view has at most one job in flight, and the pool keeps at most one
  * frame ahead of the display: a job may start while the previous recording is
  * still waiting for its vsync, so that the replay of one frame overlaps the
@@ -120,6 +126,11 @@ private:
    */
   void replaceContent(std::shared_ptr<Recorder> recorder,
                       sk_sp<SkPicture> picture, bool dirty);
+  /**
+   Whether there is something to replay: a picture, or a recorder that has
+   read its shared values (see Recorder::isReady). Under the lock.
+   */
+  bool hasContentLocked() const;
   void kickLocked();
   void produce();
 

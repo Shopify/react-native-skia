@@ -10,7 +10,6 @@
 
 void SkLog(SkLogPriority, const char[], ...) {}
 void sk_abort_no_print() { std::abort(); }
-uint32_t SkChecksum::Hash32(const void *, size_t, uint32_t) { return 0; }
 void SkTiledImageUtils::GetImageKeyValues(const SkImage *, uint32_t *) {}
 sk_sp<SkImage> SkImages::TextureFromImage(skgpu::graphite::Recorder *,
                                           const SkImage *,

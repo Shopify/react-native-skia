@@ -526,7 +526,7 @@ public:
     if (_surface) {
       auto snapshot = _surface->makeImageSnapshot();
       if (auto *recorder = _surface->recorder()) {
-        DawnContext::getInstance().submitRecording(recorder->snap().get());
+        DawnContext::getInstance().submitRecording(recorder);
       }
       if (!JsiSkImage::readPixelsInto(snapshot, *info, bfrPtr, bytesPerRow,
                                       srcX, srcY)) {

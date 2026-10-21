@@ -5,11 +5,13 @@
 #include <chrono>
 #include <condition_variable>
 #include <functional>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -44,6 +46,21 @@ namespace RNSkia {
 /** The pixels read back from a Graphite image; nullptr when the read failed. */
 using ReadResult = std::unique_ptr<const SkImage::AsyncReadResult>;
 
+/**
+ * The GPU Skia renders with: a Dawn device and the Graphite context on it.
+ *
+ * The device can be lost while the app runs (a driver reset, the GPU out of
+ * memory, GPU work refused while the app is in the background on iOS). Dawn
+ * reports it and fails every later operation on that device instead of
+ * crashing. The context then replaces the device: a new one is created on
+ * the same adapter, with a new Graphite context, and the views configure
+ * their windows on it and record their frames again. Everything made on the
+ * lost device stays valid memory, but is good for nothing: the recordings of
+ * its recorders are dropped rather than run on the new device, offscreen
+ * surfaces and texture images made on it draw nothing, and JS is told through
+ * Skia.gpu.lost so that the app makes them again. Each device and its
+ * context are a generation (see generation()).
+ */
 class DawnContext {
 public:
   DawnContext(const DawnContext &) = delete;
@@ -62,7 +79,21 @@ public:
     DawnUtils::AdapterDescription adapter;
     /** Why the GPU is unavailable; empty when it is. */
     std::string error;
+    /** The device in use (see generation()); 0 without one. */
+    uint64_t generation = 0;
   };
+
+  /**
+   A device that was lost, for the loss listeners (see addLossListener) and
+   Skia.gpu.lost: which generation, the reason in WebGPU's terms ("unknown"
+   for a loss React Native Skia did not cause) and the driver's message.
+   */
+  struct LossInfo {
+    uint64_t generation = 0;
+    std::string reason;
+    std::string message;
+  };
+  using LossListener = std::function<void(const LossInfo &)>;
 
   /**
    The context. Throws std::runtime_error, with the reason, when the device
@@ -83,18 +114,26 @@ public:
   static DawnContext *tryGetInstance() noexcept { return probe().instance; }
 
   /**
-   Probes the GPU if not done yet and describes it. Once the device is lost
-   (see isDeviceLost), unavailable, with the loss as the error. Never throws.
+   Probes the GPU if not done yet and describes it. While the device in use
+   is lost (see isDeviceLost), unavailable, with the loss as the error.
+   Never throws.
    */
   static GpuInfo getGpuInfo() noexcept {
     GpuInfo info = probe().info;
-    if (!info.available || !isDeviceLost()) {
+    if (!info.available) {
       return info;
     }
-    auto &state = lostState();
-    std::lock_guard<std::mutex> lock(state.mutex);
-    info.available = false;
-    info.error = state.message;
+    auto *instance = probe().instance;
+    auto *current = instance->_current.load(std::memory_order_acquire);
+    info.generation = current->id;
+    if (current->lost.load(std::memory_order_acquire)) {
+      std::lock_guard<std::mutex> lock(instance->_lostMutex);
+      info.available = false;
+      info.error = current->lostMessage;
+      info.error += current->recoveryFailure.empty()
+                        ? " A replacement is being made."
+                        : " " + current->recoveryFailure;
+    }
     return info;
   }
 
@@ -115,16 +154,86 @@ public:
     }).detach();
   }
 
+  // Generations ---------------------------------------------------------------
+
   /**
-   Whether the GPU device was lost since it was created: a driver reset, the
-   GPU out of memory, a device-level error. A lost Dawn device fails every
-   later operation instead of crashing, so the context stays usable in the
-   sense that calls return: views stop presenting (RNSkWindowSurface), GPU
-   APIs return nothing, and Skia.gpu reports the loss. Nothing recovers the
-   device short of restarting the app. Any thread.
+   The device in use, by number: 1 for the one probed, one more for each
+   replacement of a lost device (see the class comment); 0 without a GPU.
+   Whoever keeps a recorder or a recording remembers the generation it was
+   made for and checks it with isCurrent() before using it. Any thread.
+   */
+  static uint64_t generation() noexcept {
+    auto *instance = tryGetInstance();
+    return instance == nullptr
+               ? 0
+               : instance->_current.load(std::memory_order_acquire)->id;
+  }
+
+  /**
+   Whether the device in use was lost and not replaced yet: a replacement is
+   on its way (see onDeviceLost), or none could be made. Nothing renders
+   meanwhile: views keep their last frame (RNSkWindowSurface), recordings
+   are dropped (RNSkGraphiteTarget), GPU APIs return nothing, and Skia.gpu
+   reports the loss. Any thread.
    */
   static bool isDeviceLost() noexcept {
-    return lostState().lost.load(std::memory_order_acquire);
+    auto *instance = tryGetInstance();
+    return instance != nullptr &&
+           instance->_current.load(std::memory_order_acquire)
+               ->lost.load(std::memory_order_acquire);
+  }
+
+  /**
+   Whether something made for the given generation can be used right now:
+   it is the device in use, and that device is not lost. Any thread.
+   */
+  static bool isCurrent(uint64_t generation) noexcept {
+    auto *instance = tryGetInstance();
+    if (instance == nullptr) {
+      return false;
+    }
+    auto *current = instance->_current.load(std::memory_order_acquire);
+    return current->id == generation &&
+           !current->lost.load(std::memory_order_acquire);
+  }
+
+  /**
+   Replaces a lost device now rather than when the backoff allows (see
+   scheduleRecovery): the app came back to the foreground, where GPU work
+   is allowed again. Nothing happens unless the device in use is lost. Any
+   thread.
+   */
+  static void requestRecovery() noexcept {
+    auto *instance = tryGetInstance();
+    if (instance == nullptr) {
+      return;
+    }
+    auto *current = instance->_current.load(std::memory_order_acquire);
+    if (!current->lost.load(std::memory_order_acquire)) {
+      return;
+    }
+    instance->scheduleRecovery(current, /* failedAttempt= */ false);
+  }
+
+  /**
+   Registers a listener told of every loss of the device in use, once React
+   Native Skia has tried to replace it (so that Skia.gpu describes the new
+   device, or why there is none, by the time it runs). Called on the thread
+   that made the attempt, outside of the context lock; the listener must
+   not need the caller to still exist. Returns the id to remove it with.
+   */
+  static size_t addLossListener(LossListener listener) {
+    auto &registry = lossListeners();
+    std::lock_guard<std::mutex> lock(registry.mutex);
+    const auto id = ++registry.lastId;
+    registry.listeners.emplace(id, std::move(listener));
+    return id;
+  }
+
+  static void removeLossListener(size_t id) {
+    auto &registry = lossListeners();
+    std::lock_guard<std::mutex> lock(registry.mutex);
+    registry.listeners.erase(id);
   }
 
   // Readbacks ----------------------------------------------------------------
@@ -139,21 +248,29 @@ public:
   /**
    Reads `srcRect` of a Graphite image back into CPU memory, in the color
    type and color space of the image. The callback runs on whichever thread
-   completes the GPU work, inside the context lock: it must not use the
-   context nor a JS runtime (hand the result to the right thread instead). It
-   is called exactly once, with nullptr when the read failed.
+   completes the GPU work, inside the context lock, or right away, outside
+   of it, with nullptr while the device is lost: it must not use the context
+   nor a JS runtime (hand the result to the right thread instead). It is
+   called exactly once, with nullptr when the read failed.
    */
   void readPixels(const sk_sp<SkImage> &image, const SkIRect &srcRect,
                   std::function<void(ReadResult)> callback) {
     struct Request {
       std::function<void(ReadResult)> callback;
     };
-    auto *request = new Request{std::move(callback)};
     auto info = image->imageInfo().makeDimensions(srcRect.size());
     {
-      std::lock_guard<std::mutex> lock(_mutex);
+      std::unique_lock<std::mutex> lock(_mutex);
+      auto *current = _current.load(std::memory_order_acquire);
+      if (current->lost.load(std::memory_order_acquire)) {
+        // A lost device reads nothing back.
+        lock.unlock();
+        callback(nullptr);
+        return;
+      }
+      auto *request = new Request{std::move(callback)};
       _pendingReadbacks.fetch_add(1, std::memory_order_acq_rel);
-      fGraphiteContext->asyncRescaleAndReadPixels(
+      current->context->asyncRescaleAndReadPixels(
           image.get(), info, srcRect, SkImage::RescaleGamma::kSrc,
           SkImage::RescaleMode::kNearest,
           [](void *context, ReadResult result) {
@@ -164,7 +281,7 @@ public:
             delete request;
           },
           request);
-      fGraphiteContext->submit();
+      current->context->submit();
     }
     wakeReadbackPoller();
   }
@@ -231,6 +348,107 @@ public:
                                                    image, image->bounds()));
   }
 
+  // Recorders ----------------------------------------------------------------
+  //
+  // The recorders of the threads (see getRecorder) are known with the
+  // generation each was made for (see generation()): a recording is only run
+  // on the device it was recorded for (submitRecording), and the recorders
+  // of a lost device are kept alive, since a surface made on a recorder
+  // cannot be drawn into once the recorder is gone. A view's recorder
+  // (makeRecorder) is tracked by the view instead (RNSkGraphiteRecorder).
+
+  /**
+   A recorder of its own for a client that records on one thread and replays
+   on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
+   calling thread. Made for the device in use (see generation()), to be
+   replaced once that device is lost; its recordings go through
+   insertRecordings(), with the generation the client remembers. Creating a
+   recorder is a Context operation, hence the lock.
+   */
+  std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    return makeRecorderLocked();
+  }
+
+  /**
+   The recorder of the calling thread, for the device in use: a thread
+   whose recorder was made for a lost device gets a new one, and the old one
+   stays alive for the surfaces made on it (which draw nothing from then on).
+   Throws when no recorder can be made.
+   */
+  skgpu::graphite::Recorder *getRecorder() {
+    static thread_local ThreadRecorder recorder;
+    return currentRecorder(recorder);
+  }
+
+  /**
+   Snaps what the recorder recorded and runs it on the GPU. `recorder` is a
+   thread's (see getRecorder), also behind the surfaces made on it; any
+   other submits nothing. A recording made for a lost device (see
+   generation()) is dropped: nothing can run it, and the device in use would
+   refuse its resources. Called on the recorder's thread.
+   */
+  void submitRecording(
+      skgpu::graphite::Recorder *recorder,
+      skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
+    if (recorder == nullptr) {
+      return;
+    }
+    auto recording = recorder->snap();
+    if (recording == nullptr) {
+      return;
+    }
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto *current = _current.load(std::memory_order_acquire);
+    if (generationOf(recorder) != current->id ||
+        current->lost.load(std::memory_order_acquire)) {
+      return;
+    }
+    skgpu::graphite::InsertRecordingInfo info;
+    info.fRecording = recording.get();
+    if (!static_cast<bool>(current->context->insertRecording(info))) {
+      // The uploads it carried never ran (see ImageProvider).
+      ImageProvider::invalidateAll();
+    }
+    current->context->submit(syncToCpu);
+  }
+
+  /**
+   Replays the recordings, in order, onto the target surface (a deferred
+   canvas target) and submits them as one batch. A recording Graphite
+   rejects is logged and skipped; the others are still submitted. The
+   recordings and the surface must be the device's in use (see isCurrent);
+   nothing runs while it is lost.
+   */
+  void
+  insertRecordings(const std::vector<skgpu::graphite::Recording *> &recordings,
+                   SkSurface *targetSurface) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto *current = _current.load(std::memory_order_acquire);
+    if (current->lost.load(std::memory_order_acquire)) {
+      return;
+    }
+    for (auto *recording : recordings) {
+      skgpu::graphite::InsertRecordingInfo info;
+      info.fRecording = recording;
+      info.fTargetSurface = targetSurface;
+      auto status = current->context->insertRecording(info);
+      // InsertStatus converts to true on success.
+      if (!static_cast<bool>(status)) {
+        // The uploads it carried never ran (see ImageProvider).
+        ImageProvider::invalidateAll();
+        RNSkLogger::logToConsole(
+            "Graphite rejected a recording (InsertStatus %d): %s",
+            static_cast<int>(
+                static_cast<skgpu::graphite::InsertStatus::V>(status)),
+            status.message().c_str());
+      }
+    }
+    current->context->submit();
+  }
+
+  // GPU objects --------------------------------------------------------------
+
   /**
    A Graphite image of `image`: uploaded on an upload recorder of this thread
    and submitted, so that any recorder can draw it once this returns. The image
@@ -246,62 +464,15 @@ public:
     // submit what the offscreen surfaces of this thread recorded so far. It
     // only uploads, so it keeps Skia's default image provider rather than an
     // image cache it would never use.
-    static thread_local auto uploadRecorder = [this]() {
-      std::lock_guard<std::mutex> lock(_mutex);
-      return fGraphiteContext->makeRecorder();
-    }();
-    auto *recorder = uploadRecorder.get();
+    static thread_local ThreadRecorder uploadRecorder;
+    auto *recorder = currentRecorder(uploadRecorder, false);
     auto texture =
         SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
     if (texture == nullptr) {
       return nullptr;
     }
-    if (auto recording = recorder->snap()) {
-      submitRecording(recording.get());
-    }
+    submitRecording(recorder);
     return texture;
-  }
-
-  // A recorder of its own for a client that records on one thread and replays
-  // on another (SkiaGraphiteView): unlike getRecorder() it is not tied to the
-  // calling thread. Creating a recorder is a Context operation, hence the lock.
-  std::unique_ptr<skgpu::graphite::Recorder> makeRecorder() {
-    std::lock_guard<std::mutex> lock(_mutex);
-    return makeRecorderWithImageProvider();
-  }
-
-  // Replays the recordings, in order, onto the target surface (a deferred
-  // canvas target) and submits them as one batch. A recording Graphite
-  // rejects is logged and skipped; the others are still submitted.
-  void
-  insertRecordings(const std::vector<skgpu::graphite::Recording *> &recordings,
-                   SkSurface *targetSurface) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    for (auto *recording : recordings) {
-      skgpu::graphite::InsertRecordingInfo info;
-      info.fRecording = recording;
-      info.fTargetSurface = targetSurface;
-      auto status = fGraphiteContext->insertRecording(info);
-      // InsertStatus converts to true on success.
-      if (!static_cast<bool>(status)) {
-        RNSkLogger::logToConsole(
-            "Graphite rejected a recording (InsertStatus %d): %s",
-            static_cast<int>(
-                static_cast<skgpu::graphite::InsertStatus::V>(status)),
-            status.message().c_str());
-      }
-    }
-    fGraphiteContext->submit();
-  }
-
-  void submitRecording(
-      skgpu::graphite::Recording *recording,
-      skgpu::graphite::SyncToCpu syncToCpu = skgpu::graphite::SyncToCpu::kNo) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    skgpu::graphite::InsertRecordingInfo info;
-    info.fRecording = recording;
-    fGraphiteContext->insertRecording(info);
-    fGraphiteContext->submit(syncToCpu);
   }
 
   // Create offscreen surface
@@ -323,11 +494,16 @@ public:
     return surface;
   }
 
-  // Get the wgpu::Instance for WebGPU bindings
+  // Get the wgpu::Instance for WebGPU bindings. The instance outlives every
+  // device (see generation()).
   wgpu::Instance getWGPUInstance() { return wgpu::Instance(instance->Get()); }
 
-  // Get the wgpu::Device for WebGPU bindings
-  wgpu::Device getWGPUDevice() { return backendContext.fDevice; }
+  // Get the wgpu::Device for WebGPU bindings: the device in use, which a
+  // loss replaces (see generation()); the previous one is then good for
+  // nothing, and Skia.gpu.lost tells JS to ask again.
+  wgpu::Device getWGPUDevice() {
+    return _current.load(std::memory_order_acquire)->backendContext.fDevice;
+  }
 
   // Create a secondary Dawn device from the same adapter.
   // Has its own command queue and does NOT enable
@@ -441,7 +617,7 @@ public:
     textureDesc.mipLevelCount = 1;
     textureDesc.sampleCount = 1;
 
-    wgpu::Texture texture = backendContext.fDevice.CreateTexture(&textureDesc);
+    wgpu::Texture texture = getWGPUDevice().CreateTexture(&textureDesc);
     if (!texture) {
       return nullptr;
     }
@@ -450,8 +626,9 @@ public:
     skgpu::graphite::BackendTexture backendTexture =
         skgpu::graphite::BackendTextures::MakeDawn(texture.Get());
 
+    auto *recorder = getRecorder();
     sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
-        getRecorder(), backendTexture, DawnUtils::PreferedColorType,
+        recorder, backendTexture, DawnUtils::PreferedColorType,
         nullptr,  // colorspace
         nullptr); // surfaceProps
 
@@ -464,10 +641,7 @@ public:
     canvas->drawImage(image, 0, 0);
 
     // Flush the surface to ensure the image is rendered
-    auto recording = getRecorder()->snap();
-    if (recording) {
-      submitRecording(recording.get(), skgpu::graphite::SyncToCpu::kYes);
-    }
+    submitRecording(recorder, skgpu::graphite::SyncToCpu::kYes);
 
     return texture;
   }
@@ -488,61 +662,61 @@ public:
     return wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
   }
 
-  skgpu::graphite::Recorder *getRecorder() {
-    static thread_local auto recorder = makeRecorderWithImageProvider();
-    if (!recorder) {
-      throw std::runtime_error("Failed to create graphite context");
-    }
-    return recorder.get();
-  }
-
 private:
-  // A recorder with an image provider of its own. The options go away here,
-  // so the recorder is the provider's only owner: the provider, and the
-  // images it caches, are released with the recorder.
-  std::unique_ptr<skgpu::graphite::Recorder> makeRecorderWithImageProvider() {
-    skgpu::graphite::RecorderOptions options;
-    options.fImageProvider = ImageProvider::Make();
-    return fGraphiteContext->makeRecorder(options);
-  }
-
   struct Probe {
     DawnContext *instance = nullptr;
     GpuInfo info;
   };
 
-  struct LostState {
-    // Read on every frame of every view (RNSkWindowSurface::canPresent):
-    // the flag is atomic, the mutex only guards the message.
+  /**
+   A device and the Graphite context on it (see generation()). Never
+   destroyed: Dawn reports its loss from any of its threads, at any time,
+   and the recorders, surfaces and images made on it keep pointing at it.
+   */
+  struct Generation {
+    uint64_t id = 0;
+    std::chrono::steady_clock::time_point created;
+    // Declared before the device it listens to, so that it outlives it.
+    DawnUtils::DeviceLostListener listener;
+    skgpu::graphite::DawnBackendContext backendContext;
+    std::unique_ptr<skgpu::graphite::Context> context;
+    // Set once, by the loss callback (any thread, see onDeviceLost); the
+    // strings are guarded by _lostMutex.
     std::atomic<bool> lost{false};
-    std::mutex mutex;
-    std::string message;
+    std::string lostReason;
+    std::string lostMessage;
+    // Why the last attempt to replace the device failed, if it did.
+    std::string recoveryFailure;
   };
 
-  // Never destroyed: Dawn reports a loss from any of its threads, possibly
-  // during process teardown.
-  static LostState &lostState() noexcept {
-    static auto *state = new LostState();
-    return *state;
-  }
-
-  // The primary device's loss callback (DawnUtils::requestDevice): records
-  // the loss for isDeviceLost() and getGpuInfo(), and logs it once.
-  static void markDeviceLost(const std::string &message) noexcept {
-    auto &state = lostState();
-    std::string error =
-        "React Native Skia lost its GPU device; nothing renders until the "
-        "app is restarted. Reason: " +
-        message;
-    {
-      std::lock_guard<std::mutex> lock(state.mutex);
-      if (state.lost.load(std::memory_order_relaxed)) {
+  /**
+   The recorder of one thread, with the generation it was made for (see
+   currentRecorder). Forgotten when the thread ends.
+   */
+  struct ThreadRecorder {
+    std::unique_ptr<skgpu::graphite::Recorder> recorder;
+    uint64_t generation = 0;
+    ~ThreadRecorder() {
+      if (recorder == nullptr) {
         return;
       }
-      state.message = error;
-      state.lost.store(true, std::memory_order_release);
+      if (auto *instance = tryGetInstance()) {
+        instance->forgetRecorder(recorder.get());
+      }
     }
-    RNSkLogger::logToConsole(error);
+  };
+
+  struct LossListeners {
+    std::mutex mutex;
+    std::map<size_t, LossListener> listeners;
+    size_t lastId = 0;
+  };
+
+  // Never destroyed: a listener may be added before the GPU is probed, and
+  // a loss reported during process teardown.
+  static LossListeners &lossListeners() noexcept {
+    static auto *registry = new LossListeners();
+    return *registry;
   }
 
   static const Probe &probe() noexcept {
@@ -557,7 +731,7 @@ private:
         probe->instance = new DawnContext();
         probe->info.available = true;
         probe->info.adapter = DawnUtils::describeAdapter(
-            probe->instance->backendContext.fDevice.GetAdapter());
+            probe->instance->getWGPUDevice().GetAdapter());
       } catch (const std::exception &e) {
         probe->info.error = e.what();
         RNSkLogger::logToConsole(probe->info.error);
@@ -567,20 +741,229 @@ private:
     return *result;
   }
 
-  // Declared before the device it listens to, so that it outlives it.
-  DawnUtils::DeviceLostListener _deviceLostListener;
-  std::unique_ptr<dawn::native::Instance> instance;
-  std::unique_ptr<skgpu::graphite::Context> fGraphiteContext;
-  skgpu::graphite::DawnBackendContext backendContext;
-  std::mutex _mutex;
+  // Loss and recovery --------------------------------------------------------
 
-  // The readback poller: started on the first readback, it checks the
-  // context for finished GPU work while readbacks are pending and sleeps
-  // otherwise (see readPixels).
-  std::atomic<int> _pendingReadbacks{0};
-  std::once_flag _pollerOnce;
-  std::mutex _pollerMutex;
-  std::condition_variable _pollerCondition;
+  /**
+   Dawn's loss callback for `generation`, on whichever thread Dawn detects
+   the loss: possibly inside a context call of this very thread, which holds
+   the context lock, so nothing here takes it. Records the loss and, for the
+   device in use, schedules its replacement.
+   */
+  void onDeviceLost(Generation *generation, wgpu::DeviceLostReason reason,
+                    const std::string &message) noexcept {
+    {
+      std::lock_guard<std::mutex> lock(_lostMutex);
+      if (generation->lost.load(std::memory_order_relaxed)) {
+        return;
+      }
+      generation->lostReason = DawnUtils::deviceLostReasonName(reason);
+      generation->lostMessage =
+          "React Native Skia lost its GPU device. Reason: " + message;
+      generation->lost.store(true, std::memory_order_release);
+    }
+    if (generation != _current.load(std::memory_order_acquire)) {
+      // A device already replaced (or one still being made, which recover()
+      // checks once it is in place): nothing more to do.
+      return;
+    }
+    RNSkLogger::logToConsole("%s", generation->lostMessage.c_str());
+    // A device lost right after it was made did not take: GPU work is
+    // refused where the app is (the background, on iOS).
+    const bool shortLived =
+        std::chrono::steady_clock::now() - generation->created < kShortLived;
+    scheduleRecovery(generation, shortLived);
+  }
+
+  /**
+   Schedules the replacement of `lost`, the device in use (see recover()), on
+   a thread of its own. The delay grows with the attempts in a row that did
+   not take (`failedAttempt`): a replacement that could not be made, or one
+   lost right after it was made, as while the app is in the background on
+   iOS, where GPU work is refused. After kMaxFailedRecoveries the attempts
+   stop until requestRecovery(), when the app comes back to the foreground.
+   */
+  void scheduleRecovery(Generation *lost, bool failedAttempt) noexcept {
+    std::chrono::seconds delay;
+    {
+      std::lock_guard<std::mutex> lock(_lostMutex);
+      _failedRecoveries = failedAttempt ? _failedRecoveries + 1 : 0;
+      if (_failedRecoveries > kMaxFailedRecoveries) {
+        RNSkLogger::logToConsole(
+            "React Native Skia stops trying to replace its lost GPU device "
+            "for now; it tries again when the app comes back to the "
+            "foreground.");
+        return;
+      }
+      delay =
+          _failedRecoveries == 0
+              ? std::chrono::seconds(0)
+              : std::chrono::seconds(1 << std::min(_failedRecoveries - 1, 5));
+    }
+    std::thread([this, lost, delay]() {
+#if defined(__APPLE__)
+      pthread_setname_np("RNSkia GPU Recovery");
+#elif defined(__ANDROID__)
+      pthread_setname_np(pthread_self(), "RNSkia GPU Recovery");
+#endif
+      if (delay.count() > 0) {
+        std::this_thread::sleep_for(delay);
+      }
+      recover(lost);
+    }).detach();
+  }
+
+  /**
+   Replaces `lost` with a new device and Graphite context, unless it was
+   replaced meanwhile, then tells the loss listeners. The new device is
+   validated (see DawnUtils::requestDevice): a resource of the lost device
+   that reaches it is refused with an error rather than handed to the
+   driver. A replacement that could not be made, or that was lost before it
+   was in place, is tried again (see scheduleRecovery).
+   */
+  void recover(Generation *lost) noexcept {
+    LossInfo info;
+    Generation *next = nullptr;
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      if (_current.load(std::memory_order_acquire) != lost) {
+        return;
+      }
+      {
+        std::lock_guard<std::mutex> lostLock(_lostMutex);
+        info.generation = lost->id;
+        info.reason = lost->lostReason;
+        info.message = lost->lostMessage;
+      }
+      try {
+        next = createGeneration(/* validate= */ true);
+        _retired.push_back(lost);
+        _current.store(next, std::memory_order_release);
+        RNSkLogger::logToConsole(
+            "React Native Skia replaced its lost GPU device.");
+      } catch (const std::exception &e) {
+        std::lock_guard<std::mutex> lostLock(_lostMutex);
+        lost->recoveryFailure =
+            std::string("No replacement could be made: ") + e.what();
+        RNSkLogger::logToConsole("React Native Skia could not replace its "
+                                 "lost GPU device: %s",
+                                 e.what());
+      }
+    }
+    if (next == nullptr) {
+      scheduleRecovery(lost, /* failedAttempt= */ true);
+    } else if (next->lost.load(std::memory_order_acquire)) {
+      // Lost while it was being made (its callback found it not in use yet):
+      // GPU work is refused where the app is.
+      scheduleRecovery(next, /* failedAttempt= */ true);
+    }
+    notifyLossListeners(info);
+  }
+
+  /**
+   A new device on the adapter, with a Graphite context on it, numbered
+   after the last one. Throws, with the reason, when either cannot be made.
+   Called with the context lock held.
+   */
+  Generation *createGeneration(bool validate) {
+    // Never destroyed (see Generation), also when its creation fails
+    // halfway: a device that was made reports its loss to the listener.
+    auto *generation = new Generation();
+    generation->id = ++_lastGenerationId;
+    generation->created = std::chrono::steady_clock::now();
+    generation->listener.onLost = [this,
+                                   generation](wgpu::DeviceLostReason reason,
+                                               const std::string &message) {
+      onDeviceLost(generation, reason, message);
+    };
+    generation->backendContext = DawnUtils::createDawnBackendContext(
+        instance.get(), &generation->listener, validate);
+
+    skgpu::graphite::ContextOptions ctxOptions;
+    skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
+    ctxOptions.fOptionsPriv = &contextOptionsPriv;
+    ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
+    generation->context = skgpu::graphite::ContextFactory::MakeDawn(
+        generation->backendContext, ctxOptions);
+    if (!generation->context) {
+      throw std::runtime_error(
+          "React Native Skia could not create its Graphite context on the "
+          "GPU device.");
+    }
+    return generation;
+  }
+
+  static void notifyLossListeners(const LossInfo &info) {
+    std::vector<LossListener> listeners;
+    {
+      auto &registry = lossListeners();
+      std::lock_guard<std::mutex> lock(registry.mutex);
+      listeners.reserve(registry.listeners.size());
+      for (const auto &entry : registry.listeners) {
+        listeners.push_back(entry.second);
+      }
+    }
+    for (const auto &listener : listeners) {
+      listener(info);
+    }
+  }
+
+  // Recorders ----------------------------------------------------------------
+
+  /** Called with the context lock held. */
+  std::unique_ptr<skgpu::graphite::Recorder>
+  makeRecorderLocked(bool useImageProvider = true) {
+    auto *current = _current.load(std::memory_order_acquire);
+    if (!useImageProvider) {
+      return current->context->makeRecorder();
+    }
+    skgpu::graphite::RecorderOptions options;
+    options.fImageProvider = ImageProvider::Make();
+    return current->context->makeRecorder(options);
+  }
+
+  /**
+   The recorder in the slot, made for the device in use: one made for a
+   lost device is retired first (see getRecorder), kept alive and known with
+   its generation, so that a recording it snaps from now on is dropped (see
+   submitRecording). Throws when none can be made.
+   */
+  skgpu::graphite::Recorder *currentRecorder(ThreadRecorder &slot,
+                                             bool useImageProvider = true) {
+    if (slot.recorder != nullptr &&
+        slot.generation == _current.load(std::memory_order_acquire)->id) {
+      return slot.recorder.get();
+    }
+    std::lock_guard<std::mutex> lock(_mutex);
+    auto *current = _current.load(std::memory_order_acquire);
+    auto recorder = makeRecorderLocked(useImageProvider);
+    if (recorder == nullptr) {
+      throw std::runtime_error("Failed to create graphite context");
+    }
+    if (slot.recorder != nullptr) {
+      _retiredRecorders.push_back(std::move(slot.recorder));
+    }
+    _recorders[recorder.get()] = current->id;
+    slot.recorder = std::move(recorder);
+    slot.generation = current->id;
+    return slot.recorder.get();
+  }
+
+  /**
+   The generation a thread's recorder was made for (see currentRecorder); 0
+   for any other recorder. Called with the context lock held.
+   */
+  uint64_t generationOf(const skgpu::graphite::Recorder *recorder) const {
+    auto it = _recorders.find(recorder);
+    return it != _recorders.end() ? it->second : 0;
+  }
+
+  /** The recorder of a thread that ended (see ThreadRecorder). */
+  void forgetRecorder(const skgpu::graphite::Recorder *recorder) noexcept {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _recorders.erase(recorder);
+  }
+
+  // Readbacks ----------------------------------------------------------------
 
   void wakeReadbackPoller() {
     std::call_once(_pollerOnce, [this]() {
@@ -588,9 +971,7 @@ private:
     });
     // Taken so that a poller between its predicate check and its wait cannot
     // miss the notification.
-    {
-      std::lock_guard<std::mutex> lock(_pollerMutex);
-    }
+    { std::lock_guard<std::mutex> lock(_pollerMutex); }
     _pollerCondition.notify_one();
   }
 
@@ -617,7 +998,13 @@ private:
         std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
         if (lock.owns_lock()) {
           tick();
-          fGraphiteContext->checkAsyncWorkCompletion();
+          _current.load(std::memory_order_acquire)
+              ->context->checkAsyncWorkCompletion();
+          // A readback requested on a device lost since is failed by Dawn;
+          // its context delivers that like any other result.
+          for (auto *retired : _retired) {
+            retired->context->checkAsyncWorkCompletion();
+          }
           lock.unlock();
           interval = std::min(interval * 2, std::chrono::milliseconds(4));
         }
@@ -625,6 +1012,17 @@ private:
       }
     }
   }
+
+  // Processes the instance's events: the completions of every device on it.
+  void tick() {
+    const auto &backendContext =
+        _current.load(std::memory_order_acquire)->backendContext;
+    if (backendContext.fTick) {
+      backendContext.fTick(backendContext.fInstance);
+    }
+  }
+
+  // Construction -------------------------------------------------------------
 
   DawnContext() {
     // No dawnProcSetProcs() here: the monolithic libwebgpu_dawn (shared with
@@ -655,38 +1053,47 @@ private:
 
     instance = std::make_unique<dawn::native::Instance>(&instanceDesc);
 
-    // Dawn reports a loss from whichever thread detects it; the record is
-    // static (lostState), so the listener needs nothing of this object.
-    _deviceLostListener.onLost = [](const std::string &message) {
-      DawnContext::markDeviceLost(message);
-    };
-    backendContext = DawnUtils::createDawnBackendContext(instance.get(),
-                                                         &_deviceLostListener);
-
-    skgpu::graphite::ContextOptions ctxOptions;
-    skgpu::graphite::ContextOptionsPriv contextOptionsPriv;
-    ctxOptions.fOptionsPriv = &contextOptionsPriv;
-    ctxOptions.fOptionsPriv->fStoreContextRefInRecorder = true;
-    fGraphiteContext =
-        skgpu::graphite::ContextFactory::MakeDawn(backendContext, ctxOptions);
-
-    if (!fGraphiteContext) {
-      throw std::runtime_error(
-          "React Native Skia could not create its Graphite context on the "
-          "GPU device.");
-    }
+    // The first device skips Dawn's validation in release builds; the ones
+    // replacing a lost device are validated (see recover).
+    _current.store(createGeneration(/* validate= */ false),
+                   std::memory_order_release);
   }
 
-  ~DawnContext() {
-    backendContext.fDevice = nullptr;
-    tick();
-  }
+  // Never run: the context lives as long as the process (see probe).
+  ~DawnContext() = default;
 
-  void tick() {
-    if (backendContext.fTick) {
-      backendContext.fTick(backendContext.fInstance);
-    }
-  }
+  // The instance outlives every device made on it.
+  std::unique_ptr<dawn::native::Instance> instance;
+
+  // The device in use, and the ones it replaced, kept for what still points
+  // at them (see Generation). Written under _mutex; read on every frame of
+  // every view (isDeviceLost, isCurrent), hence atomic.
+  std::atomic<Generation *> _current{nullptr};
+  std::vector<Generation *> _retired;
+  uint64_t _lastGenerationId = 0;
+  // Guards every Context operation, and the replacement of the device.
+  std::mutex _mutex;
+
+  // The loss records of the generations and the recovery backoff (see
+  // scheduleRecovery). Taken by Dawn's loss callback, possibly inside a
+  // Context operation: never wait for _mutex while holding it.
+  std::mutex _lostMutex;
+  int _failedRecoveries = 0;
+  static constexpr int kMaxFailedRecoveries = 6;
+  static constexpr auto kShortLived = std::chrono::seconds(5);
+
+  // The recorders of the threads (see currentRecorder), with the generation
+  // each was made for, and the ones retired, kept alive. Guarded by _mutex.
+  std::unordered_map<const skgpu::graphite::Recorder *, uint64_t> _recorders;
+  std::vector<std::unique_ptr<skgpu::graphite::Recorder>> _retiredRecorders;
+
+  // The readback poller: started on the first readback, it checks the
+  // context for finished GPU work while readbacks are pending and sleeps
+  // otherwise (see readPixels).
+  std::atomic<int> _pendingReadbacks{0};
+  std::once_flag _pollerOnce;
+  std::mutex _pollerMutex;
+  std::condition_variable _pollerCondition;
 };
 
 } // namespace RNSkia
