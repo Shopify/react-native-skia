@@ -229,8 +229,8 @@ static bool appIsBackgrounded() {
 // a 120 Hz producer would then be presented every other frame. Ask for the
 // display's full rate once the view knows its screen. On iPhone this needs
 // CADisableMinimumFrameDurationOnPhone in the app's Info.plist too, else iOS
-// caps every link at 60 Hz. The link is paused while nothing is queued, so an
-// idle view does not keep the display at its full rate.
+// caps every link at 60 Hz. The link is paused while nothing is waiting or
+// coming, so an idle view does not keep the display at its full rate.
 - (void)requestFullFrameRate {
 #if !TARGET_OS_VISION
   if (_fullFrameRateRequested) {
