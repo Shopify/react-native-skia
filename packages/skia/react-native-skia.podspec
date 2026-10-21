@@ -64,11 +64,6 @@ apple_skia_packages = {
 }
 install_apple_skia_libs.call(__dir__, apple_skia_packages)
 
-# The Skia binaries are release builds: their inline code is compiled the same
-# way here in every configuration (SK_RELEASE), else a Debug build mixes the
-# SK_DEBUG assertions compiled into the app with the release code of the
-# library on the same objects (a ref-counted object destroyed by the library
-# then fails the debug destructor's assertion).
 preprocessor_defs = '$(inherited) SK_GRAPHITE=1 SK_RELEASE=1 SK_IMAGE_READ_PIXELS_DISABLE_LEGACY_API=1 SK_DISABLE_LEGACY_SHAPER_FACTORY=1'
 
 # Define framework names
