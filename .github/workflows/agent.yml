@@ -374,6 +374,10 @@ jobs:
       # .github/scripts/agent-screen.sh), which only root may send: adbd is
       # restarted as root, which the default (non Play Store) image allows.
       #
+      # ANDROID_AVD_HOME is pinned, as the emulator-runner action does: left
+      # unset, avdmanager writes the AVD somewhere the emulator does not look
+      # on the hosted runner, and the emulator exits with "Unknown AVD name".
+      #
       # The boot is bounded, as the emulator-runner action's is: it fails
       # after ten minutes, or as soon as the emulator exits, with the end of
       # the emulator's log. Unbounded, a dead emulator held the job (and the
@@ -381,6 +385,8 @@ jobs:
       - name: Boot Android emulator
         timeout-minutes: 15
         run: |
+          export ANDROID_AVD_HOME="$HOME/.android/avd"
+          mkdir -p "$ANDROID_AVD_HOME"
           sdkmanager --install "$ANDROID_SYSTEM_IMAGE" emulator > /dev/null
           echo no | avdmanager create avd --force -n "$ANDROID_AVD" -k "$ANDROID_SYSTEM_IMAGE" -d "Nexus 5X"
           nohup emulator -avd "$ANDROID_AVD" -no-window -gpu swangle_indirect -noaudio -no-boot-anim -no-snapshot-save \
