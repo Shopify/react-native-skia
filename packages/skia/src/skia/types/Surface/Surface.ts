@@ -19,7 +19,12 @@ export interface SkSurface extends SkJSIInstance<"Surface"> {
 
       @param bounds A rectangle specifying the subset of the surface that
    is of interest.
+      @param outputImage An image to update in place instead of returning a
+   new one.
       @return  Image initialized with Surface contents
+
+      Returns null if the snapshot cannot be created; `outputImage` then
+      keeps its previous content.
 
       example: https://fiddle.skia.org/c/@Surface_makeImageSnapshot
   */
@@ -44,6 +49,8 @@ export interface SkSurface extends SkJSIInstance<"Surface"> {
    * submitted work. Use this before a consumer on a different command queue
    * reads the texture this surface draws into (see
    * `Skia.Surface.MakeFromGPUTexture`). Defaults to false.
+   * @throws If Graphite cannot record, insert or submit the draws: they are
+   * then lost, and the surface does not hold them.
    */
   flush(sync?: boolean): void;
 
