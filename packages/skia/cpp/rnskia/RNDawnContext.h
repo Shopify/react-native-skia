@@ -662,6 +662,31 @@ public:
     return wgpu::Instance(instance->Get()).CreateSurface(&surfaceDescriptor);
   }
 
+  /**
+   Destroys the Dawn device of a replaced generation (see generation()), so
+   that Dawn runs the deletions it deferred on it: a lost device never ticks
+   again, and on Android the VkSurfaceKHR of a window's old swapchain keeps
+   the window connected until then, so that no swapchain can be made over it
+   on the new device (VK_ERROR_NATIVE_WINDOW_IN_USE_KHR). The Generation, its
+   device handle and its Graphite context stay: what still points at them
+   keeps failing validation, as destroyed rather than lost. Every
+   wgpu::Surface configured on the device must be gone first: Dawn does not
+   destroy swapchains with their device, and detaching one afterwards
+   dereferences the device's deleted fenced deleter (see
+   RNSkWindowSurface::ensureDevice). Nothing happens for the device in use,
+   or for one destroyed already. Any thread.
+   */
+  void destroyRetiredDevice(uint64_t generation) {
+    std::lock_guard<std::mutex> lock(_mutex);
+    for (auto *retired : _retired) {
+      if (retired->id == generation && !retired->deviceDestroyed) {
+        retired->deviceDestroyed = true;
+        retired->backendContext.fDevice.Destroy();
+        return;
+      }
+    }
+  }
+
 private:
   struct Probe {
     DawnContext *instance = nullptr;
@@ -672,6 +697,8 @@ private:
    A device and the Graphite context on it (see generation()). Never
    destroyed: Dawn reports its loss from any of its threads, at any time,
    and the recorders, surfaces and images made on it keep pointing at it.
+   The Dawn device itself is destroyed once replaced and let go of by the
+   windows (see destroyRetiredDevice); the handle stays valid.
    */
   struct Generation {
     uint64_t id = 0;
@@ -680,6 +707,9 @@ private:
     DawnUtils::DeviceLostListener listener;
     skgpu::graphite::DawnBackendContext backendContext;
     std::unique_ptr<skgpu::graphite::Context> context;
+    // Whether the device was destroyed (see destroyRetiredDevice). Guarded
+    // by _mutex.
+    bool deviceDestroyed = false;
     // Set once, by the loss callback (any thread, see onDeviceLost); the
     // strings are guarded by _lostMutex.
     std::atomic<bool> lost{false};
