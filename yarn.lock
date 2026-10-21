@@ -8552,7 +8552,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-reconciler@npm:0.28.9, @types/react-reconciler@npm:^0.28.0, @types/react-reconciler@npm:^0.28.9":
+"@types/react-reconciler@npm:0.31.0":
+  version: 0.31.0
+  resolution: "@types/react-reconciler@npm:0.31.0"
+  peerDependencies:
+    "@types/react": "*"
+  checksum: c4c0922f65043f87d8677b09391c1eec8281e051e8b860b13b6a852c70334362936af6d9f1c59d049053922654879e895135cb8ac3c25d496691055efae22b2a
+  languageName: node
+  linkType: hard
+
+"@types/react-reconciler@npm:^0.28.0, @types/react-reconciler@npm:^0.28.9":
   version: 0.28.9
   resolution: "@types/react-reconciler@npm:0.28.9"
   peerDependencies:
@@ -25245,7 +25254,7 @@ __metadata:
     "@types/pngjs": 6.0.1
     "@types/react": ^19.0.0
     "@types/react-dom": ^19.0.0
-    "@types/react-reconciler": 0.28.9
+    "@types/react-reconciler": 0.31.0
     "@types/ws": 8.5.3
     canvaskit-wasm: 0.41.1
     eslint: 9.36.0

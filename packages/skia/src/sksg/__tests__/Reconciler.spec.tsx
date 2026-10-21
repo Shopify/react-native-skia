@@ -21,4 +21,42 @@ describe("SkiaSGRoot", () => {
     expect(redraw).toHaveBeenCalledTimes(2);
     await root.unmount();
   });
+
+  it("reports an error caught by a boundary", async () => {
+    const { Skia } = importSkia();
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    const root = new SkiaSGRoot(Skia);
+    const Throws = () => {
+      throw new Error("boom");
+    };
+    class Boundary extends React.Component<
+      { children: React.ReactNode },
+      { failed: boolean }
+    > {
+      state = { failed: false };
+      static getDerivedStateFromError() {
+        return { failed: true };
+      }
+      render() {
+        return this.state.failed ? (
+          <skCircle c={{ x: 10, y: 10 }} r={5} color="red" />
+        ) : (
+          this.props.children
+        );
+      }
+    }
+    await root.render(
+      <Boundary>
+        <Throws />
+      </Boundary>
+    );
+    // The reconciler reports a caught error from a timer.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ message: "boom" }),
+      expect.anything()
+    );
+    error.mockRestore();
+    await root.unmount();
+  });
 });

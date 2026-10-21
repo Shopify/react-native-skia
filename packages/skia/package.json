@@ -113,7 +113,7 @@
     "@types/pngjs": "6.0.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/react-reconciler": "0.28.9",
+    "@types/react-reconciler": "0.31.0",
     "@types/ws": "8.5.3",
     "eslint": "9.36.0",
     "eslint-config-react-native-wcandillon": "5.0.1",
