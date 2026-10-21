@@ -3,7 +3,8 @@
 // animations through the view id only. These tests pin down that no recorder
 // or picture is captured by a worklet, that the wrapper is disposed once the
 // view owns the recording, that unmount leaves the view's last frame in place,
-// and that offscreen rendering plays the recording into a picture.
+// that offscreen rendering plays the recording into a picture, and that a
+// recording that fails never throws out of React's commit.
 
 type MockPicture = { dispose: jest.Mock };
 type MockRecorder = {
@@ -20,6 +21,7 @@ let mockSharedValues: unknown[] = [];
 let mockHasReanimated4 = true;
 const mockStartMapper = jest.fn((..._args: unknown[]) => 42);
 const mockStopMapper = jest.fn();
+const mockVisit = jest.fn();
 
 jest.mock("../../external/reanimated/ReanimatedProxy", () => ({
   __esModule: true,
@@ -38,7 +40,9 @@ jest.mock("../../external/reanimated/renderHelpers", () => ({
   REANIMATED_VERSION_MAJOR: 4,
 }));
 
-jest.mock("../Recorder/Visitor", () => ({ visit: jest.fn() }));
+jest.mock("../Recorder/Visitor", () => ({
+  visit: (...args: unknown[]) => mockVisit(...args),
+}));
 jest.mock("../../skia/NativeSetup", () => ({}));
 jest.mock("../../views/api", () => ({}));
 
@@ -64,6 +68,7 @@ const mockSkia = { Recorder: mockRecorder };
 
 type TestContainer = {
   redraw: () => void;
+  recordAfterCommit: () => void;
   unmount: () => void;
   drawOnCanvas: (canvas: unknown) => void;
 };
@@ -90,7 +95,19 @@ beforeEach(() => {
   mockHasReanimated4 = true;
   mockStartMapper.mockClear();
   mockStopMapper.mockClear();
+  mockVisit.mockReset();
 });
+
+const withDev = (dev: boolean, fn: () => void) => {
+  const globals = globalThis as unknown as { __DEV__: boolean };
+  const previous = globals.__DEV__;
+  globals.__DEV__ = dev;
+  try {
+    fn();
+  } finally {
+    globals.__DEV__ = previous;
+  }
+};
 
 describe("NativeContainer", () => {
   it("hands the recorder to the view and starts no mapper for a static scene", () => {
@@ -169,34 +186,96 @@ describe("NativeContainer", () => {
     expect(mockStartMapper).toHaveBeenCalledTimes(1);
   });
 
-  it("reports a missing Reanimated 4 when the container is created", () => {
+  it("reports the missing Reanimated support when it is created", () => {
     mockHasReanimated4 = false;
-    // In the render phase, where an error boundary can catch it, not from a
-    // redraw inside React's commit.
-    expect(() => setup()).toThrow(/Reanimated 4/);
+    // The container is created while the <Canvas> renders, where an error
+    // boundary can catch this. The recording runs inside React's commit,
+    // where nothing could.
+    expect(() => setup()).toThrow(/react-native-worklets/);
   });
 
-  it("falls back to the current shared values without Reanimated 4", () => {
+  it("records the current values without Reanimated 4 in production", () => {
     mockSharedValues = [{ value: 0 }];
     mockHasReanimated4 = false;
-    const dev = globalThis as unknown as { __DEV__: boolean };
-    const wasDev = dev.__DEV__;
-    dev.__DEV__ = false;
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
     try {
-      const { SkiaViewApi, container } = setup();
-      expect(consoleError).toHaveBeenCalledTimes(1);
-      container.redraw();
-      // The recording still reaches the view, with the current values, and
-      // nothing drives them.
-      expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
-      expect(mockStartMapper).not.toHaveBeenCalled();
+      withDev(false, () => {
+        const { SkiaViewApi, container } = setup();
+        expect(error).toHaveBeenCalledTimes(1);
+        expect(error.mock.calls[0][0]).toMatch(/react-native-worklets/);
+        // The recording still reaches the view, with the current values, and
+        // the commit completes.
+        container.recordAfterCommit();
+        expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+        expect(mockStartMapper).not.toHaveBeenCalled();
+        expect(error).toHaveBeenCalledTimes(1);
+      });
     } finally {
-      dev.__DEV__ = wasDev;
-      consoleError.mockRestore();
+      error.mockRestore();
     }
+  });
+
+  it("reports a recording that fails on screen and keeps the last frame", () => {
+    mockSharedValues = [{ value: 0 }];
+    const { SkiaViewApi, container } = setup();
+    container.recordAfterCommit();
+    const failure = new Error("Invalid shader type: skBlurImageFilter");
+    mockVisit.mockImplementationOnce(() => {
+      throw failure;
+    });
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      // React swaps the committed tree in only after this returns: it must
+      // not throw.
+      expect(() => container.recordAfterCommit()).not.toThrow();
+      expect(error).toHaveBeenCalledWith(failure);
+    } finally {
+      error.mockRestore();
+    }
+    // The view keeps the recording it has; the failed one is let go of, and
+    // its mapper was stopped with the recording it belonged to.
+    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+    expect(mockRecorders).toHaveLength(2);
+    expect(mockRecorders[1].dispose).toHaveBeenCalledTimes(1);
+    expect(mockStopMapper).toHaveBeenCalledWith(42);
+    // The next commit records again.
+    container.recordAfterCommit();
+    expect(SkiaViewApi.setJsiProperty).toHaveBeenLastCalledWith(
+      7,
+      "recorder",
+      mockRecorders[2]
+    );
+    expect(mockStartMapper).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws a recording that fails offscreen from drawOnCanvas", () => {
+    const { container } = setup(-1);
+    container.recordAfterCommit();
+    const failure = new Error("Invalid shader type: skBlurImageFilter");
+    mockVisit.mockImplementationOnce(() => {
+      throw failure;
+    });
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect(() => container.recordAfterCommit()).not.toThrow();
+      // Offscreen rendering asks for this very frame: the error reaches it
+      // through drawOnCanvas, not the console.
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
+    const canvas = { drawPicture: jest.fn() };
+    expect(() => container.drawOnCanvas(canvas)).toThrow(failure);
+    expect(canvas.drawPicture).not.toHaveBeenCalled();
+    // The previous frame is kept, the failed recorder is disposed.
+    expect(mockPictures).toHaveLength(1);
+    expect(mockPictures[0].dispose).not.toHaveBeenCalled();
+    expect(mockRecorders[1].dispose).toHaveBeenCalledTimes(1);
+    // The next commit draws again.
+    container.recordAfterCommit();
+    container.drawOnCanvas(canvas);
+    expect(canvas.drawPicture).toHaveBeenCalledWith(mockPictures[1]);
+    expect(mockPictures[0].dispose).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the last picture when a recording fails to play offscreen", () => {

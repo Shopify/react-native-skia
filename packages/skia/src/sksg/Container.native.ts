@@ -1,5 +1,5 @@
 import Rea from "../external/reanimated/ReanimatedProxy";
-import type { SkCanvas, Skia, SkPicture } from "../skia/types";
+import type { JsiRecorder, SkCanvas, Skia, SkPicture } from "../skia/types";
 import {
   HAS_REANIMATED_3,
   HAS_REANIMATED_4,
@@ -75,13 +75,6 @@ class NativeContainer extends Container {
   private mapperId: number | null = null;
   private picture: SkPicture | null = null;
 
-  constructor(
-    Skia: Skia,
-    private nativeId: number
-  ) {
-    super(Skia);
-  }
-
   private stopMapper() {
     if (this.mapperId !== null) {
       Rea.stopMapper(this.mapperId);
@@ -96,7 +89,7 @@ class NativeContainer extends Container {
     this.picture = null;
   }
 
-  drawOnCanvas(canvas: SkCanvas) {
+  protected drawFrame(canvas: SkCanvas) {
     if (!this.picture) {
       throw new Error("No recording to draw");
     }
@@ -111,35 +104,42 @@ class NativeContainer extends Container {
       return;
     }
     const recorder = this.Skia.Recorder();
-    visit(recorder, this.root);
-    const sharedValues = recorder.getSharedValues();
-    const { nativeId } = this;
-    if (nativeId === -1) {
-      try {
-        // The new picture is made before the last one goes: a recording that
-        // fails to play leaves the last frame in place rather than a disposed
-        // picture.
+    try {
+      visit(recorder, this.root);
+      if (this.nativeId === -1) {
+        // The previous frame stays until the new one is recorded.
         const picture = recorder.makePicture();
         this.picture?.dispose();
         this.picture = picture;
-      } finally {
-        recorder.dispose();
+      } else {
+        this.installRecording(recorder);
       }
-      return;
+    } finally {
+      // The wrapper is disposed right away: it would otherwise co-own the
+      // recording until the JS garbage collector finalizes it.
+      recorder.dispose();
     }
+  }
+
+  /**
+   * Hands the recording to the view, which owns it from here on, and drives
+   * its shared values from the UI thread.
+   */
+  private installRecording(recorder: JsiRecorder) {
+    const { nativeId } = this;
+    const sharedValues = recorder.getSharedValues();
     // stopMapper() only takes effect on the UI thread later, so the previous
     // mapper can still fire after the new recording is installed. Tagging the
     // updates with the recording id lets the view ignore them.
     const recorderId = recorder.getId();
-    // The view takes ownership of the recorder and draws the first frame. The
-    // wrapper is disposed right away: it would otherwise co-own the recording
-    // until the JS garbage collector finalizes it.
+    // The view takes ownership of the recorder and draws the first frame.
     SkiaViewApi.setJsiProperty(nativeId, "recorder", recorder);
-    recorder.dispose();
-    if (sharedValues.length === 0 || !HAS_REANIMATED_4) {
-      // Without Reanimated 4 (reported by createContainer) the scene was
-      // recorded with the current values of the shared values, and nothing
-      // will update them.
+    if (sharedValues.length === 0) {
+      return;
+    }
+    if (!HAS_REANIMATED_4) {
+      // The scene was recorded with the current values of the shared values
+      // and nothing will update them: createContainer() reported it.
       return;
     }
     this.mapperId = Rea.startMapper(() => {

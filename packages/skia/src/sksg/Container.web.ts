@@ -46,13 +46,6 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
 class ReanimatedContainer extends JsContainer {
   private mapperId: number | null = null;
 
-  constructor(
-    Skia: Skia,
-    private nativeId: number
-  ) {
-    super(Skia);
-  }
-
   unmount() {
     super.unmount();
     if (this.mapperId !== null) {

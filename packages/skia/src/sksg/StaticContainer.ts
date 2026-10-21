@@ -10,15 +10,20 @@ import { createDrawingContext } from "./Recorder/DrawingContext";
 import "../views/api";
 
 /**
- * Holds the scene graph that React commits and turns it into frames: redraw()
- * runs after every commit, drawOnCanvas() draws the last one (offscreen
- * rendering).
+ * Holds the scene graph that React commits and turns it into frames:
+ * recordAfterCommit() records a frame after every commit, drawOnCanvas()
+ * draws the last one (offscreen rendering).
  */
 export abstract class Container {
   private _root: Node[] = [];
   protected unmounted = false;
+  private recordingError: { error: unknown } | null = null;
 
-  constructor(protected Skia: Skia) {}
+  constructor(
+    protected Skia: Skia,
+    /** The view the frames go to, -1 when rendering offscreen. */
+    protected readonly nativeId: number
+  ) {}
 
   get root() {
     return this._root;
@@ -36,8 +41,38 @@ export abstract class Container {
     this.unmounted = true;
   }
 
-  abstract drawOnCanvas(canvas: SkCanvas): void;
+  /**
+   * Records the committed scene graph. React applies the host mutations of a
+   * commit, calls this (resetAfterCommit), and only then swaps the committed
+   * fiber tree in: an exception escaping here would leave the root
+   * inconsistent, out of reach of every error boundary. A recording that
+   * fails is reported instead. On screen, the view keeps its last frame;
+   * offscreen, drawOnCanvas() throws the error, since it asks for that very
+   * frame.
+   */
+  recordAfterCommit() {
+    try {
+      this.redraw();
+      this.recordingError = null;
+    } catch (error) {
+      this.recordingError = { error };
+      if (this.nativeId !== -1) {
+        console.error(error);
+      }
+    }
+  }
 
+  drawOnCanvas(canvas: SkCanvas) {
+    if (this.recordingError) {
+      throw this.recordingError.error;
+    }
+    this.drawFrame(canvas);
+  }
+
+  /** Draws the last recorded frame. */
+  protected abstract drawFrame(canvas: SkCanvas): void;
+
+  /** Records the scene graph into a new frame. */
   abstract redraw(): void;
 }
 
@@ -49,7 +84,7 @@ export abstract class Container {
 export abstract class JsContainer extends Container {
   protected recording: Recording | null = null;
 
-  drawOnCanvas(canvas: SkCanvas) {
+  protected drawFrame(canvas: SkCanvas) {
     if (!this.recording) {
       throw new Error("No recording to draw");
     }
@@ -70,13 +105,6 @@ export abstract class JsContainer extends Container {
 }
 
 export class StaticContainer extends JsContainer {
-  constructor(
-    Skia: Skia,
-    private nativeId: number
-  ) {
-    super(Skia);
-  }
-
   unmount() {
     super.unmount();
     if (this.recording) {
@@ -102,7 +130,7 @@ export class StaticContainer extends JsContainer {
     if (isOnScreen) {
       const rec = this.Skia.PictureRecorder();
       const canvas = rec.beginRecording();
-      this.drawOnCanvas(canvas);
+      this.drawFrame(canvas);
       const picture = rec.finishRecordingAsPicture();
       rec.dispose();
       SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
