@@ -114,8 +114,8 @@ private:
 
   /**
    Swaps the content under the lock and releases the previous one outside of
-   it: the recorder's destructor hands the commands to the main thread, and a
-   pool thread still replaying it keeps it alive until it is done. Pending
+   it: a pool thread still replaying it keeps it alive until it is done, and
+   the last owner, whichever thread that is, releases its resources. Pending
    writes go away with their recorder.
    */
   void replaceContent(std::shared_ptr<Recorder> recorder,
