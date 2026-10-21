@@ -40,6 +40,7 @@ void RNSkWindowSurface::attach(void *nativeHandle, int width, int height,
     return;
   }
   _device = context->getWGPUDevice();
+  _generation = DawnContext::generation();
   _recorder = context->getRecorder();
   _surface = context->MakeWGPUSurface(nativeHandle);
   if (!_surface) {
@@ -218,15 +219,32 @@ bool RNSkWindowSurface::surfaceSupportsFormat(wgpu::TextureFormat format) {
 }
 
 bool RNSkWindowSurface::canPresent() {
-  // A lost device (see DawnContext::isDeviceLost) takes no frame: the view
-  // keeps its last one and the queue waits, as while in the background.
+  // A lost device (see DawnContext::isDeviceLost) takes no frame until it
+  // is replaced: the view keeps its last one and the queue waits, as while
+  // in the background.
   return _surface && !DawnContext::isDeviceLost() &&
          (!_canPresent || _canPresent());
 }
 
+bool RNSkWindowSurface::ensureDevice() {
+  if (_generation == DawnContext::generation()) {
+    return true;
+  }
+  auto *context = DawnContext::tryGetInstance();
+  if (context == nullptr) {
+    return false;
+  }
+  _device = context->getWGPUDevice();
+  _generation = DawnContext::generation();
+  _recorder = context->getRecorder();
+  configureSurface();
+  updateTargetInfo();
+  return true;
+}
+
 bool RNSkWindowSurface::presentRecordings(
     const std::vector<skgpu::graphite::Recording *> &recordings) {
-  if (!canPresent()) {
+  if (!canPresent() || !ensureDevice()) {
     return false;
   }
   wgpu::SurfaceTexture surfaceTexture;
@@ -256,7 +274,7 @@ bool RNSkWindowSurface::presentRecordings(
 }
 
 bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
-  if (!canPresent()) {
+  if (!canPresent() || !ensureDevice()) {
     return false;
   }
   wgpu::SurfaceTexture surfaceTexture;
@@ -274,11 +292,7 @@ bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
     return false;
   }
   surface->getCanvas()->drawImage(image, 0, 0);
-  auto recording = _recorder->snap();
-  if (!recording) {
-    throw std::runtime_error("Failed to create graphite recording");
-  }
-  DawnContext::getInstance().submitRecording(recording.get());
+  DawnContext::getInstance().submitRecording(_recorder);
 #ifdef __APPLE__
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
