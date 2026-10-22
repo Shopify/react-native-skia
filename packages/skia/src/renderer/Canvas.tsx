@@ -103,17 +103,11 @@ const useCanvasRoot = ({
   const nativeId = useMemo(() => SkiaViewApi.allocateNativeId(), []);
 
   // First frame. Listened to from the commit that mounts the view, before
-  // it can draw anything; the latest callback is the one called.
-  const onFirstFrameRef = useRef(onFirstFrame);
-  useLayoutEffect(() => {
-    onFirstFrameRef.current = onFirstFrame;
-  }, [onFirstFrame]);
+  // it can draw anything, and again with each new callback.
   useLayoutEffect(
     () =>
-      listenToFirstFrame(nativeId, () => {
-        onFirstFrameRef.current?.();
-      }),
-    [nativeId]
+      onFirstFrame ? listenToFirstFrame(nativeId, onFirstFrame) : undefined,
+    [nativeId, onFirstFrame]
   );
 
   // Root
