@@ -8,10 +8,14 @@ import type {
   SkRect,
   SkSize,
 } from "../skia/types";
-import type { NativeProps } from "../specs/SkiaViewNativeComponent";
 
-/** The Android view a canvas draws into, see {@link AndroidCanvasProps}. */
-export type AndroidBackingView = NonNullable<NativeProps["androidBackingView"]>;
+/**
+ * The Android view a canvas draws into, see {@link AndroidCanvasProps}. Not
+ * read off the native component's spec, whose declarations a consumer's type
+ * check rejects.
+ */
+export type AndroidBackingView =
+  "TextureView" | "SurfaceView" | "HardwareBufferView";
 
 /** The options of a canvas backed by a `TextureView`, the default. */
 export interface AndroidTextureViewProps {

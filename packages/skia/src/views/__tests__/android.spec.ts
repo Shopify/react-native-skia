@@ -1,4 +1,5 @@
-import type { AndroidCanvasProps } from "../types";
+import type { NativeProps } from "../../specs/SkiaViewNativeComponent";
+import type { AndroidBackingView, AndroidCanvasProps } from "../types";
 import {
   androidNativeProps,
   resolveHighBitDepth,
@@ -57,6 +58,17 @@ describe("AndroidCanvasProps", () => {
       hardwareBufferViewTakesOpaque,
       surfaceViewTakesZOrder,
     ]).toEqual([false, false, true]);
+  });
+
+  // The published types restate the views rather than import the spec.
+  it("names the views the native component's spec takes", () => {
+    type SpecBackingView = NonNullable<NativeProps["androidBackingView"]>;
+    const sameViews: [AndroidBackingView] extends [SpecBackingView]
+      ? [SpecBackingView] extends [AndroidBackingView]
+        ? true
+        : false
+      : false = true;
+    expect(sameViews).toBe(true);
   });
 });
 
