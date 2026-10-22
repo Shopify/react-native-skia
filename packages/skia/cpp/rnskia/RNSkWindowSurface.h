@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "RNSkGraphiteTargetInfo.h"
+#include "RNSkPresentHold.h"
 #include "RNSkSurface.h"
 
 #include "webgpu/webgpu_cpp.h"
@@ -29,7 +30,8 @@ namespace RNSkia {
  * (attach, resize, detach); everything else lives here.
  *
  * Threading: the window is attached, resized, detached and presented on the
- * main thread. The description of its target texture is kept in a copy of
+ * present thread (RNSkPlatformContext::runOnPresentThread). The description
+ * of its target texture is kept in a copy of
  * its own, so that whoever records for the view (the JS thread, a worklet
  * runtime, the render thread pool) can read it from any thread, also before
  * the window exists (see getLayoutSize).
@@ -42,7 +44,11 @@ public:
    */
   using Releaser = std::function<void(void *nativeHandle)>;
 
-  RNSkWindowSurface();
+  /**
+   The platform view chooses whether the window holds a frame's present for
+   the GPU (see RNSkPresentHold).
+   */
+  explicit RNSkWindowSurface(PresentHold presentHold);
 
   ~RNSkWindowSurface() override;
 
@@ -64,14 +70,15 @@ public:
   void resize(int width, int height);
 
   /**
-   Destroys the Dawn surface and gives the native handle back to its
-   releaser. The target description goes away with it; the layout size stays.
+   Presents the frame the window holds, destroys the Dawn surface and gives
+   the native handle back to its releaser. The target description goes away
+   with it; the layout size stays.
    */
   void detach();
 
   /**
    Whether a window is attached. Its Dawn surface may be away for a frame
-   while the GPU device is replaced (see ensureDevice). Main thread.
+   while the GPU device is replaced (see ensureDevice). Present thread.
    */
   bool isAttached() const { return _nativeHandle != nullptr; }
 
@@ -116,7 +123,7 @@ public:
   }
 
   /**
-   Installed by the platform view: whether the window can show a frame right
+   Installed by the platform view: whether the window can take a frame right
    now (not while the app is in the background). The view presents nothing
    while it returns false, and asks again once told that it can (see
    RNSkView::onCanPresent). Without one, an attached window always can.
@@ -130,6 +137,52 @@ public:
    the platform view says it cannot, nor once the GPU device is lost.
    */
   bool canPresent();
+
+  /**
+   Installed by the platform view: called after each frame the window
+   presents, on the thread that presented it.
+   */
+  void setDidPresent(std::function<void()> didPresent) {
+    _didPresent = std::move(didPresent);
+  }
+
+  /**
+   Presents the frame the window holds once the GPU has finished the frame
+   presented before it, a tick allowed it (see allowNextPresent) and the
+   window took that frame (see windowTookFrame), without waiting for the GPU.
+   A frame held on a device replaced since is dropped with the surface it was
+   replayed into, which is made again on the device in use (see
+   ensureDevice). Present thread.
+   */
+  HeldFrame presentHeldFrame();
+
+  /**
+   Whether a frame presented waits for the window to take it before the next
+   goes, set by the platform view with each window (see
+   RNSkPresentHold::setLatchesOnWindowDraw). Present thread.
+   */
+  void setLatchesOnWindowDraw(bool latches) {
+    _presentHold.setLatchesOnWindowDraw(latches);
+  }
+
+  /**
+   The window took the frame presented last: the frame it holds may go (see
+   presentHeldFrame). Present thread.
+   */
+  void windowTookFrame() { _presentHold.windowTookFrame(); }
+
+  /**
+   Whether the window holds a frame: it takes no other frame meanwhile.
+   Present thread.
+   */
+  bool hasHeldFrame() const { return _presentHold.hasHeldFrame(); }
+
+  /**
+   A frame of the display asked the view to present, or the view asks for no
+   more frames for now: the window presents one frame again (see
+   RNSkPresentHold::allowNextPresent). Present thread.
+   */
+  void allowNextPresent() { _presentHold.allowNextPresent(); }
 
   // RNSkSurface -------------------------------------------------------------
 
@@ -150,14 +203,21 @@ private:
   // Configures the window on the GPU device in use when the one it was
   // configured on was lost and replaced since (see DawnContext): the Dawn
   // surface is made again on the new device, the window itself stays.
-  // Returns false without a context or a surface. Main thread.
+  // Returns false without a context or a surface. Present thread.
   bool ensureDevice();
   // Lets go of the Dawn surface of every window configured on the given
   // generation, before its device is destroyed (see ensureDevice). The
   // windows keep their target description and get a surface again on their
-  // next frame. Main thread.
+  // next frame. Present thread.
   static void releaseSurfacesOn(uint64_t generation);
-  // Configures the swapchain for the current size, format and usage.
+  // The window's Dawn surface, or none. A frame held for the surface it
+  // replaces goes with that surface: nothing can present it anymore.
+  void replaceSurface(wgpu::Surface surface) {
+    _presentHold.dropFrames();
+    _surface = std::move(surface);
+  }
+  // Configures the swapchain for the current size, format and usage, the
+  // frame it holds presented first (see RNSkPresentHold::releaseFrames).
   void configureSurface();
   // Copies the window's target description where any thread can read it.
   void updateTargetInfo();
@@ -176,6 +236,22 @@ private:
       _requestRedraw();
     }
   }
+  void didPresent() {
+    if (_didPresent) {
+      _didPresent();
+    }
+  }
+  // Whether the window takes a frame now: it can present, and holds none.
+  bool takesFrame() { return canPresent() && !_presentHold.hasHeldFrame(); }
+  // Presents the frame replayed last.
+  void presentNow();
+
+  // The GPU as RNSkPresentHold asks about it: the work given to Dawn's queue.
+  struct DawnQueue {
+    using Work = wgpu::Future;
+    Work track();
+    bool isDone(const Work &work);
+  };
 
   // The device the window is configured on, and its generation (see
   // DawnContext::generation()): a lost device is replaced, and the window
@@ -184,7 +260,7 @@ private:
   wgpu::Device _device;
   uint64_t _generation = 0;
   wgpu::Surface _surface;
-  // The recorder of the thread the window is attached on (the main thread):
+  // The recorder of the thread the window is attached on (the present thread):
   // presentImage() draws on it, presentRecordings() only wraps the swapchain
   // texture for it.
   skgpu::graphite::Recorder *_recorder = nullptr;
@@ -198,7 +274,7 @@ private:
   bool _useP3ColorSpace = false;
 
   // A copy of the window's target description, readable from any thread
-  // while the window itself belongs to the main thread.
+  // while the window itself belongs to the present thread.
   std::mutex _targetInfoMutex;
   RNSkGraphiteTargetInfo _targetInfo;
   bool _hasTargetInfo = false;
@@ -210,6 +286,9 @@ private:
 
   std::function<void()> _requestRedraw;
   std::function<bool()> _canPresent;
+  std::function<void()> _didPresent;
+  // Present thread.
+  RNSkPresentHold<DawnQueue> _presentHold;
 };
 
 } // namespace RNSkia

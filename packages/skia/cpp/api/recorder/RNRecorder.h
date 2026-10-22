@@ -189,14 +189,15 @@ public:
    * Runs on whichever thread drops the last reference: the UI thread when a
    * mapper is the last to let go of a replaced recording, a render thread when
    * a replay is. The commands hold GPU backed resources (images, pictures,
-   * paragraphs), which are destroyed on the main thread to release safely.
+   * paragraphs), which are destroyed on the thread views present on (see
+   * RNSkPlatformContext::runOnPresentThread) to release safely.
    */
   ~Recorder() {
     if (!_context || commands.empty()) {
       return;
     }
     auto pendingCommands = std::make_shared<CommandList>(std::move(commands));
-    _context->runOnMainThread(
+    _context->runOnPresentThread(
         [pendingCommands = std::move(pendingCommands)]() mutable {
           pendingCommands->clear();
         });

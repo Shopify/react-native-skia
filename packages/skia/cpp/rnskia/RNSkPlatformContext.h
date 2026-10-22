@@ -64,6 +64,16 @@ public:
   virtual void runOnMainThread(std::function<void()> func) = 0;
 
   /**
+   * Runs the passed function on the thread views present on: a thread of its
+   * own on Android, so that no present takes the window's frames from the
+   * main thread; the main thread elsewhere.
+   * @param func Function to run.
+   */
+  virtual void runOnPresentThread(std::function<void()> func) {
+    runOnMainThread(std::move(func));
+  }
+
+  /**
    * Returns an SkStream wrapping the require uri provided.
    * @param sourceUri Uri for the resource to load as a string
    * @op Operation to execute when the stream has successfuly been loaded.

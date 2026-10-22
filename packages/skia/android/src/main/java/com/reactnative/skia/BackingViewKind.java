@@ -39,4 +39,17 @@ enum BackingViewKind {
     static boolean resolveOpaque(boolean opaque, boolean surfaceHighBitDepth) {
         return opaque || surfaceHighBitDepth;
     }
+
+    /**
+     * Whether a frame presented into the canvas waits until its window has
+     * drawn the one before it (see JniSkiaView::frameLatched): a TextureView,
+     * whose frames the window takes when it draws, in no order with the
+     * presents. A frame presented before that draw replaces the one not taken
+     * yet, and from Android 11 its buffer queue waits up to 4.29 s for a buffer
+     * only that draw gives back. A SurfaceView's compositor takes its frames
+     * itself.
+     */
+    static boolean latchesOnWindowDraw(BackingViewKind kind) {
+        return kind == TEXTURE_VIEW;
+    }
 }

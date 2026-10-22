@@ -37,4 +37,14 @@ public class BackingViewKindTest {
         assertTrue(BackingViewKind.resolveOpaque(true, false));
         assertFalse(BackingViewKind.resolveOpaque(false, false));
     }
+
+    @Test
+    public void aTextureViewWaitsForItsWindowsDraw() {
+        assertTrue(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW));
+    }
+
+    @Test
+    public void aSurfaceViewNeverWaitsForAWindowsDraw() {
+        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW));
+    }
 }

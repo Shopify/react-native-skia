@@ -18,7 +18,10 @@ namespace jni = facebook::jni;
 /**
  * The JNI side of SkiaView: owns the native view and the window surface it
  * presents into, and relays the surface callbacks of the backing SurfaceView
- * or TextureView, whose ANativeWindow it acquires for the surface.
+ * or TextureView, whose ANativeWindow it acquires for the surface. The
+ * surface callbacks, the latch and the presents run on the present thread
+ * (PresentThread.java); the layout size, the bit depth and the registry calls
+ * on the main thread.
  */
 class JniSkiaView : public jni::HybridClass<JniSkiaView> {
 public:
@@ -42,7 +45,8 @@ public:
                           JniSkiaView::setSurfaceHighBitDepth),
          makeNativeMethod("registerView", JniSkiaView::registerView),
          makeNativeMethod("unregisterView", JniSkiaView::unregisterView),
-         makeNativeMethod("presentFrame", JniSkiaView::presentFrame)});
+         makeNativeMethod("presentFrame", JniSkiaView::presentFrame),
+         makeNativeMethod("frameLatched", JniSkiaView::frameLatched)});
   }
 
   // The manager is owned by the RNSkiaModule and is destroyed when the module
@@ -54,20 +58,23 @@ public:
 
 protected:
   void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
-                        bool highBitDepth) {
-    attachWindow(surface, width, height, isSurface, highBitDepth);
+                        bool highBitDepth, bool latchesOnWindowDraw) {
+    attachWindow(surface, width, height, isSurface, highBitDepth,
+                 latchesOnWindowDraw);
     _view->redraw();
   }
 
   void surfaceSizeChanged(jobject surface, int width, int height,
-                          bool isSurface, bool highBitDepth) {
+                          bool isSurface, bool highBitDepth,
+                          bool latchesOnWindowDraw) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
     if (width != 0 || height != 0) {
       if (_surface->isAttached()) {
         _surface->resize(width, height);
       } else {
-        attachWindow(surface, width, height, isSurface, highBitDepth);
+        attachWindow(surface, width, height, isSurface, highBitDepth,
+                     latchesOnWindowDraw);
       }
     }
     // Paint the new size right away rather than on the next scheduled redraw.
@@ -116,9 +123,20 @@ protected:
     manager->unregisterSkiaView(_view->getNativeId());
   }
 
-  // Choreographer tick: presents the queued recordings, returns whether more
-  // are already waiting.
-  bool presentFrame() { return _view->presentFrame(); }
+  // Presents what is waiting for the vsyncs FrameScheduler counted (see
+  // RNSkView::presentFrame); returns the value of RNSkView::NextFrame, which
+  // FrameScheduler.NextFrame reads.
+  int presentFrame(int vsyncs) {
+    return static_cast<int>(_view->presentFrame(static_cast<size_t>(vsyncs)));
+  }
+
+  /**
+   The TextureView's window took the frame last presented into it: it drew
+   it (SkiaTextureView.onSurfaceTextureUpdated) and the draw is done
+   (FrameLatchRelay), which gave a buffer back to its queue. The frame held
+   for it may go; FrameScheduler presents it. Present thread.
+   */
+  void frameLatched() { _surface->windowTookFrame(); }
 
 private:
   friend HybridBase;
@@ -127,11 +145,32 @@ private:
                        jni::alias_ref<JniSkiaManager::javaobject> skiaManager)
       : _manager(skiaManager->cthis()->getSkiaManager()) {
     auto context = skiaManager->cthis()->getPlatformContext();
-    _surface = std::make_shared<RNSkWindowSurface>();
-    _view = std::make_shared<RNSkView>(context, _surface);
-    // A submitted recording arms the Java view's frame callback. Weak: the
+    // A window's present waits, on the thread that presents, until the GPU
+    // has finished the frame presented before it (libgui's queueBuffer, for
+    // every Vulkan swapchain), and holds Dawn's device lock meanwhile; its
+    // compositor takes one frame a vsync: a frame replayed that early, or a
+    // second one in a tick, is held. A TextureView's window takes a frame only
+    // when it draws, on the main thread, in no order with the presents: its
+    // next frame is held until the window took the last (frameLatched; see
+    // BackingViewKind.latchesOnWindowDraw), its work on the GPU meanwhile.
+    _surface = std::make_shared<RNSkWindowSurface>(
+        PresentHold::kOncePerTickAfterPreviousFrame);
+    // The Java view's frame callback and its refresh-rate vote. Weak: the
     // Java view owns this object through its hybrid data.
     jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);
+    // The vote counts the frames that went to the window, not the frames the
+    // view was asked to present: it asks on every frame while one is coming.
+    _surface->setDidPresent([weakJava]() {
+      auto javaPart = weakJava.lockLocal();
+      if (!javaPart) {
+        return;
+      }
+      static const auto method =
+          javaPart->getClass()->getMethod<void()>("onFramePresented");
+      method(javaPart);
+    });
+    _view = std::make_shared<RNSkView>(context, _surface);
+    // A submitted recording arms the Java view's frame callback.
     _view->setFrameScheduler([weakJava]() {
       auto javaPart = weakJava.lockLocal();
       if (!javaPart) {
@@ -149,7 +188,7 @@ private:
    gives it back through the releaser. Android never renders in Display P3.
    */
   void attachWindow(jobject surface, int width, int height, bool isSurface,
-                    bool highBitDepth) {
+                    bool highBitDepth, bool latchesOnWindowDraw) {
     // Release the old surface and its window first.
     _surface->detach();
     JNIEnv *env = jni::Environment::current();
@@ -179,6 +218,7 @@ private:
       releaseWindow(nullptr, ownedSurface);
       return;
     }
+    _surface->setLatchesOnWindowDraw(latchesOnWindowDraw);
     _surface->attach(window, width, height, highBitDepth,
                      /* useP3ColorSpace= */ false,
                      [ownedSurface](void *nativeHandle) {

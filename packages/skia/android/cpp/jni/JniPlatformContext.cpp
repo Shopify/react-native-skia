@@ -20,6 +20,8 @@ void JniPlatformContext::registerNatives() {
       makeNativeMethod("initHybrid", JniPlatformContext::initHybrid),
       makeNativeMethod("notifyTaskReadyNative",
                        JniPlatformContext::notifyTaskReadyNative),
+      makeNativeMethod("notifyPresentTaskReadyNative",
+                       JniPlatformContext::notifyPresentTaskReadyNative),
   });
 }
 
@@ -84,44 +86,29 @@ void JniPlatformContext::performStreamOperation(
 }
 
 void JniPlatformContext::runTaskOnMainThread(std::function<void()> task) {
-  bool shouldSchedule = false;
-  {
-    std::lock_guard<std::mutex> lock(_mainThreadTasksMutex);
-    _mainThreadTasks.push(std::move(task));
-    if (!_mainThreadDispatchScheduled) {
-      _mainThreadDispatchScheduled = true;
-      shouldSchedule = true;
-    }
+  if (!_mainThreadTasks.push(std::move(task))) {
+    return;
   }
-
-  if (shouldSchedule) {
-    notifyTaskReadyExternal();
-  }
-}
-
-void JniPlatformContext::notifyTaskReadyExternal() {
   jni::ThreadScope ts;
-
   static auto method =
       javaPart_->getClass()->getMethod<void()>("notifyTaskReady");
   method(javaPart_.get());
 }
 
-void JniPlatformContext::notifyTaskReadyNative() {
-  std::queue<std::function<void()>> tasks;
-  {
-    std::lock_guard<std::mutex> lock(_mainThreadTasksMutex);
-    std::swap(tasks, _mainThreadTasks);
-    _mainThreadDispatchScheduled = false;
-  }
+void JniPlatformContext::notifyTaskReadyNative() { _mainThreadTasks.run(); }
 
-  while (!tasks.empty()) {
-    auto handler = std::move(tasks.front());
-    tasks.pop();
-    if (handler) {
-      handler();
-    }
+void JniPlatformContext::runTaskOnPresentThread(std::function<void()> task) {
+  if (!_presentThreadTasks.push(std::move(task))) {
+    return;
   }
+  jni::ThreadScope ts;
+  static auto method =
+      javaPart_->getClass()->getMethod<void()>("notifyPresentTaskReady");
+  method(javaPart_.get());
+}
+
+void JniPlatformContext::notifyPresentTaskReadyNative() {
+  _presentThreadTasks.run();
 }
 
 void JniPlatformContext::raiseError(const std::exception &err) {

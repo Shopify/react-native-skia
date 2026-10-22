@@ -55,6 +55,10 @@ public:
     _jniPlatformContext->runTaskOnMainThread(std::move(task));
   }
 
+  void runOnPresentThread(std::function<void()> task) override {
+    _jniPlatformContext->runTaskOnPresentThread(std::move(task));
+  }
+
 private:
   JniPlatformContext *_jniPlatformContext;
 };

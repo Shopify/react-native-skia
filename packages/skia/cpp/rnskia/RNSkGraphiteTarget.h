@@ -133,11 +133,12 @@ private:
  * RNSkGraphiteTargetRegistry) and kept alive by both.
  *
  * Recording happens on the producer's thread (the JS thread, a worklet
- * runtime or the render thread pool), presenting on the main thread; the
- * queue is the hand-off. A frame is recorded on the recorder of the thread
- * recording it (the render thread pool) or on a recorder of the target's own
- * (JS); either way a single recording is open at a time, and it is snapped
- * on the thread that opened it.
+ * runtime or the render thread pool), presenting on the present thread (see
+ * RNSkPlatformContext::runOnPresentThread); the queue is the hand-off. A
+ * frame is recorded on the recorder of the thread recording it (the render
+ * thread pool) or on a recorder of the target's own (JS); either way a single
+ * recording is open at a time, and it is snapped on the thread that opened
+ * it.
  */
 class RNSkGraphiteTarget {
 public:
@@ -445,7 +446,7 @@ private:
   bool _opaque = false;
   bool _highBitDepth = false;
 
-  // Hand-off to the main thread.
+  // Hand-off to the present thread.
   std::mutex _queueMutex;
   std::deque<std::shared_ptr<RNSkGraphiteRecording>> _queue;
   std::function<void()> _requestFrame;

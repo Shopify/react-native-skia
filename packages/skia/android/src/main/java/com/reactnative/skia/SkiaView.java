@@ -23,13 +23,20 @@ import com.facebook.react.views.view.ReactViewGroup;
  * androidBackingView prop and created once, from the props of the first
  * transaction, for the life of the view (see updateView()), that the native
  * side draws into with Graphite, presenting the queued recordings when the
- * backing view can show them (see FrameScheduler).
+ * backing view can show them (see FrameScheduler). The window surface and
+ * every present live on the PresentThread: the main thread relays the props,
+ * the layout and the backing view's callbacks to it.
  */
 public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreographer.FrameCallback {
     private static final String TAG = "SkiaView";
 
     @DoNotStrip
     private HybridData mHybridData;
+
+    // Main thread: React dropped the view (see dropInstance). The main thread
+    // calls no native method after that, and the present thread destroys the
+    // native view once it is done with it.
+    private boolean mDropped = false;
 
     // Props. opaque is applied in place, unless the buffer format implies it
     // (see setOpaque), and so are the z-order props where Android allows it
@@ -43,13 +50,19 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     // The backing view, created by the first prop transaction and kept, with
     // the kind and the buffer format it was created with. The kind is null
-    // until then: it is what tells a mounted canvas apart.
+    // until then: it is what tells a mounted canvas apart. Written once on the
+    // main thread, read on the present thread.
     private View mView;
     @Nullable
-    private BackingViewKind mKind = null;
+    private volatile BackingViewKind mKind = null;
     private boolean mSurfaceHighBitDepth = false;
 
+    // Main thread, but for the presents it is told of. Only a SurfaceView's
+    // surface is voted on, from Android 11 (see onSurfaceCreated).
     private final SurfaceFrameRateVote mFrameRateVote = new SurfaceFrameRateVote(this);
+    private volatile boolean mVotesOnPresents = false;
+
+    // Present thread.
     private final Runnable mPostedPresent = this::onPostedPresent;
     private final FrameScheduler mFrameScheduler = new FrameScheduler(new FrameScheduler.Host() {
         @Override
@@ -58,22 +71,36 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         }
 
         @Override
-        public void postBehindPendingDraw() {
-            post(mPostedPresent);
+        public void postPresent() {
+            PresentThread.post(mPostedPresent);
         }
 
         @Override
-        public boolean presentFrame() {
-            if (!hasNativeView()) {
-                return false;
+        public FrameScheduler.NextFrame presentFrame(int vsyncs) {
+            return hasNativeView()
+                    ? FrameScheduler.NextFrame.fromNative(SkiaView.this.presentFrame(vsyncs))
+                    : FrameScheduler.NextFrame.NONE;
+        }
+    });
+
+    // Main thread: the TextureView's latch, handed to the present thread.
+    private final FrameLatchRelay mFrameLatchRelay = new FrameLatchRelay(new FrameLatchRelay.Host() {
+        @Override
+        public void postBehindDraw(Runnable task) {
+            post(task);
+        }
+
+        @Override
+        public void postToPresentThread(Runnable task) {
+            PresentThread.post(task);
+        }
+
+        @Override
+        public void frameLatched() {
+            if (hasNativeView()) {
+                SkiaView.this.frameLatched();
+                mFrameScheduler.onFrameLatched();
             }
-            boolean moreQueued = SkiaView.this.presentFrame();
-            // Only a SurfaceView votes (attached in onSurfaceCreated): a
-            // TextureView is composited into its window, which votes for it.
-            // A frame the surface could not take counts as presented here,
-            // which at worst votes a frame early.
-            mFrameRateVote.onFramePresented();
-            return moreQueued;
         }
     });
 
@@ -214,7 +241,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         boolean opaque = BackingViewKind.resolveOpaque(mOpaque, mSurfaceHighBitDepth);
         // The surface will have this format: a frame recorded before it
         // exists, or while it is away, is recorded for it.
-        if (hasNativeView()) {
+        if (!mDropped) {
             setSurfaceHighBitDepth(mSurfaceHighBitDepth);
         }
         mView = switch (kind) {
@@ -236,19 +263,25 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     // would otherwise live on until this object is finalized, which the
     // garbage collector may never get to: the GPU memory the view holds (its
     // Graphite recorder and resource cache, the queued and last presented
-    // recordings, the swapchain) is invisible to it. Destroy it now, its
-    // destructors release all of that. The backing view may still call back
-    // after this, it leaves the window around the same time: see hasNativeView().
+    // recordings, the swapchain) is invisible to it. The present thread
+    // destroys it once it is done presenting, and its destructors release all
+    // of that. The backing view may still call back after this, it leaves the
+    // window around the same time: see hasNativeView().
     void dropInstance() {
-        if (!hasNativeView()) {
+        if (mDropped) {
             return;
         }
+        mDropped = true;
         unregisterView();
-        mHybridData.resetNative();
+        PresentThread.post(() -> {
+            stopFrames();
+            mHybridData.resetNative();
+        });
     }
 
-    // Whether the native view still exists. It is destroyed in dropInstance(),
-    // and no native method may be called after that.
+    // Present thread: whether the native view still exists. The present
+    // thread destroys it (see dropInstance), and no native method may be
+    // called after that.
     private boolean hasNativeView() {
         return mHybridData.isValid();
     }
@@ -259,7 +292,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         // The backing view gets this exact size, and so does its surface: tell
         // the native side now, so that a frame recorded before the surface
         // exists (the first one usually is) already has the right size.
-        if (hasNativeView()) {
+        if (!mDropped) {
             setLayoutSize(right - left, bottom - top);
         }
         if (mView != null) {
@@ -269,12 +302,27 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     // Frames --------------------------------------------------------------
 
-    /** A recording was submitted. Main thread; called from native. */
+    /** A recording was submitted. Present thread; called from native. */
     @DoNotStrip
     public void scheduleFrame() {
         mFrameScheduler.requestFrame(mKind);
     }
 
+    /**
+     * A frame went to the backing view's surface. Present thread; called from
+     * native. Only a SurfaceView votes (attached in onSurfaceCreated): a
+     * TextureView is composited into its window, which votes for it.
+     */
+    @DoNotStrip
+    public void onFramePresented() {
+        if (!mVotesOnPresents) {
+            return;
+        }
+        long presentedAtNanos = System.nanoTime();
+        post(() -> mFrameRateVote.onFramePresented(presentedAtNanos));
+    }
+
+    /** The present thread's Choreographer frame (see FrameScheduler.Host.postFrameCallback). */
     @Override
     public void doFrame(long frameTimeNanos) {
         mFrameScheduler.onFrame(mKind);
@@ -284,12 +332,17 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         mFrameScheduler.onPosted();
     }
 
+    // Present thread: the view asks for no more frames.
+    private void stopFrames() {
+        Choreographer.getInstance().removeFrameCallback(this);
+        PresentThread.remove(mPostedPresent);
+        mFrameScheduler.cancel();
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Choreographer.getInstance().removeFrameCallback(this);
-        removeCallbacks(mPostedPresent);
-        mFrameScheduler.cancel();
+        PresentThread.post(this::stopFrames);
     }
 
     // A no-op for a dropped view (see dropInstance), which every mounted view
@@ -302,24 +355,35 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     // Surfaces ------------------------------------------------------------
 
+    // The backing view calls these on the main thread; each runs on the
+    // present thread, after the ones before it, so a surface is attached,
+    // resized and detached in the order its callbacks came.
+
     // SurfaceView callbacks: the native side receives an android.view.Surface.
 
     @Override
     public void onSurfaceCreated(Surface surface, int width, int height) {
         mFrameRateVote.attach(surface);
-        if (!hasNativeView()) {
-            return;
-        }
-        surfaceAvailable(surface, width, height, true, mSurfaceHighBitDepth);
+        mVotesOnPresents = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
+        boolean highBitDepth = mSurfaceHighBitDepth;
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW);
+        PresentThread.post(() -> {
+            if (hasNativeView()) {
+                surfaceAvailable(surface, width, height, true, highBitDepth, latchesOnWindowDraw);
+            }
+        });
     }
 
     @Override
     public void onSurfaceChanged(Surface surface, int width, int height) {
         Log.i(TAG, "onSurfaceChanged " + width + "/" + height);
-        if (!hasNativeView()) {
-            return;
-        }
-        surfaceSizeChanged(surface, width, height, true, mSurfaceHighBitDepth);
+        boolean highBitDepth = mSurfaceHighBitDepth;
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW);
+        PresentThread.post(() -> {
+            if (hasNativeView()) {
+                surfaceSizeChanged(surface, width, height, true, highBitDepth, latchesOnWindowDraw);
+            }
+        });
     }
 
     // TextureView callbacks: the native side receives the SurfaceTexture and
@@ -327,29 +391,43 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        if (!hasNativeView()) {
-            return;
-        }
-        surfaceAvailable(surface, width, height, false, false);
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW);
+        PresentThread.post(() -> {
+            if (hasNativeView()) {
+                surfaceAvailable(surface, width, height, false, false, latchesOnWindowDraw);
+            }
+        });
     }
 
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         Log.i(TAG, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        if (!hasNativeView()) {
-            return;
-        }
-        surfaceSizeChanged(surface, width, height, false, false);
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW);
+        PresentThread.post(() -> {
+            if (hasNativeView()) {
+                surfaceSizeChanged(surface, width, height, false, false, latchesOnWindowDraw);
+            }
+        });
     }
 
     @Override
+    public void onSurfaceTextureUpdated() {
+        mFrameLatchRelay.onWindowDrewFrame();
+    }
+
+    // The surface goes away once this returns: the present thread lets go of
+    // it first. It never waits on the GPU (see RNSkPresentHold), so the wait
+    // is at most the present in progress.
+    @Override
     public void onSurfaceDestroyed() {
         // The surface is still valid here, so the vote can be taken back.
+        mVotesOnPresents = false;
         mFrameRateVote.detach();
-        if (!hasNativeView()) {
-            return;
-        }
-        surfaceDestroyed();
+        PresentThread.runAndWait(() -> {
+            if (hasNativeView()) {
+                surfaceDestroyed();
+            }
+        });
     }
 
     // Native ---------------------------------------------------------------
@@ -357,10 +435,12 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     private native HybridData initHybrid(SkiaManager skiaManager);
 
     // isSurface tells the native side whether `surface` is an
-    // android.view.Surface (SurfaceView) or a SurfaceTexture (TextureView).
-    private native void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
+    // android.view.Surface (SurfaceView) or a SurfaceTexture (TextureView);
+    // latchesOnWindowDraw, whether a frame waits for the window to draw the
+    // one before it (see BackingViewKind.latchesOnWindowDraw).
+    private native void surfaceAvailable(Object surface, int width, int height, boolean isSurface, boolean highBitDepth, boolean latchesOnWindowDraw);
 
-    private native void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth);
+    private native void surfaceSizeChanged(Object surface, int width, int height, boolean isSurface, boolean highBitDepth, boolean latchesOnWindowDraw);
 
     private native void surfaceDestroyed();
 
@@ -372,6 +452,12 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     private native void unregisterView();
 
-    /** Presents the queued recordings, returning whether any are left. */
-    private native boolean presentFrame();
+    /**
+     * Presents what is waiting, for vsyncs vsyncs, and returns the value of
+     * RNSkView::NextFrame: whether a frame is still waiting or coming (see
+     * FrameScheduler.NextFrame). Present thread.
+     */
+    private native int presentFrame(int vsyncs);
+
+    private native void frameLatched();
 }

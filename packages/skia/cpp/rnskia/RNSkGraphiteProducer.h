@@ -2,8 +2,11 @@
 
 #include <memory>
 #include <mutex>
+#include <vector>
 
 #include <jsi/jsi.h>
+
+#include "RNSkReplaySchedule.h"
 
 #include "include/core/SkRefCnt.h"
 
@@ -15,6 +18,7 @@ namespace RNSkia {
 namespace jsi = facebook::jsi;
 
 class Recorder;
+class RNSkGraphiteRecording;
 class RNSkGraphiteTarget;
 
 /**
@@ -29,7 +33,7 @@ class RNSkGraphiteTarget;
  * the pending values into them first) into a deferred canvas of the view's
  * target, on the Graphite recorder of that thread (a view holds none of its
  * own, see RNSkGraphiteTarget::beginRecording), and submits the recording;
- * the main thread presents it on the next vsync.
+ * the present thread presents it on the next vsync.
  *
  * A recording with shared values arrives without their values (recording
  * reads none, see Variables) and is not replayed before the mapper has read
@@ -37,21 +41,17 @@ class RNSkGraphiteTarget;
  * until then, one UI frame at most, rather than a frame with unset
  * properties.
  *
- * Pacing: a view has at most one job in flight, and the pool keeps at most one
- * frame ahead of the display: a job may start while the previous recording is
- * still waiting for its vsync, so that the replay of one frame overlaps the
- * present of the other, but not while two are waiting. Updates that arrive
- * meanwhile only mark the content dirty; the next job (started by the update,
- * by the end of the job before, or by a presented frame) picks them up. A
- * producer that outruns the display therefore records once per vsync, and
- * the queue of the target never grows. On a Vulkan window the present alone
- * takes two to three milliseconds of the main thread, so a replay that only
- * started once the frame was on screen missed every other vsync at 120 Hz.
+ * Pacing: when a job may start and where its recording goes is the
+ * RNSkReplaySchedule's. Updates that arrive meanwhile only mark the content
+ * dirty; the next job (started by the update, by the end of the job before,
+ * or by a presented recording) picks them up. A producer that outruns the
+ * display therefore records once per vsync, and the target never holds more
+ * than one of its recordings.
  */
 class RNSkGraphiteProducer
     : public std::enable_shared_from_this<RNSkGraphiteProducer> {
 public:
-  RNSkGraphiteProducer() = default;
+  RNSkGraphiteProducer();
   ~RNSkGraphiteProducer();
 
   /**
@@ -100,10 +100,20 @@ public:
   bool requestFrame();
 
   /**
-   The view presented `presented` recordings (every one it had taken from the
-   queue): as many slots free up for the next jobs.
+   The view is done with these recordings, taken off its target: presented,
+   or skipped as ones it cannot replay. Present thread.
    */
-  void onFramePresented(size_t presented);
+  void onRecordingsPresented(
+      const std::vector<std::shared_ptr<RNSkGraphiteRecording>> &recordings);
+
+  /**
+   The view's present tick ended: the platform asked it to present, once a
+   frame, while a frame of it was waiting or coming. Present thread.
+   */
+  void onPresentTick();
+
+  /** Whether a replay is in flight: its frame is coming. Any thread. */
+  bool isReplaying();
 
   /**
    Replays the current content into a canvas, on the calling thread (a
@@ -112,6 +122,10 @@ public:
   void renderInto(SkCanvas *canvas, float pixelDensity);
 
 private:
+  // Replays in a row that must keep up before the view waits for its
+  // presents again (see RNSkReplaySchedule): half a second at 60 Hz.
+  static constexpr size_t kReplaysToKeepUp = 30;
+
   /**
    Replays declarative content, a recorder if there is one, else a picture,
    into a canvas: clears it and applies the density.
@@ -122,7 +136,8 @@ private:
   /**
    Swaps the content under the lock and releases the previous one outside of
    it: a pool thread still replaying it keeps it alive until it is done, and
-   the last owner, whichever thread that is, releases its resources. Pending
+   the recorder's destructor, on whichever thread drops it last, hands its
+   commands to the present thread. Pending
    writes go away with their recorder.
    */
   void replaceContent(std::shared_ptr<Recorder> recorder,
@@ -140,12 +155,8 @@ private:
   std::shared_ptr<RNSkGraphiteTarget> _target;
   std::shared_ptr<Recorder> _recorder;
   sk_sp<SkPicture> _picture;
-  // Recordings submitted to the current target and not presented yet. A job
-  // starts while there is room for its recording in the queue.
-  static constexpr size_t kMaxQueued = 2;
   bool _dirty = false;
-  bool _inFlight = false;
-  size_t _queued = 0;
+  RNSkReplaySchedule<std::shared_ptr<RNSkGraphiteRecording>> _schedule;
 };
 
 } // namespace RNSkia

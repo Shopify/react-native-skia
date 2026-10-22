@@ -69,12 +69,11 @@ final class SurfaceFrameRateVote {
         mSurface = surface;
     }
 
-    /** A frame was presented on the surface. */
-    void onFramePresented() {
+    /** A frame was presented on the surface at `now`, a System.nanoTime() reading. */
+    void onFramePresented(long now) {
         if (mSurface == null) {
             return;
         }
-        long now = System.nanoTime();
         boolean animating = mLastPresentNanos != 0 && now - mLastPresentNanos <= ANIMATING_INTERVAL_NANOS;
         mLastPresentNanos = now;
         if (animating) {

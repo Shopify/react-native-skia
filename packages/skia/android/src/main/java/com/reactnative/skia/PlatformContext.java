@@ -114,8 +114,17 @@ public class PlatformContext {
         }
     }
 
+    // Always posted, also from the present thread: a task runs after the one
+    // that queued it rather than inside it.
+    @DoNotStrip
+    public void notifyPresentTaskReady() {
+        PresentThread.post(this::notifyPresentTaskReadyNative);
+    }
+
     // Private c++ native methods
     private native HybridData initHybrid(float pixelDensity);
 
     private native void notifyTaskReadyNative();
+
+    private native void notifyPresentTaskReadyNative();
 }

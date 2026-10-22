@@ -515,6 +515,29 @@ public:
     current->context->submit();
   }
 
+  /**
+   A future of everything submitted so far to the device in use, to ask
+   isWorkDone() about. Dawn forgets it once the work is done, so one nobody
+   asks about again (a frame dropped with its swapchain) is not kept for the
+   instance's lifetime, as a WaitAnyOnly future would be. Any thread.
+   */
+  wgpu::Future trackSubmittedWork() {
+    return _current.load(std::memory_order_acquire)
+        ->backendContext.fDevice.GetQueue()
+        .OnSubmittedWorkDone(
+            wgpu::CallbackMode::AllowSpontaneous,
+            [](wgpu::QueueWorkDoneStatus, wgpu::StringView) {});
+  }
+
+  /**
+   Whether the GPU has finished the work `future` tracks. It never waits: on
+   Vulkan, Dawn locks its queue's fences while a wait for the queue blocks.
+   Any thread.
+   */
+  bool isWorkDone(const wgpu::Future &future) {
+    return getWGPUInstance().WaitAny(future, 0) == wgpu::WaitStatus::Success;
+  }
+
   // GPU objects --------------------------------------------------------------
 
   /**
