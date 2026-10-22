@@ -22,9 +22,8 @@ namespace jni = facebook::jni;
  * The JNI side of SkiaView: owns the native view and the window surface it
  * presents into, and relays the surface callbacks of the backing SurfaceView
  * or TextureView, whose ANativeWindow it acquires for the surface. The
- * surface callbacks come on the main thread; the view presents on the thread
- * the Java view presents on (see SkiaView.runOnPresentThread): the present
- * thread for a SurfaceView, the main thread for a TextureView.
+ * surface callbacks come on the main thread; the view presents on the present
+ * thread of the Java side (see SkiaView.runOnPresentThread).
  */
 class JniSkiaView : public jni::HybridClass<JniSkiaView> {
 public:
@@ -142,11 +141,10 @@ private:
     auto context = skiaManager->cthis()->getPlatformContext();
     _surface = std::make_shared<RNSkWindowSurface>();
     _view = std::make_shared<RNSkView>(context, _surface);
-    // The Java view knows which thread the view presents on (it depends on
-    // the backing view, chosen when the canvas mounts): tasks for that thread
-    // go through it. Weak: the Java view owns this object through its hybrid
-    // data; a task for a view that is gone is dropped. Called from any
-    // thread, the render thread pool's included, hence the thread scope.
+    // Tasks for the present thread go through the Java view, which owns the
+    // thread. Weak: the Java view owns this object through its hybrid data;
+    // a task for a view that is gone is dropped. Called from any thread, the
+    // render thread pool's included, hence the thread scope.
     auto javaView = std::make_shared<JavaView>(jThis);
     _view->setPresentThread([javaView](std::function<void()> task) {
       jni::ThreadScope threadScope;

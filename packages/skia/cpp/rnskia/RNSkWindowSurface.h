@@ -42,7 +42,8 @@ namespace RNSkia {
  *
  * Locks, innermost last: the list of windows (see releaseSurfacesOn), a
  * window's own mutex, the GPU context's (DawnContext). A thread never holds
- * two windows' mutexes at once.
+ * two windows' mutexes at once: windows may present on different threads
+ * (every Android canvas shares one, Apple views present on the main thread).
  */
 class RNSkWindowSurface final : public RNSkSurface {
 public:

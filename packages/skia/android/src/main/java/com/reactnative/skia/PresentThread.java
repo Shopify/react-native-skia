@@ -5,16 +5,16 @@ import android.os.HandlerThread;
 import android.os.Process;
 
 /**
- * The thread every SurfaceView canvas presents on: one for the process,
- * started on first use and never stopped. Presenting a frame (replaying its
- * recordings on the GPU and handing the swapchain image to the compositor)
- * costs a few milliseconds of CPU on a Vulkan window, which this thread
- * takes off the main thread; one thread serves every canvas, as presents
- * serialize on the GPU context anyway. It is a looper thread, so that each
- * canvas's FrameScheduler runs on it as it would on the main thread, with
- * the Choreographer of this thread for its vsync. A TextureView canvas keeps
- * presenting on the main thread, behind the draw its window has pending (see
- * FrameScheduler).
+ * The thread every canvas presents on: one for the process, started on first
+ * use and never stopped. Presenting a frame (replaying its recordings on the
+ * GPU and handing the buffer to the compositor, or to the window for a
+ * TextureView) costs a few milliseconds of CPU on a Vulkan window, which this
+ * thread takes off the main thread; one thread serves every canvas, as
+ * presents serialize on the GPU context anyway. It is a looper thread, so
+ * that each canvas's FrameScheduler runs on it as it would on the main
+ * thread, with the Choreographer of this thread for its vsync (see
+ * SkiaView for how a TextureView's present still waits for its window's
+ * pending draw).
  */
 final class PresentThread {
     private static final Object sLock = new Object();

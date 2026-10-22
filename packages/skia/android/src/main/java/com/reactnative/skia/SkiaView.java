@@ -28,12 +28,13 @@ import com.facebook.react.views.view.ReactViewGroup;
  * backing view can show them (see FrameScheduler).
  *
  * Threading: the view and its surface callbacks are on the main thread. The
- * frames are presented on the thread the backing view presents on (see
- * runOnPresentThread): the present thread for a SurfaceView, the main thread
- * for a TextureView. The frame scheduler and the Choreographer callback live
- * on that thread. The native view is destroyed on the main thread while the
- * present thread may be presenting (see dropInstance): a lock keeps the two
- * apart.
+ * frames are presented on the present thread (see PresentThread), where the
+ * frame scheduler and the Choreographer callback live. A TextureView's frame
+ * is still presented behind the draw its window has pending (see
+ * FrameScheduler): the request takes a round trip through the main looper,
+ * which costs the main thread a post rather than the present. The native
+ * view is destroyed on the main thread while the present thread may be
+ * presenting (see dropInstance): a lock keeps the two apart.
  */
 public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreographer.FrameCallback {
     private static final String TAG = "SkiaView";
@@ -61,17 +62,22 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     // The backing view, created by the first prop transaction and kept, with
     // the kind and the buffer format it was created with. The kind is null
     // until then: it is what tells a mounted canvas apart. Written on the
-    // main thread, read on the present thread (see runOnPresentThread).
+    // main thread, read on the present thread (see doFrame).
     private View mView;
     @Nullable
     private volatile BackingViewKind mKind = null;
     private boolean mSurfaceHighBitDepth = false;
 
     private final SurfaceFrameRateVote mFrameRateVote = new SurfaceFrameRateVote(this);
-    private final Runnable mPostedPresent = this::onPostedPresent;
+    // The present a TextureView queues behind its window's pending draw: a
+    // message on the main looper, which the sync barrier of a pending
+    // traversal holds until that traversal has run; it only hands the present
+    // over to the present thread.
+    private final Runnable mOnPosted = this::onPostedPresent;
+    private final Runnable mPostedPresent = () -> PresentThread.handler().post(mOnPosted);
     private final Runnable mCancelFrames = this::cancelFrames;
-    // Runs on the thread the view presents on: the Choreographer it posts to
-    // is that thread's.
+    // Runs on the present thread: the Choreographer it posts to is that
+    // thread's.
     private final FrameScheduler mFrameScheduler = new FrameScheduler(new FrameScheduler.Host() {
         @Override
         public void postFrameCallback() {
@@ -80,7 +86,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
         @Override
         public void postBehindPendingDraw() {
-            post(mPostedPresent);
+            sMainHandler.post(mPostedPresent);
         }
 
         @Override
@@ -297,36 +303,18 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     // Frames --------------------------------------------------------------
 
-    // The handler of the thread the view presents on: the present thread for
-    // a SurfaceView, the main thread otherwise (a TextureView presents behind
-    // the draw its window has pending, see FrameScheduler), and until the
-    // backing view exists, when nothing presents.
-    private Handler presentHandler() {
-        return mKind == BackingViewKind.SURFACE_VIEW ? PresentThread.handler() : sMainHandler;
-    }
-
     /**
-     * Runs a task on the thread the view presents on, never on the spot (the
-     * native side posts with locks held). Any thread; called from native.
+     * Runs a task on the present thread, never on the spot (the native side
+     * posts with locks held). Any thread; called from native.
      */
     @DoNotStrip
     public void runOnPresentThread(Runnable task) {
-        presentHandler().post(task);
+        PresentThread.handler().post(task);
     }
 
-    /**
-     * A recording was submitted. On the thread the view presents on; called
-     * from native. A request posted before the backing view was chosen may
-     * land on the main thread for a SurfaceView: it goes over to the right
-     * thread, where the scheduler lives.
-     */
+    /** A recording was submitted. Present thread; called from native. */
     @DoNotStrip
     public void scheduleFrame() {
-        Handler handler = presentHandler();
-        if (Looper.myLooper() != handler.getLooper()) {
-            handler.post(this::scheduleFrame);
-            return;
-        }
         mFrameScheduler.requestFrame(mKind);
     }
 
@@ -339,23 +327,21 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         mFrameScheduler.onPosted();
     }
 
-    // Drops the frame callback and the scheduler's requests, on the thread
-    // they live on.
+    // Drops the frame callback, the posted present and the scheduler's
+    // requests, on the present thread, where they live. A present already
+    // on its way through the main looper lands after this and finds no
+    // surface to present on.
     private void cancelFrames() {
         Choreographer.getInstance().removeFrameCallback(this);
+        PresentThread.handler().removeCallbacks(mOnPosted);
         mFrameScheduler.cancel();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        removeCallbacks(mPostedPresent);
-        Handler handler = presentHandler();
-        if (Looper.myLooper() == handler.getLooper()) {
-            cancelFrames();
-        } else {
-            handler.post(mCancelFrames);
-        }
+        sMainHandler.removeCallbacks(mPostedPresent);
+        PresentThread.handler().post(mCancelFrames);
     }
 
     // A no-op for a dropped view (see dropInstance), which every mounted view
@@ -444,8 +430,8 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     private native void unregisterView();
 
     /**
-     * Presents the queued recordings, returning whether any are left. On the
-     * thread the view presents on, under mNativeLock.
+     * Presents the queued recordings, returning whether any are left. Present
+     * thread, under mNativeLock.
      */
     private native boolean presentFrame();
 }

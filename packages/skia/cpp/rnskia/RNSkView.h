@@ -43,8 +43,8 @@ namespace jsi = facebook::jsi;
  * recordings are queued on the target; the view presents them onto its window
  * surface once the platform view's surface can show a new frame (see
  * setFrameScheduler), on the thread the platform view presents on: the main
- * thread, or a thread of its own (an Android SurfaceView canvas presents on
- * one shared by every such canvas, see setPresentThread).
+ * thread, or a thread of its own (an Android canvas presents on one shared by
+ * every canvas, see setPresentThread).
  *
  * Threading: the registry side (RNSkJsiViewApi) runs on the JS thread, except
  * applyUpdates() which a Reanimated mapper calls on the UI runtime; snapshots
