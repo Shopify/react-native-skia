@@ -58,6 +58,13 @@ public:
            std::shared_ptr<RNSkWindowSurface> surface)
       : _platformContext(std::move(context)), _surface(std::move(surface)),
         _producer(std::make_shared<RNSkGraphiteProducer>()) {
+    // Until the platform view installs a present thread (see
+    // setPresentThread), the view presents on the main thread. Without this
+    // view: the runner is copied into callbacks that may outlive it.
+    auto platformContext = _platformContext;
+    _runOnPresentThread = [platformContext](std::function<void()> task) {
+      platformContext->runOnMainThread(std::move(task));
+    };
     // A new window or a new size: present again. The platform view owns
     // the surface together with this view, and the destructor clears the
     // callback, so a raw capture is safe.
@@ -105,7 +112,7 @@ public:
     // Self-contained: the target calls it from whichever thread submits a
     // recording, possibly while this view is being destroyed.
     std::weak_ptr<RNSkView> weakThis = weak_from_this();
-    auto run = presentThreadRunner();
+    auto run = _runOnPresentThread;
     auto scheduleOnPresentThread = [weakThis, run]() {
       run([weakThis]() {
         if (auto view = weakThis.lock()) {
@@ -258,8 +265,10 @@ public:
    Installed by the platform view when it presents on another thread than
    the main thread: runs a task on the thread the view presents on, never on
    the spot (the window surface posts redraws with its mutex held). Any
-   thread. Without one, tasks run on the main thread. Installed once, before
-   the view is bound to its id.
+   thread. Without one, tasks are posted to the main thread, which the Apple
+   views present on; an Android view always installs one (its platform
+   context runs a task handed over on the main thread on the spot, see
+   JniPlatformContext). Installed once, before the view is bound to its id.
    */
   void setPresentThread(std::function<void(std::function<void()>)> run) {
     _runOnPresentThread = std::move(run);
@@ -386,7 +395,7 @@ private:
   /** Runs redraw() on the present thread, when it gets to it. */
   void postRedraw() {
     std::weak_ptr<RNSkView> weakThis = weak_from_this();
-    presentThreadRunner()([weakThis]() {
+    _runOnPresentThread([weakThis]() {
       if (auto view = weakThis.lock()) {
         if (view->_redrawRequested) {
           view->redraw();
@@ -396,23 +405,14 @@ private:
   }
 
   /**
-   Runs tasks on the present thread (see setPresentThread), without this
-   view: for a callback that may outlive it.
-   */
-  std::function<void(std::function<void()>)> presentThreadRunner() {
-    if (_runOnPresentThread) {
-      return _runOnPresentThread;
-    }
-    auto context = _platformContext;
-    return [context](std::function<void()> task) {
-      context->runOnMainThread(std::move(task));
-    };
-  }
-
-  /**
-   Presents the recordings onto the window and remembers the last one shown.
-   Returns whether all of them went through; the one the window could not
-   take and the ones behind it go back to the front of the target's queue.
+   Presents the recordings onto the window, described by targetInfo, and
+   remembers the last one shown. Returns whether all of them went through;
+   the one the window could not take and the ones behind it go back to the
+   front of the target's queue: the window had no drawable, or it changed
+   under the present (the main thread resized it between the read of its
+   description and the present, see RNSkWindowSurface::presentRecordings).
+   The next frame reads the window as it is now, and drops what was recorded
+   for the previous size (see present).
    */
   bool presentOrKeep(
       RNSkGraphiteTarget &target, const RNSkGraphiteTargetInfo &targetInfo,
@@ -431,9 +431,15 @@ private:
    Replays the recordings onto the surface's target, in order, and remembers
    the last one shown for the next redraw when asked to (not for a snapshot).
    Returns how many of them are done, from the front: all, unless the surface
-   could not take one (no drawable), also through a texture; that one and the
-   ones behind it are left to the caller. One made for another format, or
-   whose replay into a texture failed, is skipped: done, not shown.
+   could not take one (no drawable, or the surface is no longer the target
+   described by targetInfo: resized since it was read), also through a
+   texture; that one and the ones behind it are left to the caller. One made
+   for another format, or whose replay into a texture failed, is skipped:
+   done, not shown. So is one that declarative content recorded for another
+   size than the target's: the content is recorded again for the target as
+   it is now (see redraw), so the frame is stale, and showing it would leave
+   the edge the resize uncovered empty for a frame, where the window keeps
+   its previous frame, stretched to the new size, until the new one lands.
    */
   size_t
   present(RNSkSurface &surface, const RNSkGraphiteTargetInfo &targetInfo,
@@ -448,7 +454,7 @@ private:
     // Presents the batch; the recordings before upTo are then done.
     auto flush = [&](size_t upTo) {
       if (!batch.empty()) {
-        if (!surface.presentRecordings(batch)) {
+        if (!surface.presentRecordings(targetInfo, batch)) {
           return false;
         }
         batch.clear();
@@ -482,11 +488,14 @@ private:
         batchLast = recording;
         continue;
       }
+      if (!recording->hasSizeOf(targetInfo) && _producer->hasContent()) {
+        continue;
+      }
       if (!flush(i)) {
         taken = false;
         break;
       }
-      const auto result = presentThroughTexture(surface, recording);
+      const auto result = presentThroughTexture(surface, targetInfo, recording);
       if (result == TexturePresent::kDeclined) {
         taken = false;
         break;
@@ -519,11 +528,11 @@ private:
    for a recording made in another color space than the target's: the
    texture is in the color space of the recording, and drawing it converts
    the colors. A recording that cannot be replayed into such a texture is
-   consumed; one the surface could not take (no drawable) is declined, for
-   the caller to keep.
+   consumed; one the surface could not take (no drawable, or it is no longer
+   the target described by targetInfo) is declined, for the caller to keep.
    */
   TexturePresent presentThroughTexture(
-      RNSkSurface &surface,
+      RNSkSurface &surface, const RNSkGraphiteTargetInfo &targetInfo,
       const std::shared_ptr<RNSkGraphiteRecording> &recording) {
     const auto &size = recording->getTarget();
     RNSkOffscreenSurface intermediate(_platformContext, size.width, size.height,
@@ -538,7 +547,7 @@ private:
                                surface.getHeight());
       return TexturePresent::kConsumed;
     }
-    auto image = intermediate.presentRecordings({recording->get()})
+    auto image = intermediate.presentRecordings(info, {recording->get()})
                      ? intermediate.makeImage()
                      : nullptr;
     if (image == nullptr) {
@@ -547,8 +556,8 @@ private:
                                size.width, size.height);
       return TexturePresent::kConsumed;
     }
-    return surface.presentImage(image) ? TexturePresent::kPresented
-                                       : TexturePresent::kDeclined;
+    return surface.presentImage(targetInfo, image) ? TexturePresent::kPresented
+                                                   : TexturePresent::kDeclined;
   }
 
   std::shared_ptr<RNSkPlatformContext> _platformContext;

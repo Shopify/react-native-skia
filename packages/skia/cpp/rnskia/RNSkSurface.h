@@ -38,20 +38,26 @@ public:
 
   /**
    Replays the recordings, in order, onto the target texture and presents
-   it. Called on the thread that owns the surface. Returns false when the
-   surface cannot present right now (there is none, or the app is in the
-   background): nothing was consumed.
+   it. The target is the one the caller read with getTargetInfo() and chose
+   the recordings for: a surface that is no longer that target (resized from
+   another thread since) declines, as the recordings would not fit it.
+   Called on the thread that presents on the surface. Returns false when the
+   surface cannot present right now (there is none, the app is in the
+   background, or the surface is not the target given): nothing was
+   consumed.
    */
   virtual bool presentRecordings(
+      const RNSkGraphiteTargetInfo &target,
       const std::vector<skgpu::graphite::Recording *> &recordings) = 0;
 
   /**
    Draws an image at the origin of the target texture and presents it. Same
-   thread and return value as presentRecordings(). Used for a recording whose
-   size or color space differs from the target's: it is replayed into a
-   texture of its own first (see RNSkView::present).
+   target, thread and return value as presentRecordings(). Used for a
+   recording whose size or color space differs from the target's: it is
+   replayed into a texture of its own first (see RNSkView::present).
    */
-  virtual bool presentImage(const sk_sp<SkImage> &image) = 0;
+  virtual bool presentImage(const RNSkGraphiteTargetInfo &target,
+                            const sk_sp<SkImage> &image) = 0;
 };
 
 } // namespace RNSkia

@@ -125,7 +125,10 @@ public:
     return true;
   }
 
+  // The surface is used by one thread at a time, so it is always the target
+  // the caller read.
   bool presentRecordings(
+      const RNSkGraphiteTargetInfo & /* target */,
       const std::vector<skgpu::graphite::Recording *> &recordings) override {
     auto *recorder = _surface ? _surface->recorder() : nullptr;
     if (recorder == nullptr) {
@@ -145,7 +148,8 @@ public:
     return true;
   }
 
-  bool presentImage(const sk_sp<SkImage> &image) override {
+  bool presentImage(const RNSkGraphiteTargetInfo & /* target */,
+                    const sk_sp<SkImage> &image) override {
     if (_surface == nullptr) {
       return false;
     }

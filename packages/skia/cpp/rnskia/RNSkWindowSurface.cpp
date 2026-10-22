@@ -206,16 +206,22 @@ void RNSkWindowSurface::updateTargetInfo() {
     _hasTargetInfo = false;
     return;
   }
-  _targetInfo.width = _width;
-  _targetInfo.height = _height;
-  _targetInfo.colorType = _colorType;
-  _targetInfo.useP3ColorSpace = _useP3ColorSpace;
-  _targetInfo.textureInfo = getTextureInfo();
+  _targetInfo = describeLocked();
   _hasTargetInfo = true;
   // What the surface granted, kept once the window is detached: it is what
   // the window comes back with.
   _knownHighBitDepth = _colorType == DawnUtils::HighBitDepthColorType;
   _hasKnownHighBitDepth = true;
+}
+
+RNSkGraphiteTargetInfo RNSkWindowSurface::describeLocked() const {
+  RNSkGraphiteTargetInfo info;
+  info.width = _width;
+  info.height = _height;
+  info.colorType = _colorType;
+  info.useP3ColorSpace = _useP3ColorSpace;
+  info.textureInfo = getTextureInfo();
+  return info;
 }
 
 skgpu::graphite::TextureInfo RNSkWindowSurface::getTextureInfo() const {
@@ -292,6 +298,11 @@ bool RNSkWindowSurface::canPresentLocked() {
          (!_canPresent || _canPresent());
 }
 
+bool RNSkWindowSurface::isTargetLocked(
+    const RNSkGraphiteTargetInfo &target) const {
+  return describeLocked() == target;
+}
+
 void RNSkWindowSurface::retireReplacedDevice() {
   const auto generation = _generation.load(std::memory_order_acquire);
   if (generation == 0 || generation == DawnContext::generation()) {
@@ -354,10 +365,12 @@ skgpu::graphite::Recorder *RNSkWindowSurface::presentRecorder() {
 }
 
 bool RNSkWindowSurface::presentRecordings(
+    const RNSkGraphiteTargetInfo &target,
     const std::vector<skgpu::graphite::Recording *> &recordings) {
   retireReplacedDevice();
   std::lock_guard<std::mutex> lock(_mutex);
-  if (!canPresentLocked() || !ensureDeviceLocked()) {
+  // The device check first: it may configure the window again.
+  if (!canPresentLocked() || !ensureDeviceLocked() || !isTargetLocked(target)) {
     return false;
   }
   wgpu::SurfaceTexture surfaceTexture;
@@ -390,10 +403,11 @@ bool RNSkWindowSurface::presentRecordings(
   return true;
 }
 
-bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
+bool RNSkWindowSurface::presentImage(const RNSkGraphiteTargetInfo &target,
+                                     const sk_sp<SkImage> &image) {
   retireReplacedDevice();
   std::lock_guard<std::mutex> lock(_mutex);
-  if (!canPresentLocked() || !ensureDeviceLocked()) {
+  if (!canPresentLocked() || !ensureDeviceLocked() || !isTargetLocked(target)) {
     return false;
   }
   wgpu::SurfaceTexture surfaceTexture;

@@ -35,7 +35,11 @@ namespace RNSkia {
  * A mutex keeps the two apart: the window is never reconfigured or released
  * under a present, and detaching waits for the present in flight before it
  * lets go of the window, so that the platform may destroy it right after.
- * The description of the target texture is kept in a copy of its own, so
+ * A present is made for the target the presenting thread read before it took
+ * the mutex; under it, the window checks that it still is that target, and
+ * declines a present made for a window resized since (see
+ * presentRecordings). The description of the target texture is kept in a
+ * copy of its own, so
  * that whoever records for the view (the JS thread, a worklet runtime, the
  * render thread pool) can read it from any thread, also before the window
  * exists (see getLayoutSize).
@@ -166,17 +170,23 @@ public:
    view presents on; the swapchain texture is wrapped for the recorder of
    that thread. Returns false, consuming nothing, when the window cannot
    present right now: there is none, the app is in the background, the GPU
-   device is lost, or the window had no drawable.
+   device is lost, the window had no drawable, or the window is no longer
+   the target given: it was resized, or configured again on a new device,
+   since the caller read it (see getTargetInfo), and the recordings chosen
+   for that target would not fit it. The redraw the change asked for presents
+   onto the window as it is now.
    */
   bool presentRecordings(
+      const RNSkGraphiteTargetInfo &target,
       const std::vector<skgpu::graphite::Recording *> &recordings) override;
 
   /**
    Draws an image at the origin of the window and presents it, on the thread
-   the view presents on, with the recorder of that thread. Same return value
-   as presentRecordings().
+   the view presents on, with the recorder of that thread. Same target and
+   return value as presentRecordings().
    */
-  bool presentImage(const sk_sp<SkImage> &image) override;
+  bool presentImage(const RNSkGraphiteTargetInfo &target,
+                    const sk_sp<SkImage> &image) override;
 
 private:
   // Lets go of the Dawn surface and the window; see detach(). Called with
@@ -185,6 +195,11 @@ private:
   // Whether a window is attached and can show a frame (see canPresent()).
   // Called with the mutex held.
   bool canPresentLocked();
+  // Whether the window is still the target the caller read (see
+  // getTargetInfo): the main thread may have resized it, or a device
+  // replacement configured it again (see ensureDeviceLocked), between the
+  // read and the present. Called with the mutex held.
+  bool isTargetLocked(const RNSkGraphiteTargetInfo &target) const;
   // Lets go of the surfaces made on the GPU device this window was
   // configured on when that device was lost and replaced since (see
   // DawnContext), the window's own included, and destroys the device: the
@@ -216,6 +231,9 @@ private:
   // Copies the window's target description where any thread can read it.
   // Called with the mutex held.
   void updateTargetInfo();
+  // The description of the window's texture as it is now: what getTargetInfo
+  // hands out once copied. Called with the mutex held.
+  RNSkGraphiteTargetInfo describeLocked() const;
   // Graphite needs more than RenderAttachment on the swapchain texture:
   // TextureBinding so a render pass can reload the existing contents through
   // LoadOp::ExpandResolveTexture (any backdrop filter or mid-frame readback
