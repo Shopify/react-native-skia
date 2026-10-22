@@ -6,9 +6,9 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 APK="$1"; shift
 ROUTES=("$@")
 if [ ${#ROUTES[@]} -eq 0 ]; then
-  ROUTES=(HeavyCanvas ManyCanvases AndroidBacking SmallIcon GcStorm)
+  ROUTES=(HeavyCanvas ManyCanvases AndroidBacking SmallIcon GcStorm IconGrid)
 fi
-PKG=com.microsoft.reacttestapp
+PKG=${ANDROID_PACKAGE:-com.reactnativeskia.example}
 adb reverse tcp:4299 tcp:4299
 adb shell svc power stayon usb
 adb shell settings put system min_refresh_rate 120

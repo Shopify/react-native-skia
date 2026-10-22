@@ -36,6 +36,11 @@ export const benchmarks: {
     title: "5. GC storm",
     description: "35 charts re-rendered on every interaction",
   },
+  {
+    route: "IconGrid",
+    title: "6. Icon grid",
+    description: "25 to 200 static icon canvases mounted, held and unmounted",
+  },
 ];
 
 export const List = () => (

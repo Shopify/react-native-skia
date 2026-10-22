@@ -10,6 +10,13 @@
 #include <utility>
 #include <vector>
 
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#else
+#include <cstdio>
+#include <unistd.h>
+#endif
+
 #include "RNSkGraphiteProducer.h"
 #include "RNSkGraphiteTarget.h"
 #include "RNSkPlatformContext.h"
@@ -271,6 +278,36 @@ public:
     return jsi::Value::undefined();
   }
 
+  /**
+   The physical memory footprint of the process, in bytes: what Xcode's memory
+   gauge shows on Apple platforms, the resident set elsewhere. For the
+   benchmarks of the example app. 0 when unavailable.
+   */
+  JSI_HOST_FUNCTION(memoryFootprint) {
+#if defined(__APPLE__)
+    task_vm_info_data_t info;
+    mach_msg_type_number_t infoCount = TASK_VM_INFO_COUNT;
+    if (task_info(mach_task_self(), TASK_VM_INFO,
+                  reinterpret_cast<task_info_t>(&info),
+                  &infoCount) == KERN_SUCCESS) {
+      return jsi::Value(static_cast<double>(info.phys_footprint));
+    }
+    return jsi::Value(0);
+#else
+    long pages = 0;
+    long resident = 0;
+    FILE *statm = fopen("/proc/self/statm", "r");
+    if (statm != nullptr) {
+      if (fscanf(statm, "%ld %ld", &pages, &resident) != 2) {
+        resident = 0;
+      }
+      fclose(statm);
+    }
+    return jsi::Value(static_cast<double>(resident) *
+                      static_cast<double>(sysconf(_SC_PAGESIZE)));
+#endif
+  }
+
   JSI_HOST_FUNCTION(size) {
     if (count != 1) {
       _platformContext->raiseError(std::string(
@@ -358,6 +395,8 @@ public:
     installHostMethod(runtime, prototype, "makeImageSnapshot",
                       &RNSkJsiViewApi::makeImageSnapshot);
     installHostMethod(runtime, prototype, "size", &RNSkJsiViewApi::size);
+    installHostMethod(runtime, prototype, "memoryFootprint",
+                      &RNSkJsiViewApi::memoryFootprint);
     installHostMethod(runtime, prototype, "makeGraphiteContext",
                       &RNSkJsiViewApi::makeGraphiteContext);
     installHostMethod(runtime, prototype, "destroyGraphiteContext",

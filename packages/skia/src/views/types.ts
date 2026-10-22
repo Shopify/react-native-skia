@@ -55,6 +55,13 @@ export interface ISkiaViewApi {
   makeImageSnapshot: (nativeId: number, rect?: SkRect) => SkImage;
   size: (nativeId: number) => SkSize;
   /**
+   * The physical memory footprint of the process, in bytes: what Xcode's
+   * memory gauge shows on Apple platforms, the resident set on Android. A
+   * probe for the benchmarks of the example app; native only, 0 when
+   * unavailable.
+   */
+  memoryFootprint?: () => number;
+  /**
    * The recording side of a view: its native id, the layout size in points,
    * and the props its surface format follows from.
    */

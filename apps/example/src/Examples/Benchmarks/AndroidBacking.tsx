@@ -103,8 +103,11 @@ export const AndroidBacking = () => {
         <Canvas
           key={mode}
           style={{ width, height: canvasHeight, marginTop: 80 }}
-          opaque={mode === "SurfaceView"}
-          android={{ surfaceType: mode }}
+          android={
+            mode === "SurfaceView"
+              ? { backingView: "SurfaceView", opaque: true }
+              : { backingView: "TextureView", opaque: false }
+          }
         >
           <Scene
             width={width}

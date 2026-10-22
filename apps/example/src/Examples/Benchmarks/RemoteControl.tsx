@@ -10,6 +10,7 @@ const benchmarkRoutes = new Set([
   "AndroidBacking",
   "SmallIcon",
   "GcStorm",
+  "IconGrid",
 ]);
 
 // The part of a navigation container ref the control needs.
@@ -23,23 +24,33 @@ interface Props {
 
 // Lets the results server drive the app: every two seconds, while no
 // benchmark is running, the app asks for the next queued benchmark and opens
-// it with `auto`, which sends it back to the list once it is done.
+// it with `auto`, which sends it back to the list once it is done. The server
+// is optional (without it the benchmarks run by hand), so a request that
+// gets no answer is abandoned after a second, one request is in flight at a
+// time, and an unreachable host is asked again half a minute later rather
+// than every two seconds: an e2e session has no server to reach.
 export const BenchmarkRemoteControl = ({ navigationRef }: Props) => {
   useEffect(() => {
     let cancelled = false;
+    let inFlight = false;
     // A benchmark that was just opened is not the current route until the
     // navigation settles, so polling pauses after each one.
     let busyUntil = 0;
     const poll = async () => {
-      if (!navigationRef.isReady() || Date.now() < busyUntil) {
+      if (inFlight || !navigationRef.isReady() || Date.now() < busyUntil) {
         return;
       }
       const current = navigationRef.getCurrentRoute()?.name;
       if (current !== undefined && benchmarkRoutes.has(current)) {
         return;
       }
+      inFlight = true;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 1000);
       try {
-        const res = await fetch(`${RESULTS_HOST}/next`);
+        const res = await fetch(`${RESULTS_HOST}/next`, {
+          signal: controller.signal,
+        });
         const { route } = (await res.json()) as { route: string | null };
         if (!cancelled && route) {
           busyUntil = Date.now() + 15000;
@@ -52,7 +63,10 @@ export const BenchmarkRemoteControl = ({ navigationRef }: Props) => {
           );
         }
       } catch {
-        // The server is optional: without it the benchmarks run by hand.
+        busyUntil = Date.now() + 30000;
+      } finally {
+        clearTimeout(timeout);
+        inFlight = false;
       }
     };
     const timer = setInterval(poll, 2000);

@@ -10,4 +10,4 @@ export const BENCH_VERSION = "v3";
 export const RESULTS_HOST =
   Platform.OS === "android"
     ? "http://localhost:4299"
-    : "http://192.168.1.74:4299";
+    : "http://192.168.1.29:4299";

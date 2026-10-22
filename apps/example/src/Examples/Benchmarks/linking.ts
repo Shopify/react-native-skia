@@ -8,4 +8,5 @@ export const benchmarkScreenPaths: Record<keyof Routes, string> = {
   AndroidBacking: "android-backing",
   SmallIcon: "small-icon",
   GcStorm: "gc-storm",
+  IconGrid: "icon-grid",
 };

@@ -5,7 +5,7 @@ set -euo pipefail
 APP="$1"; shift
 ROUTES=("$@")
 if [ ${#ROUTES[@]} -eq 0 ]; then
-  ROUTES=(HeavyCanvas ManyCanvases AndroidBacking SmallIcon GcStorm)
+  ROUTES=(HeavyCanvas ManyCanvases AndroidBacking SmallIcon GcStorm IconGrid)
 fi
 UDID=2BC2DC1B-1701-5AC5-A43B-9BA964FDF2E7
 ID=com.microsoft.ReactTestAppSkia42

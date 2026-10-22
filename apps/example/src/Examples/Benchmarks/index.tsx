@@ -8,6 +8,7 @@ import { ManyCanvases } from "./ManyCanvases";
 import { AndroidBacking } from "./AndroidBacking";
 import { SmallIcon } from "./SmallIcon";
 import { GcStorm } from "./GcStorm";
+import { IconGrid } from "./IconGrid";
 
 const Stack = createNativeStackNavigator<Routes>();
 
@@ -24,6 +25,7 @@ export const Benchmarks = () => {
       <Stack.Screen name="AndroidBacking" component={AndroidBacking} />
       <Stack.Screen name="SmallIcon" component={SmallIcon} />
       <Stack.Screen name="GcStorm" component={GcStorm} />
+      <Stack.Screen name="IconGrid" component={IconGrid} />
     </Stack.Navigator>
   );
 };

@@ -149,12 +149,43 @@ const parseGfxinfo = (text) => {
   };
 };
 
+// The memory of the process as dumpsys meminfo reports it, in kB: the PSS
+// and RSS totals, the app summary categories, and the GPU allocations the
+// driver tracks (the mtrack rows, where the Pixel's Mali driver accounts for
+// textures and buffers).
+const parseMeminfo = (text) => {
+  const num = (label) => {
+    const m = text.match(new RegExp(`${label}:\\s+([\\d,]+)`));
+    return m ? Number(m[1].replace(/,/g, "")) : null;
+  };
+  const row = (label) => {
+    const m = text.match(new RegExp(`^\\s*${label}\\s+(\\d+)`, "m"));
+    return m ? Number(m[1]) : null;
+  };
+  return {
+    totalPssKb: num("TOTAL PSS"),
+    totalRssKb: num("TOTAL RSS"),
+    javaHeapKb: num("Java Heap"),
+    nativeHeapKb: num("Native Heap"),
+    graphicsKb: num("Graphics"),
+    privateOtherKb: num("Private Other"),
+    glMtrackKb: row("GL mtrack"),
+    eglMtrackKb: row("EGL mtrack"),
+    gfxDevKb: row("Gfx dev"),
+  };
+};
+
+const meminfo = () => {
+  const raw = adb(["shell", "dumpsys", "meminfo", pkg]);
+  return { ...parseMeminfo(raw), raw };
+};
+
 const startCapture = (key) => {
   const pid = pidOf();
   adb(["shell", "dumpsys", "SurfaceFlinger", "--timestats", "-clear"]);
   adb(["shell", "dumpsys", "SurfaceFlinger", "--timestats", "-enable"]);
   adb(["shell", "dumpsys", "gfxinfo", pkg, "reset"]);
-  captures.set(key, { pid, cpu: threadCpu(pid), startedAt: Date.now() });
+  captures.set(key, { pid, cpu: threadCpu(pid), startedAt: Date.now(), meminfo: meminfo() });
 };
 
 const endCapture = (key) => {
@@ -165,6 +196,7 @@ const endCapture = (key) => {
   adb(["shell", "dumpsys", "SurfaceFlinger", "--timestats", "-disable"]);
   const gfxinfoRaw = adb(["shell", "dumpsys", "gfxinfo", pkg]);
   const cpuAfter = threadCpu(pid);
+  const memAfter = meminfo();
   const elapsedMs = started ? Date.now() - started.startedAt : null;
   const delta = started ? cpuDelta(started.cpu, cpuAfter) : {};
   const roles = cpuByRole(delta);
@@ -182,6 +214,8 @@ const endCapture = (key) => {
     cpuMs: delta,
     cpuByRoleMs: roles,
     cpuByRoleMsPerSecond: perSecond,
+    meminfoStart: started ? started.meminfo : null,
+    meminfoEnd: memAfter,
     raw: { timestats: timestatsRaw, gfxinfo: gfxinfoRaw },
   };
 };
@@ -244,6 +278,7 @@ http
             }
           } else {
             console.log(`event ${tag} ${data.action}`);
+            save(`event-${tag}-${data.action}-${stamp()}.json`, { ...data, receivedAt: new Date().toISOString(), receivedAtMs: Date.now() });
           }
           res.end(JSON.stringify({ ok: true }));
           return;

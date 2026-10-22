@@ -7,4 +7,5 @@ export type Routes = {
   AndroidBacking: BenchParams;
   SmallIcon: BenchParams;
   GcStorm: BenchParams;
+  IconGrid: BenchParams;
 };
