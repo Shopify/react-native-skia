@@ -13,25 +13,7 @@ import "./Elements";
 
 const skiaReconciler = ReactReconciler(sksgHostConfig);
 
-// @ts-expect-error DefinitelyTyped is not up to date
 skiaReconciler.injectIntoDevTools();
-
-type ErrorCallback = (error: unknown) => void;
-
-// @types/react-reconciler 0.31 still declares React 18's createContainer.
-// The 0.31 runtime takes onUncaughtError, onCaughtError and onRecoverableError.
-const createRoot = skiaReconciler.createContainer as unknown as (
-  containerInfo: Container,
-  tag: number,
-  hydrationCallbacks: null,
-  isStrictMode: boolean,
-  concurrentUpdatesByDefaultOverride: null,
-  identifierPrefix: string,
-  onUncaughtError: ErrorCallback,
-  onCaughtError: ErrorCallback,
-  onRecoverableError: ErrorCallback,
-  transitionCallbacks: null
-) => OpaqueRoot;
 
 export class SkiaSGRoot {
   private root: OpaqueRoot;
@@ -43,7 +25,7 @@ export class SkiaSGRoot {
   ) {
     const strictMode = false;
     this.container = createContainer(Skia, nativeId);
-    this.root = createRoot(
+    this.root = skiaReconciler.createContainer(
       this.container,
       0,
       null,
@@ -53,6 +35,7 @@ export class SkiaSGRoot {
       console.error,
       console.error,
       console.error,
+      () => {},
       null
     );
   }
@@ -63,19 +46,24 @@ export class SkiaSGRoot {
   }
 
   private updateContainer(element: ReactNode) {
+    const { recordCount } = this.container;
     return new Promise((resolve) => {
       skiaReconciler.updateContainer(element, this.root, null, () => {
+        if (this.container.recordCount === recordCount) {
+          this.container.recordAfterCommit();
+        }
         resolve(true);
       });
     });
   }
 
   /**
-   * Commits the element. The container records the scene graph at the end
-   * of every commit (resetAfterCommit), this one included: React runs the
-   * commit effects whenever the root carries one, and the completion
-   * callback updateContainer() is given is one, so an element React bails
-   * out on (the same one again) is recorded too.
+   * Commits the element and records the scene graph once. The container
+   * records it at the end of a commit that changes the host tree
+   * (resetAfterCommit), which React does not call for a commit that changes
+   * nothing, such as the one of an element React bails out on (the same one
+   * again): the completion callback updateContainer() is given records that
+   * one, so a shared value changed since the last render is picked up.
    */
   async render(element: ReactNode) {
     this.container.mount();

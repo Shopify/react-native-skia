@@ -11,13 +11,15 @@ import "../views/api";
 
 /**
  * Holds the scene graph that React commits and turns it into frames:
- * recordAfterCommit() records a frame after every commit, drawOnCanvas()
- * draws the last one (offscreen rendering).
+ * recordAfterCommit() records a frame after every commit that changes it and
+ * every render() (Reconciler.ts), drawOnCanvas() draws the last one
+ * (offscreen rendering).
  */
 export abstract class Container {
   private _root: Node[] = [];
   protected unmounted = false;
   private recordingError: { error: unknown } | null = null;
+  private _recordCount = 0;
 
   constructor(
     protected Skia: Skia,
@@ -41,6 +43,11 @@ export abstract class Container {
     this.unmounted = true;
   }
 
+  /** How many times recordAfterCommit() has been called. */
+  get recordCount() {
+    return this._recordCount;
+  }
+
   /**
    * Records the committed scene graph. React applies the host mutations of a
    * commit, calls this (resetAfterCommit), and only then swaps the committed
@@ -51,6 +58,7 @@ export abstract class Container {
    * frame.
    */
   recordAfterCommit() {
+    this._recordCount++;
     try {
       this.redraw();
       this.recordingError = null;

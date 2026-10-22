@@ -39,6 +39,7 @@ React Native Skia runs on iOS, Android, macOS, Mac Catalyst, tvOS, and [the Web]
 
 Android TV is not supported by v3. It remain supported by [v2](https://wcandillon.github.io/react-native-skia/v2/docs/getting-started/installation/).
 For `react-native@<=0.78` and `react@<=18`, you need to use `@shopify/react-native-skia` version `1.12.4` or below.
+On React Native below `0.83` (React `19.0` or `19.1`), your package manager warns that `react-reconciler` asks for React `19.2`: this is expected, as React Native Skia ships React 19.2's reconciler, which also renders on React 19.0 and 19.1.
 
 ## iOS
 
