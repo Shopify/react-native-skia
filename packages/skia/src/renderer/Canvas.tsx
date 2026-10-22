@@ -14,7 +14,7 @@ import type {
   ViewProps,
 } from "react-native";
 
-import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
+import { SkiaViewApi } from "../views/api";
 import { androidNativeProps, useBackingViewWarning } from "../views/android";
 import type { AndroidCanvasProps } from "../views/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
@@ -91,9 +91,7 @@ const useCanvasRoot = ({
 }: Pick<CanvasProps, "children" | "ref">) => {
   const viewRef = useRef<NativeView>(null);
   // Native ID
-  const nativeId = useMemo(() => {
-    return SkiaViewNativeId.current++;
-  }, []);
+  const nativeId = useMemo(() => SkiaViewApi.allocateNativeId(), []);
 
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);

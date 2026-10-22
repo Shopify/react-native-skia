@@ -50,9 +50,9 @@ RNSkManager::RNSkManager(
 RNSkManager::~RNSkManager() {
   DawnContext::removeLossListener(_lossListener);
   // The runtime that made the Graphite contexts is going away, with the
-  // views of its bundle. Native ids start over with the next bundle, and a
-  // target kept past this point would be bound by the first view reusing
-  // its id.
+  // views of its bundle: nothing binds to or draws into a target kept past
+  // this point (the next bundle's views get ids of their own, see
+  // ViewRegistry::allocateId).
   RNSkGraphiteTargetRegistry::getInstance().clear();
   // Free up any references
   _viewApi = nullptr;
