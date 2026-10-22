@@ -340,6 +340,7 @@ bool RNSkWindowSurface::presentRecordings(
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
   _surface.Present();
+  didPresent();
   return true;
 }
 
@@ -367,6 +368,7 @@ bool RNSkWindowSurface::presentImage(const sk_sp<SkImage> &image) {
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());
 #endif
   _surface.Present();
+  didPresent();
   return true;
 }
 
