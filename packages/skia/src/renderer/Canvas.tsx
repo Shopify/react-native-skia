@@ -14,7 +14,7 @@ import type {
   ViewProps,
 } from "react-native";
 
-import { SkiaViewNativeId } from "../views/SkiaViewNativeId";
+import { SkiaViewApi } from "../views/api";
 import { androidNativeProps, useBackingViewWarning } from "../views/android";
 import type { AndroidCanvasProps } from "../views/types";
 import SkiaViewNativeComponent from "../specs/SkiaViewNativeComponent";
@@ -91,9 +91,7 @@ const useCanvasRoot = ({
 }: Pick<CanvasProps, "children" | "ref">) => {
   const viewRef = useRef<NativeView>(null);
   // Native ID
-  const nativeId = useMemo(() => {
-    return SkiaViewNativeId.current++;
-  }, []);
+  const nativeId = useMemo(() => SkiaViewApi.allocateNativeId(), []);
 
   // Root
   const root = useMemo(() => new SkiaSGRoot(Skia, nativeId), [nativeId]);
@@ -148,7 +146,7 @@ const useCanvasRoot = ({
  * renderer; the frames are produced off the JS thread:
  *
  * - the JS thread records the scene graph into a native recorder once per
- *   React commit and hands it to the view;
+ *   React commit that changes it and hands it to the view;
  * - the Reanimated UI runtime only reads the shared values into it (the one
  *   step that needs a JS runtime), it never replays anything;
  * - a dedicated native thread pool replays the recorder into a Graphite

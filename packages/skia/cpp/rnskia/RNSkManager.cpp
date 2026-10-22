@@ -50,10 +50,16 @@ RNSkManager::RNSkManager(
 RNSkManager::~RNSkManager() {
   DawnContext::removeLossListener(_lossListener);
   // The runtime that made the Graphite contexts is going away, with the
-  // views of its bundle. Native ids start over with the next bundle, and a
-  // target kept past this point would be bound by the first view reusing
-  // its id.
+  // views of its bundle: nothing binds to or draws into a target kept past
+  // this point (the next bundle's views get ids of their own, see
+  // ViewRegistry::allocateId).
   RNSkGraphiteTargetRegistry::getInstance().clear();
+  // Likewise for the view registry: Fabric tears the bundle's views down with
+  // no ordering against this destructor, and their late unregistrations are
+  // no-ops (the views only hold the manager weakly). Dropped here, the
+  // entries of views torn down after this point, and the tombstones of the
+  // ones torn down before it, do not stay for the life of the process.
+  ViewRegistry::getInstance().clear();
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;

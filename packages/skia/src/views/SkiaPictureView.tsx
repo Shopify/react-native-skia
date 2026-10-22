@@ -11,7 +11,6 @@ import {
 } from "./android";
 import type { BackingViewProps } from "./android";
 import type { SkiaPictureViewNativeProps } from "./types";
-import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
   mode?: "default" | "continuous";
@@ -26,12 +25,12 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
 
   constructor(props: SkiaPictureViewProps) {
     super(props);
-    this._nativeId = SkiaViewNativeId.current++;
+    assertSkiaViewApi();
+    this._nativeId = SkiaViewApi.allocateNativeId();
     this.mountProps = props;
     warnBackingViewAtMount(props);
     const { picture } = props;
     if (picture) {
-      assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
     }
     this.tick();

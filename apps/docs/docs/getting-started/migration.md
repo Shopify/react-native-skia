@@ -180,7 +180,7 @@ A few methods were renamed so that the name says whether the result lives on the
 ### Rendering off the JS and UI threads
 
 In v2, `<Canvas>` drew its frames on the UI thread.
-In v3, the scene is recorded once per React commit, and a dedicated native thread pool replays it into a Graphite frame whenever its content changes.
+In v3, the scene is recorded once per React commit that changes it, and a dedicated native thread pool replays it into a Graphite frame whenever its content changes.
 The UI thread only applies the animated values, it no longer draws.
 Nothing changes in your code: see [how frames are produced](/docs/canvas/overview#how-frames-are-produced).
 
