@@ -54,6 +54,12 @@ RNSkManager::~RNSkManager() {
   // this point (the next bundle's views get ids of their own, see
   // ViewRegistry::allocateId).
   RNSkGraphiteTargetRegistry::getInstance().clear();
+  // Likewise for the view registry: Fabric tears the bundle's views down with
+  // no ordering against this destructor, and their late unregistrations are
+  // no-ops (the views only hold the manager weakly). Dropped here, the
+  // entries of views torn down after this point, and the tombstones of the
+  // ones torn down before it, do not stay for the life of the process.
+  ViewRegistry::getInstance().clear();
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;
