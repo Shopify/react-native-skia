@@ -1,7 +1,5 @@
 package com.reactnative.skia;
 
-import android.os.Build;
-
 import androidx.annotation.Nullable;
 
 /**
@@ -44,13 +42,14 @@ enum BackingViewKind {
 
     /**
      * Whether a frame presented into the canvas waits until its window has
-     * drawn the one before it (see JniSkiaView::frameLatched): a TextureView
-     * from Android 11, whose buffer queue waits up to 4.29 s for a buffer only
-     * that draw gives back. A SurfaceView's compositor takes its frames itself,
-     * and Android 10's TextureView queue never waits: a frame not drawn yet is
-     * replaced instead.
+     * drawn the one before it (see JniSkiaView::frameLatched): a TextureView,
+     * whose frames the window takes when it draws, in no order with the
+     * presents. A frame presented before that draw replaces the one not taken
+     * yet, and from Android 11 its buffer queue waits up to 4.29 s for a buffer
+     * only that draw gives back. A SurfaceView's compositor takes its frames
+     * itself.
      */
-    static boolean latchesOnWindowDraw(BackingViewKind kind, int sdkInt) {
-        return kind == TEXTURE_VIEW && sdkInt >= Build.VERSION_CODES.R;
+    static boolean latchesOnWindowDraw(BackingViewKind kind) {
+        return kind == TEXTURE_VIEW;
     }
 }

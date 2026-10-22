@@ -123,8 +123,7 @@ public:
 
   /**
    Installed by the platform view: whether the window can take a frame right
-   now (not while the app is in the background, nor while an Android
-   TextureView has yet to show the last one). The view presents nothing
+   now (not while the app is in the background). The view presents nothing
    while it returns false, and asks again once told that it can (see
    RNSkView::onCanPresent). Without one, an attached window always can.
    */
@@ -148,12 +147,28 @@ public:
 
   /**
    Presents the frame the window holds once the GPU has finished the frame
-   presented before it and a tick allowed it (see allowNextPresent), without
-   waiting for the GPU. A frame held on a device replaced since is dropped
-   with the surface it was replayed into, which is made again on the device
-   in use (see ensureDevice). Present thread.
+   presented before it, a tick allowed it (see allowNextPresent) and the
+   window took that frame (see windowTookFrame), without waiting for the GPU.
+   A frame held on a device replaced since is dropped with the surface it was
+   replayed into, which is made again on the device in use (see
+   ensureDevice). Present thread.
    */
   HeldFrame presentHeldFrame();
+
+  /**
+   Whether a frame presented waits for the window to take it before the next
+   goes, set by the platform view with each window (see
+   RNSkPresentHold::setLatchesOnWindowDraw). Present thread.
+   */
+  void setLatchesOnWindowDraw(bool latches) {
+    _presentHold.setLatchesOnWindowDraw(latches);
+  }
+
+  /**
+   The window took the frame presented last: the frame it holds may go (see
+   presentHeldFrame). Present thread.
+   */
+  void windowTookFrame() { _presentHold.windowTookFrame(); }
 
   /**
    Whether the window holds a frame: it takes no other frame meanwhile.

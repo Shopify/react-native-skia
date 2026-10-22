@@ -39,15 +39,12 @@ public class BackingViewKindTest {
     }
 
     @Test
-    public void aTextureViewWaitsForItsWindowsDrawFromAndroid11() {
-        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, 29));
-        assertTrue(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, 30));
-        assertTrue(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, 36));
+    public void aTextureViewWaitsForItsWindowsDraw() {
+        assertTrue(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW));
     }
 
     @Test
     public void aSurfaceViewNeverWaitsForAWindowsDraw() {
-        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW, 29));
-        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW, 30));
+        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW));
     }
 }

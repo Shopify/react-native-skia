@@ -1,5 +1,6 @@
 // Host-side checks of RNSkia::RNSkPresentHold, which holds a window's present
-// for the GPU and gives it one frame a tick (see run.sh).
+// for the GPU, gives it one frame a tick and, for a window that latches on its
+// draw, one frame per frame it took (see run.sh).
 
 #include <algorithm>
 #include <cstddef>
@@ -49,17 +50,31 @@ using Hold = RNSkPresentHold<FakeGpu>;
 static_assert(!std::is_default_constructible_v<Hold>,
               "a window's hold is chosen when the window is made");
 
-constexpr PresentHold kHolds[] = {PresentHold::kNone,
-                                  PresentHold::kOncePerTickAfterPreviousFrame};
+/** A window's hold, and whether it latches on its draw. */
+struct WindowKind {
+  PresentHold hold;
+  bool latches;
+};
+
+constexpr WindowKind kWindowKinds[] = {
+    {PresentHold::kNone, false},
+    {PresentHold::kOncePerTickAfterPreviousFrame, false},
+    {PresentHold::kNone, true},
+    {PresentHold::kOncePerTickAfterPreviousFrame, true}};
 
 /**
  A window's side of the hold, as RNSkWindowSurface drives it: the frames it
- replays, presents and drops, and the GPU they run on.
+ replays, presents and drops, the GPU they run on and, for a window that
+ latches on its draw, the frames its draws take.
  */
 class Window {
 public:
-  explicit Window(PresentHold hold)
-      : _gpu(std::make_shared<GpuQueue>()), _presentHold(hold, FakeGpu(_gpu)) {}
+  explicit Window(PresentHold hold, bool latches = false)
+      : _gpu(std::make_shared<GpuQueue>()), _presentHold(hold, FakeGpu(_gpu)) {
+    _presentHold.setLatchesOnWindowDraw(latches);
+  }
+
+  explicit Window(WindowKind kind) : Window(kind.hold, kind.latches) {}
 
   Window(const Window &) = delete;
   Window &operator=(const Window &) = delete;
@@ -94,6 +109,22 @@ public:
     return true;
   }
 
+  /** The window's draw takes the frame presented last, if one waits for it. */
+  bool windowTakesFrame() {
+    if (!_frameForWindow) {
+      return false;
+    }
+    _frameForWindow = std::nullopt;
+    _presentHold.windowTookFrame();
+    return true;
+  }
+
+  /** The window stops latching on its draw, as a new window may. */
+  void stopLatching() {
+    _presentHold.setLatchesOnWindowDraw(false);
+    _frameForWindow = std::nullopt;
+  }
+
   /** The swapchain is reconfigured, and a held frame goes with it. */
   void reconfigure() {
     if (_presentHold.hasHeldFrame()) {
@@ -102,6 +133,7 @@ public:
     _presentHold.dropFrames();
     _lastPresented = std::nullopt;
     _presentedSinceTick = 0;
+    _frameForWindow = std::nullopt;
   }
 
   bool hasHeldFrame() const { return _presentHold.hasHeldFrame(); }
@@ -116,13 +148,21 @@ public:
   bool presentedOverBusyGpu() const { return _presentedOverBusyGpu; }
   /** The most frames ever presented on one swapchain between two ticks. */
   int mostPresentedInATick() const { return _mostPresentedInATick; }
+  /**
+   Whether a frame was ever presented before the window took the frame
+   presented before it, on the same swapchain.
+   */
+  bool presentedOverUntakenFrame() const { return _presentedOverUntakenFrame; }
 
 private:
   void present() {
     _presentedOverBusyGpu =
         _presentedOverBusyGpu ||
         (_lastPresented && _gpu->finished < *_lastPresented);
+    _presentedOverUntakenFrame =
+        _presentedOverUntakenFrame || _frameForWindow.has_value();
     _lastPresented = _frame;
+    _frameForWindow = _frame;
     _presented.push_back(_frame);
     _mostPresentedInATick =
         std::max(_mostPresentedInATick, ++_presentedSinceTick);
@@ -132,7 +172,10 @@ private:
   Hold _presentHold;
   int _frame = 0;
   std::optional<int> _lastPresented;
+  // The frame presented last, until the window's draw takes it.
+  std::optional<int> _frameForWindow;
   bool _presentedOverBusyGpu = false;
+  bool _presentedOverUntakenFrame = false;
   int _presentedSinceTick = 0;
   int _mostPresentedInATick = 0;
   std::vector<int> _replayed;
@@ -145,12 +188,18 @@ enum class Event {
   kPresentHeldFrame,
   kFinishGpuFrame,
   kReconfigure,
-  kTick
+  kTick,
+  kWindowTakesFrame
 };
 
 constexpr Event kEvents[] = {Event::kReplay, Event::kPresentHeldFrame,
                              Event::kFinishGpuFrame, Event::kReconfigure,
                              Event::kTick};
+
+constexpr Event kLatchingEvents[] = {
+    Event::kReplay,         Event::kPresentHeldFrame,
+    Event::kFinishGpuFrame, Event::kReconfigure,
+    Event::kTick,           Event::kWindowTakesFrame};
 
 /** Applies an event the window can take in its state. Returns whether it could.
  */
@@ -168,18 +217,20 @@ bool apply(Window &window, Event event) {
   case Event::kTick:
     window.tick();
     return true;
+  case Event::kWindowTakesFrame:
+    return window.windowTakesFrame();
   }
   return false;
 }
 
 /**
- A window with `hold` that took `sequence` from the start, or none if it could
+ A window of `kind` that took `sequence` from the start, or none if it could
  not take one of its events. A window shares its GPU with its hold, so it is
  made again rather than copied.
  */
-std::unique_ptr<Window> windowAfter(PresentHold hold,
+std::unique_ptr<Window> windowAfter(WindowKind kind,
                                     const std::vector<Event> &sequence) {
-  auto window = std::make_unique<Window>(hold);
+  auto window = std::make_unique<Window>(kind);
   for (Event event : sequence) {
     if (!apply(*window, event)) {
       return nullptr;
@@ -191,28 +242,36 @@ std::unique_ptr<Window> windowAfter(PresentHold hold,
 using Check =
     std::function<void(const std::vector<Event> &sequence, const Window &)>;
 
-void forEachSequence(PresentHold hold, size_t depth, const Check &check,
-                     std::vector<Event> &sequence) {
+template <typename Events>
+void forEachSequence(WindowKind kind, const Events &events, size_t depth,
+                     const Check &check, std::vector<Event> &sequence) {
   if (sequence.size() == depth) {
     return;
   }
-  for (Event event : kEvents) {
+  for (Event event : events) {
     sequence.push_back(event);
-    if (auto window = windowAfter(hold, sequence)) {
+    if (auto window = windowAfter(kind, sequence)) {
       check(sequence, *window);
-      forEachSequence(hold, depth, check, sequence);
+      forEachSequence(kind, events, depth, check, sequence);
     }
     sequence.pop_back();
   }
 }
 
 /**
- Every sequence of events up to a depth a window with `hold` can take: `check`
- runs after each event.
+ Every sequence of events up to a depth a window of `kind` can take: `check`
+ runs after each event. Only a window that latches on its draw sees its draws
+ take frames; any other never waits for one. The extra event costs the
+ latching window a level of depth, which still holds several frames taken in
+ a row.
  */
-void forEachSequence(PresentHold hold, const Check &check) {
+void forEachSequence(WindowKind kind, const Check &check) {
   std::vector<Event> sequence;
-  forEachSequence(hold, 10, check, sequence);
+  if (kind.latches) {
+    forEachSequence(kind, kLatchingEvents, 9, check, sequence);
+  } else {
+    forEachSequence(kind, kEvents, 10, check, sequence);
+  }
 }
 
 TEST_CASE(PresentsEveryFrameAtOnceWithoutHolding) {
@@ -314,23 +373,100 @@ TEST_CASE(DropsTheHeldFrameWithItsSwapchain) {
   EXPECT(window.presented() == (std::vector<int>{1, 3}));
 }
 
+TEST_CASE(ALatchingWindowHoldsTheNextFrameUntilItTookTheLast) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame, true);
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
+  window.tick();
+  REQUIRE(window.replay());
+  EXPECT(window.hasHeldFrame());
+  EXPECT(window.replayed() == (std::vector<int>{1, 2}));
+  REQUIRE(window.finishGpuFrame());
+  window.tick();
+  EXPECT(window.presentHeldFrame() == HeldFrame::kWaiting);
+  EXPECT(window.presented() == (std::vector<int>{1}));
+
+  REQUIRE(window.windowTakesFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kPresented);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
+}
+
+TEST_CASE(AFrameTheWindowTookStillWaitsForTheGpu) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame, true);
+  REQUIRE(window.replay());
+  window.tick();
+  REQUIRE(window.replay());
+  REQUIRE(window.windowTakesFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kWaiting);
+  REQUIRE(window.finishGpuFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kPresented);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
+}
+
+TEST_CASE(ALatchingWindowWithoutHoldingWaitsOnlyForItsDraw) {
+  Window window(PresentHold::kNone, true);
+  REQUIRE(window.replay());
+  REQUIRE(window.replay());
+  EXPECT(window.hasHeldFrame());
+  EXPECT(window.tracked() == 0);
+  REQUIRE(window.windowTakesFrame());
+  EXPECT(window.presentHeldFrame() == HeldFrame::kPresented);
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
+}
+
+TEST_CASE(ANewSwapchainWaitsForNoFrameTheOldOneHad) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame, true);
+  REQUIRE(window.replay());
+  window.reconfigure();
+  REQUIRE(window.replay());
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presented() == (std::vector<int>{1, 2}));
+}
+
+TEST_CASE(AWindowThatStopsLatchingWaitsForNoDraw) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame, true);
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
+  window.stopLatching();
+  window.tick();
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
+  window.tick();
+  REQUIRE(window.replay());
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.presented() == (std::vector<int>{1, 2, 3}));
+}
+
 TEST_CASE(NeverPresentsOverABusyGpuInEverySequence) {
-  for (PresentHold hold : kHolds) {
+  for (WindowKind kind : kWindowKinds) {
     bool presentedOverBusyGpu = false;
-    forEachSequence(hold, [&presentedOverBusyGpu](const std::vector<Event> &,
+    forEachSequence(kind, [&presentedOverBusyGpu](const std::vector<Event> &,
                                                   const Window &window) {
       presentedOverBusyGpu =
           presentedOverBusyGpu || window.presentedOverBusyGpu();
     });
-    EXPECT(presentedOverBusyGpu == (hold == PresentHold::kNone));
+    EXPECT(presentedOverBusyGpu == (kind.hold == PresentHold::kNone));
+  }
+}
+
+TEST_CASE(NeverPresentsBeforeTheWindowTookTheLastFrameInEverySequence) {
+  for (WindowKind kind : kWindowKinds) {
+    bool presentedOverUntakenFrame = false;
+    forEachSequence(
+        kind, [&presentedOverUntakenFrame](const std::vector<Event> &,
+                                           const Window &window) {
+          presentedOverUntakenFrame =
+              presentedOverUntakenFrame || window.presentedOverUntakenFrame();
+        });
+    EXPECT(presentedOverUntakenFrame == !kind.latches);
   }
 }
 
 TEST_CASE(PresentsOrDropsEveryFrameOnceInOrderInEverySequence) {
-  for (PresentHold hold : kHolds) {
+  for (WindowKind kind : kWindowKinds) {
     size_t mostDropped = 0;
     forEachSequence(
-        hold, [&mostDropped](const std::vector<Event> &, const Window &window) {
+        kind, [&mostDropped](const std::vector<Event> &, const Window &window) {
           const auto &presented = window.presented();
           EXPECT(std::is_sorted(presented.begin(), presented.end()));
           std::vector<int> settled = presented;
@@ -343,37 +479,44 @@ TEST_CASE(PresentsOrDropsEveryFrameOnceInOrderInEverySequence) {
           EXPECT(settled == expected);
           mostDropped = std::max(mostDropped, window.dropped().size());
         });
-    EXPECT((mostDropped > 0) == (hold == PresentHold::kOncePerTickAfterPreviousFrame));
+    EXPECT((mostDropped > 0) ==
+           (kind.hold == PresentHold::kOncePerTickAfterPreviousFrame ||
+            kind.latches));
   }
 }
 
 TEST_CASE(PresentsAtMostOneFrameATickInEverySequence) {
-  for (PresentHold hold : kHolds) {
+  for (WindowKind kind : kWindowKinds) {
     int mostPresentedInATick = 0;
-    forEachSequence(hold, [&mostPresentedInATick](const std::vector<Event> &,
+    forEachSequence(kind, [&mostPresentedInATick](const std::vector<Event> &,
                                                   const Window &window) {
       mostPresentedInATick =
           std::max(mostPresentedInATick, window.mostPresentedInATick());
     });
-    EXPECT((mostPresentedInATick > 1) == (hold == PresentHold::kNone));
+    EXPECT((mostPresentedInATick > 1) == (kind.hold == PresentHold::kNone));
   }
 }
 
-TEST_CASE(TakesAFrameAfterTheGpuAndATickInEverySequence) {
-  for (PresentHold hold : kHolds) {
+TEST_CASE(TakesAFrameAfterTheGpuATickAndTheWindowsDrawInEverySequence) {
+  for (WindowKind kind : kWindowKinds) {
     size_t held = 0;
-    forEachSequence(hold, [hold, &held](const std::vector<Event> &sequence,
+    forEachSequence(kind, [kind, &held](const std::vector<Event> &sequence,
                                         const Window &reached) {
       held += reached.hasHeldFrame() ? 1 : 0;
-      auto window = windowAfter(hold, sequence);
+      auto window = windowAfter(kind, sequence);
       while (window->finishGpuFrame()) {
       }
       window->tick();
+      if (kind.latches) {
+        window->windowTakesFrame();
+      }
       EXPECT(window->presentHeldFrame() != HeldFrame::kWaiting);
       EXPECT(!window->hasHeldFrame());
       EXPECT(window->replay());
     });
-    EXPECT((held > 0) == (hold == PresentHold::kOncePerTickAfterPreviousFrame));
+    EXPECT((held > 0) ==
+           (kind.hold == PresentHold::kOncePerTickAfterPreviousFrame ||
+            kind.latches));
   }
 }
 

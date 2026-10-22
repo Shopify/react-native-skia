@@ -5,12 +5,12 @@ import androidx.annotation.Nullable;
 /**
  * Decides when a SkiaView presents the recordings queued for it: a SurfaceView
  * on the next vsync, a TextureView as soon as the present thread gets to it,
- * once its window has drawn the previous frame (the latch gate, see
- * JniSkiaView::frameLatched). While a replay is in flight it asks for every
- * vsync, whose present paces the replays, and it tells each present how many
- * vsyncs asked for it, each a tick (see RNSkView::presentFrame). Keeps at most
- * one frame callback and one posted present outstanding. Present thread (see
- * PresentThread).
+ * its frame held until its window has drawn the previous one (see
+ * JniSkiaView::frameLatched), and presented the moment the window has. While a
+ * replay is in flight it asks for every vsync, whose present paces the
+ * replays, and it tells each present how many vsyncs asked for it, each a tick
+ * (see RNSkView::presentFrame). Keeps at most one frame callback and one posted
+ * present outstanding. Present thread (see PresentThread).
  */
 final class FrameScheduler {
     /** What the view still needs after a present. */
@@ -89,6 +89,15 @@ final class FrameScheduler {
         } else {
             postPresent(1);
         }
+    }
+
+    /**
+     * The window took the frame presented last (see FrameLatchRelay): the
+     * frame held for it presents now rather than at the retry outstanding,
+     * which would race the next vsync's draw and start the next replay later.
+     */
+    void onFrameLatched() {
+        present(0);
     }
 
     /** The message posted with Host.postPresent(). */

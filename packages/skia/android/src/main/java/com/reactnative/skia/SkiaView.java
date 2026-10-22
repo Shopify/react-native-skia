@@ -99,6 +99,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         public void frameLatched() {
             if (hasNativeView()) {
                 SkiaView.this.frameLatched();
+                mFrameScheduler.onFrameLatched();
             }
         }
     });
@@ -365,7 +366,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
         mFrameRateVote.attach(surface);
         mVotesOnPresents = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
         boolean highBitDepth = mSurfaceHighBitDepth;
-        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW, Build.VERSION.SDK_INT);
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW);
         PresentThread.post(() -> {
             if (hasNativeView()) {
                 surfaceAvailable(surface, width, height, true, highBitDepth, latchesOnWindowDraw);
@@ -377,7 +378,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     public void onSurfaceChanged(Surface surface, int width, int height) {
         Log.i(TAG, "onSurfaceChanged " + width + "/" + height);
         boolean highBitDepth = mSurfaceHighBitDepth;
-        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW, Build.VERSION.SDK_INT);
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW);
         PresentThread.post(() -> {
             if (hasNativeView()) {
                 surfaceSizeChanged(surface, width, height, true, highBitDepth, latchesOnWindowDraw);
@@ -390,7 +391,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
 
     @Override
     public void onSurfaceTextureCreated(SurfaceTexture surface, int width, int height) {
-        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, Build.VERSION.SDK_INT);
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW);
         PresentThread.post(() -> {
             if (hasNativeView()) {
                 surfaceAvailable(surface, width, height, false, false, latchesOnWindowDraw);
@@ -401,7 +402,7 @@ public class SkiaView extends ReactViewGroup implements SkiaViewAPI, Choreograph
     @Override
     public void onSurfaceTextureChanged(SurfaceTexture surface, int width, int height) {
         Log.i(TAG, "onSurfaceTextureSizeChanged " + width + "/" + height);
-        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, Build.VERSION.SDK_INT);
+        boolean latchesOnWindowDraw = BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW);
         PresentThread.post(() -> {
             if (hasNativeView()) {
                 surfaceSizeChanged(surface, width, height, false, false, latchesOnWindowDraw);

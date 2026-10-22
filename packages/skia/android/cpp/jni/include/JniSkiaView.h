@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <memory>
 
 #include <android/native_window.h>
@@ -82,10 +81,7 @@ protected:
     _view->redraw();
   }
 
-  void surfaceDestroyed() {
-    _framePendingLatch->store(false);
-    _surface->detach();
-  }
+  void surfaceDestroyed() { _surface->detach(); }
 
   /**
    The pixel size the backing view was laid out with. The surface it gets
@@ -137,14 +133,10 @@ protected:
   /**
    The TextureView's window took the frame last presented into it: it drew
    it (SkiaTextureView.onSurfaceTextureUpdated) and the draw is done
-   (FrameLatchRelay), which gave a buffer back to its queue. What waited for
-   it goes now. Present thread.
+   (FrameLatchRelay), which gave a buffer back to its queue. The frame held
+   for it may go; FrameScheduler presents it. Present thread.
    */
-  void frameLatched() {
-    if (_framePendingLatch->exchange(false)) {
-      _view->onCanPresent();
-    }
-  }
+  void frameLatched() { _surface->windowTookFrame(); }
 
 private:
   friend HybridBase;
@@ -157,30 +149,18 @@ private:
     // has finished the frame presented before it (libgui's queueBuffer, for
     // every Vulkan swapchain), and holds Dawn's device lock meanwhile; its
     // compositor takes one frame a vsync: a frame replayed that early, or a
-    // second one in a tick, is held.
+    // second one in a tick, is held. A TextureView's window takes a frame only
+    // when it draws, on the main thread, in no order with the presents: its
+    // next frame is held until the window took the last (frameLatched; see
+    // BackingViewKind.latchesOnWindowDraw), its work on the GPU meanwhile.
     _surface = std::make_shared<RNSkWindowSurface>(
         PresentHold::kOncePerTickAfterPreviousFrame);
     // The Java view's frame callback and its refresh-rate vote. Weak: the
     // Java view owns this object through its hybrid data.
     jni::weak_ref<jhybridobject> weakJava = jni::make_weak(jThis);
-    // A TextureView takes a frame only when its window draws, on the main
-    // thread. A present before that draw replaces the frame still queued,
-    // and on Android 11 waits up to 4.29 s for a buffer only that draw gives
-    // back: its Vulkan loader gives the queue a dequeue timeout where it
-    // means none. Presents come from the present thread, in no order with
-    // the window's draws, so from Android 11 the next frame waits until the
-    // window has drawn the last one (frameLatched; the platform view decides,
-    // see BackingViewKind.latchesOnWindowDraw). Android 10's queue never
-    // waits: there a frame the window has yet to draw is replaced instead,
-    // at most one a tick (the hold).
     // The vote counts the frames that went to the window, not the frames the
     // view was asked to present: it asks on every frame while one is coming.
-    _surface->setDidPresent([latchesOnWindowDraw = _latchesOnWindowDraw,
-                             framePendingLatch = _framePendingLatch,
-                             weakJava]() {
-      if (latchesOnWindowDraw->load()) {
-        framePendingLatch->store(true);
-      }
+    _surface->setDidPresent([weakJava]() {
       auto javaPart = weakJava.lockLocal();
       if (!javaPart) {
         return;
@@ -188,9 +168,6 @@ private:
       static const auto method =
           javaPart->getClass()->getMethod<void()>("onFramePresented");
       method(javaPart);
-    });
-    _surface->setCanPresent([framePendingLatch = _framePendingLatch]() {
-      return !framePendingLatch->load();
     });
     _view = std::make_shared<RNSkView>(context, _surface);
     // A submitted recording arms the Java view's frame callback.
@@ -241,8 +218,7 @@ private:
       releaseWindow(nullptr, ownedSurface);
       return;
     }
-    _latchesOnWindowDraw->store(latchesOnWindowDraw);
-    _framePendingLatch->store(false);
+    _surface->setLatchesOnWindowDraw(latchesOnWindowDraw);
     _surface->attach(window, width, height, highBitDepth,
                      /* useP3ColorSpace= */ false,
                      [ownedSurface](void *nativeHandle) {
@@ -273,13 +249,6 @@ private:
   }
 
   std::weak_ptr<RNSkManager> _manager;
-  // Whether a frame presented into the window waits for the window to draw
-  // it, and whether one waits now. Shared with the surface's callbacks,
-  // which can outlive this object.
-  std::shared_ptr<std::atomic<bool>> _latchesOnWindowDraw =
-      std::make_shared<std::atomic<bool>>(false);
-  std::shared_ptr<std::atomic<bool>> _framePendingLatch =
-      std::make_shared<std::atomic<bool>>(false);
   // Declared before the view, which unbinds itself from the surface when it
   // is destroyed.
   std::shared_ptr<RNSkWindowSurface> _surface;

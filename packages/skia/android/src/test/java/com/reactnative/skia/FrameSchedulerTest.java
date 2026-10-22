@@ -113,6 +113,43 @@ public class FrameSchedulerTest {
     }
 
     @Test
+    public void aLatchPresentsTheHeldFrameAtOnceWhileARetryIsOutstanding() {
+        mHost.nextFrames.add(FrameScheduler.NextFrame.WAITING);
+        mScheduler.requestFrame(BackingViewKind.TEXTURE_VIEW);
+        mScheduler.onPosted();
+        mHost.takeCalls();
+
+        mScheduler.onFrameLatched();
+        assertEquals(Arrays.asList(Call.PRESENT_ON_REQUEST), mHost.takeCalls());
+
+        mScheduler.onFrame(BackingViewKind.TEXTURE_VIEW);
+        mScheduler.onPosted();
+        assertEquals(Arrays.asList(Call.POST_PRESENT, Call.PRESENT_ON_VSYNC), mHost.takeCalls());
+    }
+
+    @Test
+    public void aLatchWithAFrameStillHeldKeepsOneRetry() {
+        mHost.nextFrames.add(FrameScheduler.NextFrame.WAITING);
+        mHost.nextFrames.add(FrameScheduler.NextFrame.WAITING);
+        mScheduler.requestFrame(BackingViewKind.TEXTURE_VIEW);
+        mScheduler.onPosted();
+        mHost.takeCalls();
+
+        mScheduler.onFrameLatched();
+        assertEquals(Arrays.asList(Call.PRESENT_ON_REQUEST), mHost.takeCalls());
+
+        mScheduler.requestFrame(BackingViewKind.TEXTURE_VIEW);
+        assertEquals(Arrays.asList(), mHost.takeCalls());
+    }
+
+    @Test
+    public void aLatchWithAReplayComingAsksForTheNextVsync() {
+        mHost.nextFrames.add(FrameScheduler.NextFrame.COMING);
+        mScheduler.onFrameLatched();
+        assertEquals(Arrays.asList(Call.PRESENT_ON_REQUEST, Call.POST_FRAME_CALLBACK), mHost.takeCalls());
+    }
+
+    @Test
     public void textureViewRequestWhileAFrameIsComingIsPresentedByAPostedMessage() {
         mHost.nextFrames.add(FrameScheduler.NextFrame.COMING);
         mScheduler.requestFrame(BackingViewKind.TEXTURE_VIEW);

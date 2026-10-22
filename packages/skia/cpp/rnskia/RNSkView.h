@@ -263,7 +263,8 @@ public:
 
   /**
    Presents the frame the window holds once the GPU is done with the one
-   before it, then the queued recordings (see setFrameScheduler for when).
+   before it and the window took that one, then the queued recordings (see
+   setFrameScheduler for when).
    `vsyncs` is how many frames of the display asked for this present since the
    view's last one, each a tick: none for the present a recording just
    submitted asked for, more than one when the platform view could not present
@@ -271,10 +272,9 @@ public:
    does a view that asks for no more frames, so that its next one, whenever it
    comes, starts a frame of its own (see RNSkPresentHold). Without a surface
    the queue is left alone: the surface presents it when it appears. While the
-   window cannot show a frame (the app in the background, a TextureView whose
-   window has yet to draw the last one) the queue is left alone until
-   onCanPresent(), and only a replay in flight keeps the ticks going, so that
-   they count every frame it takes.
+   window cannot show a frame (the app in the background) the queue is left
+   alone until onCanPresent(), and only a replay in flight keeps the ticks
+   going, so that they count every frame it takes.
    */
   NextFrame presentFrame(size_t vsyncs) {
     if (vsyncs > 0) {

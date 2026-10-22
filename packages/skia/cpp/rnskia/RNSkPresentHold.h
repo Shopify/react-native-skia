@@ -23,8 +23,9 @@ enum class HeldFrame {
   /** The held frame was presented. */
   kPresented,
   /**
-   The GPU is still on the frame before it, or the window presented a frame
-   since the last tick: the frame stays held.
+   The GPU is still on the frame before it, the window presented a frame
+   since the last tick, or the window has yet to take the frame presented
+   before it: the frame stays held.
    */
   kWaiting,
 };
@@ -38,13 +39,16 @@ enum class HeldFrame {
  * Vulkan swapchain. And the window's buffer queue gives its compositor one
  * frame a vsync: a second frame presented in the same frame is replaced unseen
  * (a TextureView's window draws once a frame) or waits a vsync behind the first
- * (a SurfaceView). Holding, a frame replayed while the GPU is on the frame
- * before it, or after the window presented one since the last tick, has its
- * work submitted and its present held until a later call finds that frame done
- * after a tick (see allowNextPresent); the window takes no other frame
- * meanwhile (see hasHeldFrame). `Gpu` tracks the work submitted so far
- * (`Work track()`) and says whether it is done, without waiting
- * (`bool isDone(const Work &)`).
+ * (a SurfaceView). A window that latches on its draw (an Android TextureView
+ * presented from a thread other than the window's) takes the next frame only
+ * once it took the last (see setLatchesOnWindowDraw). Holding, a frame replayed
+ * while the GPU is on the frame before it, after the window presented one
+ * since the last tick, or before the window took the last one, has its work
+ * submitted and its present held until a later call finds that frame done
+ * after a tick and taken (see allowNextPresent, windowTookFrame); the window
+ * takes no other frame meanwhile (see hasHeldFrame). `Gpu` tracks the work
+ * submitted so far (`Work track()`) and says whether it is done, without
+ * waiting (`bool isDone(const Work &)`).
  */
 template <typename Gpu> class RNSkPresentHold {
 public:
@@ -64,9 +68,24 @@ public:
   void allowNextPresent() { _presentedSinceTick = false; }
 
   /**
+   Whether a frame presented waits for the window to take it before the next
+   one goes: an Android TextureView's window takes one frame a draw, and a
+   frame presented before it took the last one replaces that frame unseen, or
+   from Android 11 waits for a buffer only that draw gives back. Set with each
+   window; a frame presented earlier is not waited for.
+   */
+  void setLatchesOnWindowDraw(bool latches) {
+    _latchesOnWindowDraw = latches;
+    _windowHasFrameToTake = false;
+  }
+
+  /** The window took the frame presented last: the next one may go. */
+  void windowTookFrame() { _windowHasFrameToTake = false; }
+
+  /**
    A frame was replayed: presents it through `present` now, or holds it if
-   the GPU is still on the frame presented before it or the window presented
-   one since the last tick.
+   the GPU is still on the frame presented before it, the window presented
+   one since the last tick, or the window has yet to take the last one.
    */
   template <typename Present> void presentOrHold(Present &&present) {
     if (!mayPresentNow()) {
@@ -78,7 +97,8 @@ public:
 
   /**
    Presents the held frame through `present` once the GPU has finished the
-   frame before it and a tick allowed it, without waiting for the GPU.
+   frame before it, a tick allowed it and the window took that frame, without
+   waiting for the GPU.
    */
   template <typename Present> HeldFrame presentHeldFrame(Present &&present) {
     if (!_hasHeldFrame) {
@@ -101,10 +121,14 @@ public:
     _hasHeldFrame = false;
     _previousFrame.reset();
     _presentedSinceTick = false;
+    _windowHasFrameToTake = false;
   }
 
 private:
   bool mayPresentNow() {
+    if (_windowHasFrameToTake) {
+      return false;
+    }
     switch (_hold) {
     case PresentHold::kNone:
       return true;
@@ -116,6 +140,7 @@ private:
 
   template <typename Present> void presentNow(Present &present) {
     present();
+    _windowHasFrameToTake = _latchesOnWindowDraw;
     switch (_hold) {
     case PresentHold::kNone:
       return;
@@ -141,6 +166,10 @@ private:
   std::optional<Work> _previousFrame;
   // Whether the window presented a frame since the last tick allowed one.
   bool _presentedSinceTick = false;
+  // Whether a frame presented waits for the window to take it, and whether
+  // the window has yet to take the one presented last.
+  bool _latchesOnWindowDraw = false;
+  bool _windowHasFrameToTake = false;
 };
 
 } // namespace RNSkia
