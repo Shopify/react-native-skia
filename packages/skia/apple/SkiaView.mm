@@ -49,8 +49,13 @@ static bool appIsBackgrounded() {
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   CAMetalLayer *_layer;
 #pragma clang diagnostic pop
-  // Owned by the module, which outlives its views (see finalizeUpdates:).
-  RNSkia::RNSkManager *_manager;
+  // Owned by the module (see finalizeUpdates:). A view can outlive its
+  // manager: on a reload the module is invalidated on the JS thread while
+  // Fabric still holds the views of the old bundle, which it deallocates
+  // afterwards on the main thread. The weak reference makes that late
+  // unregistration a no-op, and a concurrent one keep the manager alive for
+  // the duration of the call.
+  std::weak_ptr<RNSkia::RNSkManager> _manager;
   size_t _nativeId;
   bool _highBitDepth;
   // Whether the window can show a frame (see appIsBackgrounded). Main thread.
@@ -67,7 +72,7 @@ static bool appIsBackgrounded() {
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    _manager = [RNSkiaModule latestActiveSkManager].get();
+    _manager = [RNSkiaModule latestActiveSkManager];
     _nativeId = 0;
     _highBitDepth = false;
     _canPresent = !appIsBackgrounded();
@@ -114,10 +119,11 @@ static bool appIsBackgrounded() {
 - (void)viewWillMoveToSuperview:(NSView *)newSuperView {
   [super viewWillMoveToSuperview:newSuperView];
 #endif // !TARGET_OS_OSX
-  if (newSuperView == nullptr || _view != nullptr || _manager == nullptr) {
+  auto manager = _manager.lock();
+  if (newSuperView == nullptr || _view != nullptr || manager == nullptr) {
     return;
   }
-  auto context = _manager->getPlatformContext();
+  auto context = manager->getPlatformContext();
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
   _layer = [CAMetalLayer layer];
@@ -136,7 +142,7 @@ static bool appIsBackgrounded() {
   _view = std::make_shared<RNSkia::RNSkView>(context, _surface);
   [self.layer addSublayer:_layer];
   if (_nativeId != 0) {
-    _manager->setSkiaView(_nativeId, _view);
+    manager->setSkiaView(_nativeId, _view);
   }
   _view->setFrameScheduler([weakSelf]() { [weakSelf scheduleFrame]; });
 }
@@ -145,8 +151,9 @@ static bool appIsBackgrounded() {
   [self stopDisplayLink];
   if (_view != nullptr) {
     [_layer removeFromSuperlayer];
-    if (_nativeId != 0 && _manager != nullptr) {
-      _manager->setSkiaView(_nativeId, nullptr);
+    auto manager = _manager.lock();
+    if (_nativeId != 0 && manager != nullptr) {
+      manager->setSkiaView(_nativeId, nullptr);
     }
     _view = nullptr;
     _surface = nullptr;
@@ -173,13 +180,14 @@ static bool appIsBackgrounded() {
     // this flag is only set when the view is inserted and we want to set the
     // manager here since the view could be recycled or the app could be
     // refreshed and we would have a stale manager then
-    _manager = [RNSkiaModule latestActiveSkManager].get();
+    _manager = [RNSkiaModule latestActiveSkManager];
   }
 }
 
 - (void)unregisterView {
-  if (_manager != nullptr && _nativeId != 0) {
-    _manager->unregisterSkiaView(_nativeId);
+  auto manager = _manager.lock();
+  if (manager != nullptr && _nativeId != 0) {
+    manager->unregisterSkiaView(_nativeId);
   }
 }
 
@@ -345,8 +353,9 @@ static bool appIsBackgrounded() {
 // (the string Fabric assigns from the nativeID prop).
 - (void)bindNativeId:(size_t)nativeId {
   _nativeId = nativeId;
-  if (_view != nullptr) {
-    _manager->registerSkiaView(nativeId, _view);
+  auto manager = _manager.lock();
+  if (_view != nullptr && manager != nullptr) {
+    manager->registerSkiaView(nativeId, _view);
   }
 }
 

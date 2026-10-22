@@ -87,6 +87,13 @@ export type AndroidCanvasProps =
 
 export interface ISkiaViewApi {
   web?: boolean;
+  /**
+   * The id a view about to mount registers under. Ids are unique for the
+   * life of the process, not of the JS runtime: the native registries
+   * outlive a reload, and the views of the bundle being replaced leave them
+   * while the new bundle is already mounting.
+   */
+  allocateNativeId: () => number;
   setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
   requestRedraw: (nativeId: number) => void;
   /**
