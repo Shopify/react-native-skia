@@ -23,7 +23,6 @@ import type {
   SkiaWebViewHandle,
 } from "../specs/NativeSkiaModule.web";
 
-import { SkiaViewNativeId } from "./SkiaViewNativeId";
 import { useSkiaWebRenderer } from "./SkiaWebRenderer";
 import type { Renderer, WebFrame } from "./SkiaWebRenderer";
 
@@ -158,7 +157,7 @@ export const SkiaView = (props: SkiaViewProps) => {
     () =>
       props.nativeID !== undefined
         ? Number(props.nativeID)
-        : SkiaViewNativeId.current++,
+        : (global.SkiaViewApi as ISkiaViewApiWeb).allocateNativeId(),
     [props.nativeID]
   );
 

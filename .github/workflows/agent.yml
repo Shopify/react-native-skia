@@ -373,22 +373,49 @@ jobs:
       # agent navigates with go to it as explicit intents (see
       # .github/scripts/agent-screen.sh), which only root may send: adbd is
       # restarted as root, which the default (non Play Store) image allows.
+      #
+      # ANDROID_AVD_HOME is pinned, as the emulator-runner action does: left
+      # unset, avdmanager writes the AVD somewhere the emulator does not look
+      # on the hosted runner, and the emulator exits with "Unknown AVD name".
+      #
+      # The boot is bounded, as the emulator-runner action's is: it fails
+      # after ten minutes, or as soon as the emulator exits, with the end of
+      # the emulator's log. Unbounded, a dead emulator held the job (and the
+      # agent concurrency group) until the job's own timeout.
       - name: Boot Android emulator
+        timeout-minutes: 15
         run: |
+          export ANDROID_AVD_HOME="$HOME/.android/avd"
+          mkdir -p "$ANDROID_AVD_HOME"
           sdkmanager --install "$ANDROID_SYSTEM_IMAGE" emulator > /dev/null
           echo no | avdmanager create avd --force -n "$ANDROID_AVD" -k "$ANDROID_SYSTEM_IMAGE" -d "Nexus 5X"
           nohup emulator -avd "$ANDROID_AVD" -no-window -gpu swangle_indirect -noaudio -no-boot-anim -no-snapshot-save \
             > "$AGENT_OUTPUT/emulator.log" 2>&1 &
-          adb wait-for-device
-          until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do
+          emulator_pid=$!
+          booted=0
+          deadline=$((SECONDS + 600))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            if ! kill -0 "$emulator_pid" 2>/dev/null; then
+              echo "::error::The emulator exited before it finished booting"
+              break
+            fi
+            if [ "$(timeout 10 adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              booted=1
+              break
+            fi
             sleep 5
           done
+          if [ "$booted" != 1 ]; then
+            kill -0 "$emulator_pid" 2>/dev/null && echo "::error::The emulator did not finish booting in ten minutes"
+            tail -n 100 "$AGENT_OUTPUT/emulator.log"
+            exit 1
+          fi
           adb shell settings put global window_animation_scale 0
           adb shell settings put global transition_animation_scale 0
           adb shell settings put global animator_duration_scale 0
           adb shell input keyevent 82
           adb root
-          adb wait-for-device
+          timeout 60 adb wait-for-device
           # The app reaches Metro at localhost, which inside the emulator is
           # the guest: reverse the port to the host.
           adb reverse tcp:8081 tcp:$METRO_PORT
