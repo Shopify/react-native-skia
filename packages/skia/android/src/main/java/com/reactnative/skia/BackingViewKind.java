@@ -1,5 +1,7 @@
 package com.reactnative.skia;
 
+import android.os.Build;
+
 import androidx.annotation.Nullable;
 
 /**
@@ -38,5 +40,17 @@ enum BackingViewKind {
      */
     static boolean resolveOpaque(boolean opaque, boolean surfaceHighBitDepth) {
         return opaque || surfaceHighBitDepth;
+    }
+
+    /**
+     * Whether a frame presented into the canvas waits until its window has
+     * drawn the one before it (see JniSkiaView::frameLatched): a TextureView
+     * from Android 11, whose buffer queue waits up to 4.29 s for a buffer only
+     * that draw gives back. A SurfaceView's compositor takes its frames itself,
+     * and Android 10's TextureView queue never waits: a frame not drawn yet is
+     * replaced instead.
+     */
+    static boolean latchesOnWindowDraw(BackingViewKind kind, int sdkInt) {
+        return kind == TEXTURE_VIEW && sdkInt >= Build.VERSION_CODES.R;
     }
 }

@@ -59,20 +59,23 @@ public:
 
 protected:
   void surfaceAvailable(jobject surface, int width, int height, bool isSurface,
-                        bool highBitDepth) {
-    attachWindow(surface, width, height, isSurface, highBitDepth);
+                        bool highBitDepth, bool latchesOnWindowDraw) {
+    attachWindow(surface, width, height, isSurface, highBitDepth,
+                 latchesOnWindowDraw);
     _view->redraw();
   }
 
   void surfaceSizeChanged(jobject surface, int width, int height,
-                          bool isSurface, bool highBitDepth) {
+                          bool isSurface, bool highBitDepth,
+                          bool latchesOnWindowDraw) {
     // Setting width/height to zero is nothing we need to care about when
     // it comes to invalidating the surface.
     if (width != 0 || height != 0) {
       if (_surface->isAttached()) {
         _surface->resize(width, height);
       } else {
-        attachWindow(surface, width, height, isSurface, highBitDepth);
+        attachWindow(surface, width, height, isSurface, highBitDepth,
+                     latchesOnWindowDraw);
       }
     }
     // Paint the new size right away rather than on the next scheduled redraw.
@@ -165,8 +168,11 @@ private:
     // and on Android 11 waits up to 4.29 s for a buffer only that draw gives
     // back: its Vulkan loader gives the queue a dequeue timeout where it
     // means none. Presents come from the present thread, in no order with
-    // the window's draws, so the next frame waits until the window has drawn
-    // the last one (frameLatched), on every release.
+    // the window's draws, so from Android 11 the next frame waits until the
+    // window has drawn the last one (frameLatched; the platform view decides,
+    // see BackingViewKind.latchesOnWindowDraw). Android 10's queue never
+    // waits: there a frame the window has yet to draw is replaced instead,
+    // at most one a tick (the hold).
     // The vote counts the frames that went to the window, not the frames the
     // view was asked to present: it asks on every frame while one is coming.
     _surface->setDidPresent([latchesOnWindowDraw = _latchesOnWindowDraw,
@@ -205,7 +211,7 @@ private:
    gives it back through the releaser. Android never renders in Display P3.
    */
   void attachWindow(jobject surface, int width, int height, bool isSurface,
-                    bool highBitDepth) {
+                    bool highBitDepth, bool latchesOnWindowDraw) {
     // Release the old surface and its window first.
     _surface->detach();
     JNIEnv *env = jni::Environment::current();
@@ -235,7 +241,7 @@ private:
       releaseWindow(nullptr, ownedSurface);
       return;
     }
-    _latchesOnWindowDraw->store(!isSurface);
+    _latchesOnWindowDraw->store(latchesOnWindowDraw);
     _framePendingLatch->store(false);
     _surface->attach(window, width, height, highBitDepth,
                      /* useP3ColorSpace= */ false,

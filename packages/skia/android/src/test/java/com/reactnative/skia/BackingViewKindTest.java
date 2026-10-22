@@ -37,4 +37,17 @@ public class BackingViewKindTest {
         assertTrue(BackingViewKind.resolveOpaque(true, false));
         assertFalse(BackingViewKind.resolveOpaque(false, false));
     }
+
+    @Test
+    public void aTextureViewWaitsForItsWindowsDrawFromAndroid11() {
+        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, 29));
+        assertTrue(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, 30));
+        assertTrue(BackingViewKind.latchesOnWindowDraw(BackingViewKind.TEXTURE_VIEW, 36));
+    }
+
+    @Test
+    public void aSurfaceViewNeverWaitsForAWindowsDraw() {
+        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW, 29));
+        assertFalse(BackingViewKind.latchesOnWindowDraw(BackingViewKind.SURFACE_VIEW, 30));
+    }
 }
