@@ -211,8 +211,8 @@ const ImageDemo = () => {
 | `height`        | Returns the possibly scaled height of the image.                      |
 | `width`         | Returns the possibly scaled width of the image.                       |
 | `getImageInfo`  | Returns the image info for the image.                                 |
-| `encodeToBytes` | Encodes the image pixels, returning the result as a `UInt8Array`.     |
-| `encodeToBase64`| Encodes the image pixels, returning the result as a base64-encoded string. |
+| `encodeToBytes` | Encodes the image pixels, returning the result as a `UInt8Array`; throws when the image cannot be encoded. |
+| `encodeToBase64`| Encodes the image pixels, returning the result as a base64-encoded string; throws when the image cannot be encoded. |
 | `readPixels`    | Reads the image pixels, returning result as UInt8Array or Float32Array. On a GPU image, waits for the GPU. |
 | `makeRasterImage` | Resolves to a CPU copy of the image, read back from the GPU or decoded on a background thread. See [GPU and CPU images](#gpu-and-cpu-images). |
 | `makeTextureImage` | Uploads the image to the GPU now and returns the GPU image. See [GPU and CPU images](#gpu-and-cpu-images). |

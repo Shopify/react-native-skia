@@ -184,6 +184,13 @@ Pod::Spec.new do |s|
     "HEADER_SEARCH_PATHS" => '"$(PODS_TARGET_SRCROOT)/cpp"/** "$(PODS_TARGET_SRCROOT)/cpp" "$(PODS_TARGET_SRCROOT)/cpp/skia" "$(PODS_TARGET_SRCROOT)/cpp/dawn/include"'
   }
 
+  # Nothing references rnskia_getWGPUInstance, so the linker never loads its
+  # object file from the static library. Without it, react-native-webgpu's
+  # dlsym lookup fails and it creates a second Dawn instance.
+  s.user_target_xcconfig = {
+    'OTHER_LDFLAGS' => '$(inherited) -Wl,-u,_rnskia_getWGPUInstance'
+  }
+
   s.frameworks = ['MetalKit', 'AVFoundation', 'AVKit', 'CoreMedia']
 
   # Platform-specific vendored frameworks (copied into libs/)
