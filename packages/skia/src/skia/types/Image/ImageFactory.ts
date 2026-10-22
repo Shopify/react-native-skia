@@ -51,8 +51,8 @@ export interface ImageFactory {
    * Returns a raster (CPU) image with the given pixel data and format.
    * The pixel data is always copied: the image is not modifiable after
    * creation. Drawing the image uploads it on the first frame that draws
-   * it, once for every canvas; call `makeTextureImage()` on it to upload it
-   * beforehand.
+   * it, once, shared by every canvas; call `makeTextureImage()` on it to
+   * upload it beforehand.
    *
    * @param info
    * @param data - bytes representing the pixel data.

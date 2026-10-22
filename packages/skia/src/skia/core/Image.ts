@@ -15,7 +15,8 @@ const decode = (data: SkData) => {
 /**
  * Loads an image and decodes it off the JS thread. Resolves to a raster
  * image: drawing it uploads it to the GPU on the first frame that draws it,
- * once for every canvas (see `makeTextureImage()` to upload it beforehand),
+ * once, shared by every canvas (see `makeTextureImage()` to upload it
+ * beforehand),
  * reading its pixels is a CPU operation. Resolves to null for a null
  * source, rejects when the image cannot be loaded or decoded.
  */

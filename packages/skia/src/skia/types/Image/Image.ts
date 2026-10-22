@@ -166,7 +166,8 @@ export interface SkImage extends SkJSIInstance<"Image"> {
    * Returns a GPU image: the image is uploaded now, on the calling thread,
    * and every canvas draws it afterwards without a copy. A raster image
    * drawn directly is uploaded on the first frame that draws it instead,
-   * once for every canvas, and held in a cache for as long as it is drawn;
+   * once, shared by every canvas, and held in a cache for as long as it is
+   * drawn;
    * an encoded image is decoded first. Returns the image itself when it
    * already is a GPU image. Throws if the upload fails.
    *

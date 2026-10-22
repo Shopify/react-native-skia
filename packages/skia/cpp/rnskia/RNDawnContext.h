@@ -482,28 +482,13 @@ public:
    itself when it already is one (with mipmaps when asked for). An encoded
    image is decoded on the calling thread first. nullptr when the upload
    failed, or did not run (the device is lost). The image provider of every
-   recorder uploads through here (see ImageProvider).
+   recorder uploads the same way (see upload()).
    */
   sk_sp<SkImage> MakeTextureImage(const sk_sp<SkImage> &image, bool mipmapped) {
     if (image->isTextureBacked() && (!mipmapped || image->hasMipmaps())) {
       return image;
     }
-    // A recorder of its own: snapping the recorder of this thread would also
-    // submit what the offscreen surfaces of this thread recorded so far. It
-    // only uploads, so it keeps Skia's default image provider rather than
-    // the image cache, which uploads through here.
-    static thread_local ThreadRecorder uploadRecorder;
-    auto *recorder = currentRecorder(uploadRecorder, false);
-    auto texture =
-        SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
-    if (texture == nullptr) {
-      return nullptr;
-    }
-    if (!submitRecording(recorder)) {
-      // The upload never ran: the texture holds nothing.
-      return nullptr;
-    }
-    return texture;
+    return upload(image, mipmapped).texture;
   }
 
   // Create offscreen surface
@@ -983,13 +968,48 @@ private:
       return current->context->makeRecorder();
     }
     skgpu::graphite::RecorderOptions options;
-    // The provider uploads through MakeTextureImage (see ImageProvider). The
-    // context is never destroyed, so the capture is safe.
-    options.fImageProvider =
-        ImageProvider::Make([this](const SkImage *image, bool mipmapped) {
-          return MakeTextureImage(sk_ref_sp(image), mipmapped);
-        });
+    // The provider uploads through upload() (see ImageProvider), and serves
+    // the recorder textures of the device in use only. The context is never
+    // destroyed, so the capture is safe.
+    options.fImageProvider = ImageProvider::Make(
+        [this, generation = current->id](const SkImage *image, bool mipmapped) {
+          try {
+            return upload(sk_ref_sp(image), mipmapped);
+          } catch (const std::exception &e) {
+            // No recorder could be made: a failed upload, which the provider
+            // remembers for a moment (see ImageProvider::Uploader).
+            RNSkLogger::logToConsole("Uploading an image failed: %s", e.what());
+            return ImageProvider::Upload{nullptr, generation};
+          }
+        },
+        current->id);
     return current->context->makeRecorder(options);
+  }
+
+  /**
+   Uploads a CPU image (decoded first when encoded) on the upload recorder of
+   this thread and submits the upload (see MakeTextureImage), with the
+   generation of the device it ran on (see ImageProvider::Upload): no texture
+   when the upload failed or did not run. Throws when no recorder can be
+   made.
+   */
+  ImageProvider::Upload upload(const sk_sp<SkImage> &image, bool mipmapped) {
+    // A recorder of its own: snapping the recorder of this thread would also
+    // submit what the offscreen surfaces of this thread recorded so far. It
+    // only uploads, so it keeps Skia's default image provider rather than
+    // the image cache, which uploads through here.
+    static thread_local ThreadRecorder uploadRecorder;
+    auto *recorder = currentRecorder(uploadRecorder, false);
+    ImageProvider::Upload result;
+    result.generation = uploadRecorder.generation;
+    auto texture =
+        SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
+    if (texture == nullptr || !submitRecording(recorder)) {
+      // Not run: the texture would hold nothing.
+      return result;
+    }
+    result.texture = std::move(texture);
+    return result;
   }
 
   /**
