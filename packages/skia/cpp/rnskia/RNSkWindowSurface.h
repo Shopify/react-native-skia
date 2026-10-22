@@ -43,7 +43,7 @@ public:
    */
   using Releaser = std::function<void(void *nativeHandle)>;
 
-  RNSkWindowSurface() = default;
+  RNSkWindowSurface();
 
   ~RNSkWindowSurface() override;
 
@@ -70,8 +70,11 @@ public:
    */
   void detach();
 
-  /** Whether a window is attached. Main thread. */
-  bool isAttached() const { return _surface != nullptr; }
+  /**
+   Whether a window is attached. Its Dawn surface may be away for a frame
+   while the GPU device is replaced (see ensureDevice). Main thread.
+   */
+  bool isAttached() const { return _nativeHandle != nullptr; }
 
   /**
    The pixel size the platform laid the view out with, which the window gets
@@ -153,6 +156,16 @@ public:
   bool presentImage(const sk_sp<SkImage> &image) override;
 
 private:
+  // Configures the window on the GPU device in use when the one it was
+  // configured on was lost and replaced since (see DawnContext): the Dawn
+  // surface is made again on the new device, the window itself stays.
+  // Returns false without a context or a surface. Main thread.
+  bool ensureDevice();
+  // Lets go of the Dawn surface of every window configured on the given
+  // generation, before its device is destroyed (see ensureDevice). The
+  // windows keep their target description and get a surface again on their
+  // next frame. Main thread.
+  static void releaseSurfacesOn(uint64_t generation);
   // Configures the swapchain for the current size, format and usage.
   void configureSurface();
   // Copies the window's target description where any thread can read it.
@@ -173,7 +186,12 @@ private:
     }
   }
 
+  // The device the window is configured on, and its generation (see
+  // DawnContext::generation()): a lost device is replaced, and the window
+  // configured again on the new one (see ensureDevice). The surface is null
+  // between the two, and while the window is detached.
   wgpu::Device _device;
+  uint64_t _generation = 0;
   wgpu::Surface _surface;
   // The recorder of the thread the window is attached on (the main thread):
   // presentImage() draws on it, presentRecordings() only wraps the swapchain
