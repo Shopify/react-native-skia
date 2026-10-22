@@ -146,7 +146,7 @@ const useCanvasRoot = ({
  * renderer; the frames are produced off the JS thread:
  *
  * - the JS thread records the scene graph into a native recorder once per
- *   React commit and hands it to the view;
+ *   React commit that changes it and hands it to the view;
  * - the Reanimated UI runtime only reads the shared values into it (the one
  *   step that needs a JS runtime), it never replays anything;
  * - a dedicated native thread pool replays the recorder into a Graphite
