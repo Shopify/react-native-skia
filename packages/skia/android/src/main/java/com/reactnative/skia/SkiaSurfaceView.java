@@ -3,19 +3,57 @@ package com.reactnative.skia;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 @SuppressLint("ViewConstructor")
 public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
     SkiaViewAPI mApi;
+    private boolean mZOrderOnTop;
+    private final SurfaceHandOver mHandOver;
 
     public SkiaSurfaceView(Context context, SkiaViewAPI api, boolean zOrderOnTop,
             boolean zOrderMediaOverlay, boolean opaque) {
         super(context);
         mApi = api;
+        mHandOver = new SurfaceHandOver(new SurfaceHandOver.Host() {
+            // Only reached on API 29 and later, see SurfaceHandOver.defersArrivalToWindowFrame.
+            @Override
+            @RequiresApi(Build.VERSION_CODES.Q)
+            public void runAfterWindowFrameCommits(Runnable release) {
+                getViewTreeObserver().registerFrameCommitCallback(release);
+                invalidate();
+            }
+
+            @Override
+            public void handOverSurface() {
+                mApi.onSurfaceCreated(getHolder().getSurface(), getWidth(), getHeight());
+            }
+
+            @Override
+            public void holdFirstFrame() {
+                mApi.holdFirstFrame();
+            }
+
+            @Override
+            public void releaseFirstFrame() {
+                mApi.releaseFirstFrame();
+            }
+
+            @Override
+            public void forwardSurfaceChanged() {
+                mApi.onSurfaceChanged(getHolder().getSurface(), getWidth(), getHeight());
+            }
+
+            @Override
+            public void forwardSurfaceDestroyed() {
+                mApi.onSurfaceDestroyed();
+            }
+        });
         // Both are read when the surface is created.
         setZOrder(zOrderOnTop, zOrderMediaOverlay);
         setOpaque(opaque);
@@ -36,6 +74,7 @@ public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     // applies a changed request with the window's next frame (its pre-draw
     // listener runs updateSurface()), which invalidate() schedules.
     public void setZOrder(boolean onTop, boolean mediaOverlay) {
+        mZOrderOnTop = onTop;
         setZOrderOnTop(onTop);
         if (!onTop) {
             setZOrderMediaOverlay(mediaOverlay);
@@ -46,21 +85,22 @@ public class SkiaSurfaceView extends SurfaceView implements SurfaceHolder.Callba
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mApi.onSurfaceDestroyed();
+        mHandOver.onSurfaceReleased();
     }
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        mApi.onSurfaceCreated(holder.getSurface(), getWidth(), getHeight());
+        mHandOver.onSurfaceCreated(SurfaceHandOver.defersArrivalToWindowFrame(
+                Build.VERSION.SDK_INT, isHardwareAccelerated(), mZOrderOnTop));
     }
 
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-        mApi.onSurfaceChanged(holder.getSurface(), getWidth(), getHeight());
+        mHandOver.onSurfaceChanged();
     }
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-        mApi.onSurfaceDestroyed();
+        mHandOver.onSurfaceReleased();
     }
 }

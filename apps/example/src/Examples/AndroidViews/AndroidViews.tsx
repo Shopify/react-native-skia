@@ -32,7 +32,10 @@ import {
 // TextureView keeps the clip, the alpha and the stacking order, while a
 // SurfaceView punches through all of them. The zOrderOnTop switch then moves
 // the SurfaceView above the whole window, and zOrderMediaOverlay above the
-// other SurfaceView.
+// other SurfaceView. The shown switch puts a plain screen in the canvases'
+// place and swaps them back in one frame; they mount again while hidden, so
+// they have their pictures before the swap gives them surfaces, as on a
+// screen navigated to.
 
 const backingViews: AndroidBackingView[] = [
   "TextureView",
@@ -74,6 +77,8 @@ export const AndroidViews = () => {
   const [opaque, setOpaque] = useState(false);
   const [zOrderOnTop, setZOrderOnTop] = useState(false);
   const [zOrderMediaOverlay, setZOrderMediaOverlay] = useState(false);
+  const [shown, setShown] = useState(true);
+  const [hiddenCount, setHiddenCount] = useState(0);
   const [animate, setAnimate] = useState(true);
   const clock = useClock();
   const cx = useDerivedValue(
@@ -114,7 +119,8 @@ export const AndroidViews = () => {
     <View style={styles.container}>
       <View style={styles.stage}>
         <Stripes />
-        <View style={styles.frame}>
+        {!shown && <View style={styles.plainScreen} />}
+        <View key={hiddenCount} style={[styles.frame, !shown && styles.hidden]}>
           <View style={styles.clip}>
             <Canvas key={backingKey} style={styles.canvas} android={android}>
               <Fill>
@@ -199,6 +205,18 @@ export const AndroidViews = () => {
           />
         </View>
         <View style={styles.row}>
+          <Text style={styles.label}>shown</Text>
+          <Switch
+            value={shown}
+            onValueChange={(value) => {
+              setShown(value);
+              if (!value) {
+                setHiddenCount((count) => count + 1);
+              }
+            }}
+          />
+        </View>
+        <View style={styles.row}>
           <Text style={styles.label}>animate</Text>
           <Switch value={animate} onValueChange={setAnimate} />
         </View>
@@ -239,6 +257,13 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     overflow: "hidden",
     transform: [{ rotate: "-6deg" }],
+  },
+  hidden: {
+    display: "none",
+  },
+  plainScreen: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "#ff9500",
   },
   canvas: {
     width: 260,

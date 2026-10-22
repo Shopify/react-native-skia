@@ -264,8 +264,8 @@ bool RNSkWindowSurface::canPresent() {
   // is replaced: the view keeps its last one and the queue waits, as while
   // in the background. A window whose surface is away for the replacement
   // (see ensureDevice) can: presenting is what brings the surface back.
-  return _nativeHandle != nullptr && !DawnContext::isDeviceLost() &&
-         (!_canPresent || _canPresent());
+  return _nativeHandle != nullptr && !_presentsHeld &&
+         !DawnContext::isDeviceLost() && (!_canPresent || _canPresent());
 }
 
 void RNSkWindowSurface::releaseSurfacesOn(uint64_t generation) {
