@@ -136,11 +136,25 @@ public:
     _frameForWindow = std::nullopt;
   }
 
+  /**
+   The window goes away: its held frame is presented into it before the
+   swapchain goes, whatever the GPU and the tick, and the next window starts
+   afresh.
+   */
+  void detach() {
+    _presentHold.releaseFrames([this] { _released.push_back(_frame); });
+    _lastPresented = std::nullopt;
+    _presentedSinceTick = 0;
+    _frameForWindow = std::nullopt;
+  }
+
   bool hasHeldFrame() const { return _presentHold.hasHeldFrame(); }
   int tracked() const { return _gpu->tracked; }
   const std::vector<int> &replayed() const { return _replayed; }
   const std::vector<int> &presented() const { return _presented; }
   const std::vector<int> &dropped() const { return _dropped; }
+  /** The frames presented into a window as it went away. */
+  const std::vector<int> &released() const { return _released; }
   /**
    Whether a frame was ever presented while the GPU was still on the frame
    presented before it, on the same swapchain.
@@ -181,6 +195,7 @@ private:
   std::vector<int> _replayed;
   std::vector<int> _presented;
   std::vector<int> _dropped;
+  std::vector<int> _released;
 };
 
 enum class Event {
@@ -189,17 +204,19 @@ enum class Event {
   kFinishGpuFrame,
   kReconfigure,
   kTick,
-  kWindowTakesFrame
+  kWindowTakesFrame,
+  kDetach
 };
 
-constexpr Event kEvents[] = {Event::kReplay, Event::kPresentHeldFrame,
+constexpr Event kEvents[] = {Event::kReplay,         Event::kPresentHeldFrame,
                              Event::kFinishGpuFrame, Event::kReconfigure,
-                             Event::kTick};
+                             Event::kTick,           Event::kDetach};
 
 constexpr Event kLatchingEvents[] = {
     Event::kReplay,         Event::kPresentHeldFrame,
     Event::kFinishGpuFrame, Event::kReconfigure,
-    Event::kTick,           Event::kWindowTakesFrame};
+    Event::kTick,           Event::kWindowTakesFrame,
+    Event::kDetach};
 
 /** Applies an event the window can take in its state. Returns whether it could.
  */
@@ -219,6 +236,9 @@ bool apply(Window &window, Event event) {
     return true;
   case Event::kWindowTakesFrame:
     return window.windowTakesFrame();
+  case Event::kDetach:
+    window.detach();
+    return true;
   }
   return false;
 }
@@ -252,7 +272,9 @@ void forEachSequence(WindowKind kind, const Events &events, size_t depth,
     sequence.push_back(event);
     if (auto window = windowAfter(kind, sequence)) {
       check(sequence, *window);
-      forEachSequence(kind, events, depth, check, sequence);
+      if (event != Event::kDetach) {
+        forEachSequence(kind, events, depth, check, sequence);
+      }
     }
     sequence.pop_back();
   }
@@ -263,7 +285,8 @@ void forEachSequence(WindowKind kind, const Events &events, size_t depth,
  runs after each event. Only a window that latches on its draw sees its draws
  take frames; any other never waits for one. The extra event costs the
  latching window a level of depth, which still holds several frames taken in
- a row.
+ a row. A detach ends a sequence: the window that follows starts as one after
+ a reconfigure does, which the sequences already cover.
  */
 void forEachSequence(WindowKind kind, const Check &check) {
   std::vector<Event> sequence;
@@ -437,6 +460,68 @@ TEST_CASE(AWindowThatStopsLatchingWaitsForNoDraw) {
   EXPECT(window.presented() == (std::vector<int>{1, 2, 3}));
 }
 
+TEST_CASE(PresentsTheHeldFrameWhenItsWindowGoesAway) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame);
+  REQUIRE(window.replay());
+  window.tick();
+  REQUIRE(window.replay());
+  REQUIRE(window.hasHeldFrame());
+  window.detach();
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.released() == (std::vector<int>{2}));
+  EXPECT(window.dropped().empty());
+  REQUIRE(window.replay());
+  EXPECT(window.presented() == (std::vector<int>{1, 3}));
+}
+
+TEST_CASE(ALatchingWindowGoingAwayPresentsTheFrameHeldForItsDraw) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame, true);
+  REQUIRE(window.replay());
+  REQUIRE(window.finishGpuFrame());
+  window.tick();
+  REQUIRE(window.replay());
+  REQUIRE(window.hasHeldFrame());
+  window.detach();
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.released() == (std::vector<int>{2}));
+  REQUIRE(window.replay());
+  EXPECT(window.presented() == (std::vector<int>{1, 3}));
+}
+
+TEST_CASE(PresentsNothingWhenAWindowHoldingNoFrameGoesAway) {
+  for (WindowKind kind : kWindowKinds) {
+    Window window(kind);
+    window.detach();
+    REQUIRE(window.replay());
+    window.detach();
+    EXPECT(window.released().empty());
+    EXPECT(window.presented() == (std::vector<int>{1}));
+  }
+}
+
+TEST_CASE(LeavesNoFrameHeldWhenItsWindowGoesAwayInEverySequence) {
+  for (WindowKind kind : kWindowKinds) {
+    size_t released = 0;
+    forEachSequence(kind, [kind, &released](const std::vector<Event> &sequence,
+                                            const Window &window) {
+      if (sequence.back() != Event::kDetach) {
+        return;
+      }
+      EXPECT(!window.hasHeldFrame());
+      std::vector<Event> beforeDetach(sequence.begin(), sequence.end() - 1);
+      const bool held = windowAfter(kind, beforeDetach)->hasHeldFrame();
+      const std::vector<int> heldFrame =
+          held ? std::vector<int>{window.replayed().back()}
+               : std::vector<int>{};
+      EXPECT(window.released() == heldFrame);
+      released += window.released().size();
+    });
+    EXPECT((released > 0) ==
+           (kind.hold == PresentHold::kOncePerTickAfterPreviousFrame ||
+            kind.latches));
+  }
+}
+
 TEST_CASE(NeverPresentsOverABusyGpuInEverySequence) {
   for (WindowKind kind : kWindowKinds) {
     bool presentedOverBusyGpu = false;
@@ -472,6 +557,8 @@ TEST_CASE(PresentsOrDropsEveryFrameOnceInOrderInEverySequence) {
           std::vector<int> settled = presented;
           settled.insert(settled.end(), window.dropped().begin(),
                          window.dropped().end());
+          settled.insert(settled.end(), window.released().begin(),
+                         window.released().end());
           std::sort(settled.begin(), settled.end());
           std::vector<int> expected(window.replayed().size() -
                                     (window.hasHeldFrame() ? 1 : 0));

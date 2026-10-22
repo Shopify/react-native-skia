@@ -121,7 +121,9 @@ void RNSkWindowSurface::resize(int width, int height) {
 }
 
 void RNSkWindowSurface::detach() {
-  // The surface goes before the window it draws into.
+  // The surface goes before the window it draws into, and the frame it holds
+  // goes to the window first (see RNSkPresentHold::releaseFrames).
+  _presentHold.releaseFrames([this]() { _surface.Present(); });
   replaceSurface(nullptr);
   _recorder = nullptr;
   updateTargetInfo();

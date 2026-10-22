@@ -70,8 +70,9 @@ public:
   void resize(int width, int height);
 
   /**
-   Destroys the Dawn surface and gives the native handle back to its
-   releaser. The target description goes away with it; the layout size stays.
+   Presents the frame the window holds, destroys the Dawn surface and gives
+   the native handle back to its releaser. The target description goes away
+   with it; the layout size stays.
    */
   void detach();
 
