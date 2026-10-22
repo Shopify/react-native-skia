@@ -113,13 +113,15 @@ public:
   }
 
   /**
-   The window is going away: presents the held frame through `present`
-   whatever it waits for, so that the window takes back the image the frame
-   was replayed into while it still can, then forgets the frames as
-   dropFrames() does. Dawn destroys a swapchain it was detached from only once
-   the GPU is done with it, after the window's buffer queue is gone, and an
-   image still acquired then is cancelled into that queue. The present may
-   wait for the GPU to finish the frame before it.
+   The swapchain the frames went to is about to change — reconfigured for a
+   new size, or gone with its window: presents the held frame through
+   `present` whatever it waits for, so that the window takes back the image
+   the frame was replayed into while it still can, then forgets the frames as
+   dropFrames() does. Dawn destroys a swapchain it replaced or was detached
+   from only once the GPU is done with it: by then a reconfigured window has
+   reallocated its buffers under the image, and a destroyed window's buffer
+   queue is gone, so an image still acquired is freed or cancelled into
+   nothing. The present may wait for the GPU to finish the frame before it.
    */
   template <typename Present> void releaseFrames(Present &&present) {
     if (_hasHeldFrame) {

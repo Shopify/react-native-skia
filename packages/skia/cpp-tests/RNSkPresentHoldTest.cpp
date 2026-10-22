@@ -125,8 +125,11 @@ public:
     _frameForWindow = std::nullopt;
   }
 
-  /** The swapchain is reconfigured, and a held frame goes with it. */
-  void reconfigure() {
+  /**
+   The window's surface is replaced, as when its GPU device is: a held frame
+   goes with it, since nothing can present it anymore.
+   */
+  void replaceSurface() {
     if (_presentHold.hasHeldFrame()) {
       _dropped.push_back(_frame);
     }
@@ -137,23 +140,24 @@ public:
   }
 
   /**
+   The swapchain is reconfigured for a new size: its held frame is presented
+   into it first, whatever the GPU and the tick.
+   */
+  void reconfigure() { release(); }
+
+  /**
    The window goes away: its held frame is presented into it before the
    swapchain goes, whatever the GPU and the tick, and the next window starts
    afresh.
    */
-  void detach() {
-    _presentHold.releaseFrames([this] { _released.push_back(_frame); });
-    _lastPresented = std::nullopt;
-    _presentedSinceTick = 0;
-    _frameForWindow = std::nullopt;
-  }
+  void detach() { release(); }
 
   bool hasHeldFrame() const { return _presentHold.hasHeldFrame(); }
   int tracked() const { return _gpu->tracked; }
   const std::vector<int> &replayed() const { return _replayed; }
   const std::vector<int> &presented() const { return _presented; }
   const std::vector<int> &dropped() const { return _dropped; }
-  /** The frames presented into a window as it went away. */
+  /** The frames presented into a swapchain about to change. */
   const std::vector<int> &released() const { return _released; }
   /**
    Whether a frame was ever presented while the GPU was still on the frame
@@ -182,6 +186,13 @@ private:
         std::max(_mostPresentedInATick, ++_presentedSinceTick);
   }
 
+  void release() {
+    _presentHold.releaseFrames([this] { _released.push_back(_frame); });
+    _lastPresented = std::nullopt;
+    _presentedSinceTick = 0;
+    _frameForWindow = std::nullopt;
+  }
+
   std::shared_ptr<GpuQueue> _gpu;
   Hold _presentHold;
   int _frame = 0;
@@ -203,6 +214,7 @@ enum class Event {
   kPresentHeldFrame,
   kFinishGpuFrame,
   kReconfigure,
+  kReplaceSurface,
   kTick,
   kWindowTakesFrame,
   kDetach
@@ -210,13 +222,14 @@ enum class Event {
 
 constexpr Event kEvents[] = {Event::kReplay,         Event::kPresentHeldFrame,
                              Event::kFinishGpuFrame, Event::kReconfigure,
-                             Event::kTick,           Event::kDetach};
+                             Event::kReplaceSurface, Event::kTick,
+                             Event::kDetach};
 
 constexpr Event kLatchingEvents[] = {
-    Event::kReplay,         Event::kPresentHeldFrame,
-    Event::kFinishGpuFrame, Event::kReconfigure,
-    Event::kTick,           Event::kWindowTakesFrame,
-    Event::kDetach};
+    Event::kReplay,           Event::kPresentHeldFrame,
+    Event::kFinishGpuFrame,   Event::kReconfigure,
+    Event::kReplaceSurface,   Event::kTick,
+    Event::kWindowTakesFrame, Event::kDetach};
 
 /** Applies an event the window can take in its state. Returns whether it could.
  */
@@ -230,6 +243,9 @@ bool apply(Window &window, Event event) {
     return window.finishGpuFrame();
   case Event::kReconfigure:
     window.reconfigure();
+    return true;
+  case Event::kReplaceSurface:
+    window.replaceSurface();
     return true;
   case Event::kTick:
     window.tick();
@@ -291,9 +307,9 @@ void forEachSequence(WindowKind kind, const Events &events, size_t depth,
 void forEachSequence(WindowKind kind, const Check &check) {
   std::vector<Event> sequence;
   if (kind.latches) {
-    forEachSequence(kind, kLatchingEvents, 9, check, sequence);
+    forEachSequence(kind, kLatchingEvents, 8, check, sequence);
   } else {
-    forEachSequence(kind, kEvents, 10, check, sequence);
+    forEachSequence(kind, kEvents, 9, check, sequence);
   }
 }
 
@@ -383,15 +399,30 @@ TEST_CASE(ATickPresentsTheHeldFrameOnlyOnceTheGpuIsDone) {
   EXPECT(window.presented() == (std::vector<int>{1, 2}));
 }
 
-TEST_CASE(DropsTheHeldFrameWithItsSwapchain) {
+TEST_CASE(DropsTheHeldFrameWithItsSurface) {
   Window window(PresentHold::kOncePerTickAfterPreviousFrame);
   REQUIRE(window.replay());
   REQUIRE(window.replay());
-  window.reconfigure();
+  window.replaceSurface();
   EXPECT(!window.hasHeldFrame());
   EXPECT(window.presentHeldFrame() == HeldFrame::kNone);
-  window.reconfigure();
+  window.replaceSurface();
   EXPECT(window.dropped() == (std::vector<int>{2}));
+  REQUIRE(window.replay());
+  EXPECT(window.presented() == (std::vector<int>{1, 3}));
+}
+
+TEST_CASE(PresentsTheHeldFrameBeforeItsSwapchainIsReconfigured) {
+  Window window(PresentHold::kOncePerTickAfterPreviousFrame);
+  REQUIRE(window.replay());
+  REQUIRE(window.replay());
+  REQUIRE(window.hasHeldFrame());
+  window.reconfigure();
+  EXPECT(!window.hasHeldFrame());
+  EXPECT(window.released() == (std::vector<int>{2}));
+  EXPECT(window.dropped().empty());
+  window.reconfigure();
+  EXPECT(window.released() == (std::vector<int>{2}));
   REQUIRE(window.replay());
   EXPECT(window.presented() == (std::vector<int>{1, 3}));
 }
@@ -509,12 +540,13 @@ TEST_CASE(LeavesNoFrameHeldWhenItsWindowGoesAwayInEverySequence) {
       }
       EXPECT(!window.hasHeldFrame());
       std::vector<Event> beforeDetach(sequence.begin(), sequence.end() - 1);
-      const bool held = windowAfter(kind, beforeDetach)->hasHeldFrame();
-      const std::vector<int> heldFrame =
-          held ? std::vector<int>{window.replayed().back()}
-               : std::vector<int>{};
-      EXPECT(window.released() == heldFrame);
-      released += window.released().size();
+      const auto attached = windowAfter(kind, beforeDetach);
+      std::vector<int> expected = attached->released();
+      if (attached->hasHeldFrame()) {
+        expected.push_back(window.replayed().back());
+      }
+      EXPECT(window.released() == expected);
+      released += window.released().size() - attached->released().size();
     });
     EXPECT((released > 0) ==
            (kind.hold == PresentHold::kOncePerTickAfterPreviousFrame ||

@@ -212,7 +212,7 @@ skgpu::graphite::TextureInfo RNSkWindowSurface::getTextureInfo() const {
 }
 
 void RNSkWindowSurface::configureSurface() {
-  _presentHold.dropFrames();
+  _presentHold.releaseFrames([this]() { _surface.Present(); });
   wgpu::SurfaceConfiguration config;
   config.device = _device;
   config.format = _format;

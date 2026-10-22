@@ -216,7 +216,8 @@ private:
     _presentHold.dropFrames();
     _surface = std::move(surface);
   }
-  // Configures the swapchain for the current size, format and usage.
+  // Configures the swapchain for the current size, format and usage, the
+  // frame it holds presented first (see RNSkPresentHold::releaseFrames).
   void configureSurface();
   // Copies the window's target description where any thread can read it.
   void updateTargetInfo();
