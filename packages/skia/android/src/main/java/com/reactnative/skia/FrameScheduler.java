@@ -6,7 +6,9 @@ import androidx.annotation.Nullable;
  * Decides when a SkiaView presents the recordings queued for it: a SurfaceView
  * on the next vsync, a TextureView behind the draw its window has pending, so
  * that the window has taken the previous frame by then. Keeps at most one
- * frame callback and one posted present outstanding. Main thread.
+ * frame callback and one posted present outstanding. Lives on the thread the
+ * view presents on: the present thread for a SurfaceView, whose Choreographer
+ * gives the vsync, the main thread for a TextureView (see SkiaView).
  */
 final class FrameScheduler {
     /** What the scheduler asks of the view. */
