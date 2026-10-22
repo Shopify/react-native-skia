@@ -116,8 +116,9 @@ public:
   }
 
   /**
-   Installed by the platform view: whether the window can show a frame right
-   now (not while the app is in the background). The view presents nothing
+   Installed by the platform view: whether the window can take a frame right
+   now (not while the app is in the background, nor while an Android
+   TextureView has yet to show the last one). The view presents nothing
    while it returns false, and asks again once told that it can (see
    RNSkView::onCanPresent). Without one, an attached window always can.
    */
@@ -130,6 +131,14 @@ public:
    the platform view says it cannot, nor once the GPU device is lost.
    */
   bool canPresent();
+
+  /**
+   Installed by the platform view: called after each frame the window
+   presents, on the thread that presented it.
+   */
+  void setDidPresent(std::function<void()> didPresent) {
+    _didPresent = std::move(didPresent);
+  }
 
   // RNSkSurface -------------------------------------------------------------
 
@@ -176,6 +185,11 @@ private:
       _requestRedraw();
     }
   }
+  void didPresent() {
+    if (_didPresent) {
+      _didPresent();
+    }
+  }
 
   // The device the window is configured on, and its generation (see
   // DawnContext::generation()): a lost device is replaced, and the window
@@ -210,6 +224,7 @@ private:
 
   std::function<void()> _requestRedraw;
   std::function<bool()> _canPresent;
+  std::function<void()> _didPresent;
 };
 
 } // namespace RNSkia
