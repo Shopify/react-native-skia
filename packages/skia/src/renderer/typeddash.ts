@@ -7,3 +7,15 @@ export const exhaustiveCheck = (a: never): never => {
   "worklet";
   throw new Error(`Unexhaustive handling for ${a}`);
 };
+
+// Shallow eq on props (without children); a key array is made only once every value matched.
+export const shallowEq = <P extends object>(p1: P, p2: P): boolean => {
+  let keyCount = 0;
+  for (const key in p1) {
+    keyCount++;
+    if (key !== "children" && p1[key] !== p2[key]) {
+      return false;
+    }
+  }
+  return keyCount === mapKeys(p2).length;
+};
