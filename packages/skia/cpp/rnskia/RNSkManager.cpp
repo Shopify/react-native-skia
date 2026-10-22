@@ -57,8 +57,8 @@ RNSkManager::~RNSkManager() {
   // Likewise for the view registry: Fabric tears the bundle's views down with
   // no ordering against this destructor, and their late unregistrations are
   // no-ops (the views only hold the manager weakly). Dropped here, the
-  // entries of views torn down after this point, and the tombstones of the
-  // ones torn down before it, do not stay for the life of the process.
+  // entries of the views torn down after this point do not stay for the life
+  // of the process.
   ViewRegistry::getInstance().clear();
   // Free up any references
   _viewApi = nullptr;
@@ -69,15 +69,21 @@ RNSkManager::~RNSkManager() {
 
 void RNSkManager::registerSkiaView(size_t nativeId,
                                    std::shared_ptr<RNSkView> view) {
-  _viewApi->registerSkiaView(nativeId, std::move(view));
+  ViewRegistry::getInstance().bind(nativeId, std::move(view));
 }
 
 void RNSkManager::unregisterSkiaView(size_t nativeId) {
-  _viewApi->unregisterSkiaView(nativeId);
+  ViewRegistry::getInstance().remove(nativeId);
+  RNSkGraphiteTargetRegistry::getInstance().remove(nativeId);
 }
 
 void RNSkManager::setSkiaView(size_t nativeId, std::shared_ptr<RNSkView> view) {
-  _viewApi->setSkiaView(nativeId, std::move(view));
+  auto &registry = ViewRegistry::getInstance();
+  if (view != nullptr) {
+    registry.bind(nativeId, std::move(view));
+  } else {
+    registry.unbind(nativeId);
+  }
 }
 
 void RNSkManager::installBindings() {

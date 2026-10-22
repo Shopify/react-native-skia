@@ -2,6 +2,7 @@ import Rea from "../external/reanimated/ReanimatedProxy";
 import { Worklets } from "../external/reanimated/WorkletsProxy";
 import type { Skia } from "../skia/types";
 import { HAS_REANIMATED_3 } from "../external/reanimated/renderHelpers";
+import type { SkiaViewHandle } from "../views/types";
 
 import type { Recording } from "./Recorder/Recorder";
 import { Recorder, disposeRecording } from "./Recorder/Recorder";
@@ -11,12 +12,12 @@ import { createDrawingContext } from "./Recorder/DrawingContext";
 import { JsContainer, StaticContainer } from "./StaticContainer";
 
 import "../skia/NativeSetup";
-import "../views/api";
 
-// create local reference for `strictGlobal` option in Worklets
-const { SkiaViewApi } = globalThis;
-
-const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
+const drawOnscreen = (
+  Skia: Skia,
+  handle: SkiaViewHandle,
+  recording: Recording
+) => {
   "worklet";
   const rec = Skia.PictureRecorder();
   const canvas = rec.beginRecording();
@@ -36,7 +37,7 @@ const drawOnscreen = (Skia: Skia, nativeId: number, recording: Recording) => {
   }
   //const end = performance.now();
   //console.log("Recording time: ", end - start);
-  SkiaViewApi.setJsiProperty(nativeId, "picture", picture);
+  handle.setPicture(picture);
   // The view now references the new picture; the previous one is ours to
   // delete.
   recording.lastPicture?.dispose();
@@ -84,11 +85,12 @@ class ReanimatedContainer extends JsContainer {
       commands: record.commands,
       paintPool: record.paintPool,
     };
-    const { nativeId, Skia, recording } = this;
+    const { Skia, recording } = this;
+    const handle = this.getViewHandle();
     if (animationValues.size > 0) {
       this.mapperId = Rea.startMapper(() => {
         "worklet";
-        drawOnscreen(Skia, nativeId, recording!);
+        drawOnscreen(Skia, handle, recording!);
       }, Array.from(animationValues));
     }
     Worklets.scheduleOnUI(() => {
@@ -97,7 +99,7 @@ class ReanimatedContainer extends JsContainer {
         // Runs after any still-queued draw of the previous recording.
         disposeRecording(previousRecording);
       }
-      drawOnscreen(Skia, nativeId, recording!);
+      drawOnscreen(Skia, handle, recording!);
     });
   }
 }

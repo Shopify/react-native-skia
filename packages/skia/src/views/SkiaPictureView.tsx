@@ -10,7 +10,7 @@ import {
   warnBackingViewChange,
 } from "./android";
 import type { BackingViewProps } from "./android";
-import type { SkiaPictureViewNativeProps } from "./types";
+import type { SkiaPictureViewNativeProps, SkiaViewHandle } from "./types";
 
 interface SkiaPictureViewProps extends SkiaPictureViewNativeProps {
   mode?: "default" | "continuous";
@@ -29,27 +29,34 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     this._nativeId = SkiaViewApi.allocateNativeId();
     this.mountProps = props;
     warnBackingViewAtMount(props);
-    const { picture } = props;
-    if (picture) {
-      SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
-    }
-    this.tick();
   }
 
   private _nativeId: number;
   // What the Android backing view was chosen from, see warnBackingViewChange.
   private mountProps: BackingViewProps;
+  // The handle of the native view, from mount to unmount (see
+  // SkiaViewHandle). Made once mounted rather than in the constructor, which
+  // React's StrictMode runs twice, keeping one instance.
+  private handle: SkiaViewHandle | null = null;
 
   public get nativeId() {
     return this._nativeId;
+  }
+
+  componentDidMount() {
+    this.handle = SkiaViewApi.makeViewHandle(this._nativeId);
+    const { picture } = this.props;
+    if (picture) {
+      this.handle.setPicture(picture);
+    }
+    this.tick();
   }
 
   componentDidUpdate(prevProps: SkiaPictureViewProps) {
     warnBackingViewChange(this.mountProps, prevProps, this.props);
     const { picture } = this.props;
     if (picture !== prevProps.picture) {
-      assertSkiaViewApi();
-      SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
+      this.handle?.setPicture(picture ?? null);
     }
     this.tick();
   }
@@ -58,6 +65,8 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
     if (this.requestId) {
       cancelAnimationFrame(this.requestId);
     }
+    this.handle?.dispose();
+    this.handle = null;
   }
 
   private tick() {
@@ -108,7 +117,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
 const assertSkiaViewApi = () => {
   if (
     SkiaViewApi === null ||
-    SkiaViewApi.setJsiProperty === null ||
+    SkiaViewApi.makeViewHandle === null ||
     SkiaViewApi.requestRedraw === null ||
     SkiaViewApi.makeImageSnapshot === null
   ) {

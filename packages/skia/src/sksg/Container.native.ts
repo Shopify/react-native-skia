@@ -54,10 +54,11 @@ const reportUnsupportedReanimated = () => {
  * Records the scene graph into the native recorder, on the JS thread, once
  * per React commit.
  *
- * On screen, the recorder is handed to the view, which owns it and replays it
- * on the render thread pool. The Reanimated mapper only pushes the shared
- * values into that recorder through the view id: no Skia object is captured
- * by a worklet, so nothing on the UI runtime holds native memory. The JS
+ * On screen, the recorder is handed to the view through its handle (see
+ * SkiaViewHandle); the view owns it and replays it on the render thread pool.
+ * The Reanimated mapper only pushes the shared values into that recorder
+ * through the view id: no Skia object is captured by a worklet, so nothing
+ * on the UI runtime holds native memory. The JS
  * wrapper is disposed right after the handoff, so the view is the sole owner
  * and the resources referenced by the recording (images, pictures) are
  * released when the view replaces it or is torn down, not when a garbage
@@ -152,7 +153,7 @@ class NativeContainer extends Container {
     const recorderId = recorder.getId();
     // The view takes ownership of the recorder and draws it (right away for a
     // static scene, from the first update on otherwise).
-    SkiaViewApi.setJsiProperty(nativeId, "recorder", recorder);
+    this.getViewHandle().setRecorder(recorder);
     if (sharedValues.length === 0) {
       return;
     }

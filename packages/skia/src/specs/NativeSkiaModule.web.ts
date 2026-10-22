@@ -5,7 +5,7 @@ import type {
   SkPicture,
   SkRect,
 } from "../skia/types";
-import type { ISkiaViewApi } from "../views/types";
+import type { ISkiaViewApi, SkiaViewHandle } from "../views/types";
 
 /** What the web view registers under its native id. */
 export interface SkiaWebViewHandle {
@@ -38,12 +38,25 @@ export type ISkiaViewApiWeb = ISkiaViewApi & {
   unregisteredViews: Set<string>;
   registerView(nativeId: string, view: SkiaWebViewHandle): void;
   unregisterView(nativeId: string): void;
+  /** Shows a picture on the view of the id, or keeps it until it registers. */
+  setJsiProperty<T>(nativeId: number, name: string, value: T): void;
 };
 
 global.SkiaViewApi = {
   nextNativeId: 1000,
   allocateNativeId() {
     return this.nextNativeId++;
+  },
+  makeViewHandle(nativeId: number): SkiaViewHandle {
+    return {
+      setPicture: (picture) =>
+        this.setJsiProperty(nativeId, "picture", picture),
+      setRecorder: () => {
+        // The web draws its frames into pictures (see Container.web.ts): no
+        // view owns a recorder.
+      },
+      dispose: () => {},
+    };
   },
   views: {},
   deferedPictures: {},

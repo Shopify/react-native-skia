@@ -2,6 +2,7 @@ import type { ViewProps } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
 import type {
+  JsiRecorder,
   SkGraphiteContext,
   SkImage,
   SkPicture,
@@ -85,6 +86,22 @@ export type AndroidCanvasProps =
   | AndroidSurfaceViewProps
   | AndroidHardwareBufferViewProps;
 
+/**
+ * The handle of a Skia view: what JS hands the view (the recorder of a
+ * `Canvas`, a picture) goes through it rather than by id, so that nothing
+ * handed over after the view is gone can take its place in the native
+ * registry. Made by `makeViewHandle` for the view's id when the canvas
+ * mounts, disposed when it unmounts; what is handed over before the native
+ * view registers waits for it.
+ */
+export interface SkiaViewHandle {
+  /** Shows a picture (`null` clears it): a `SkiaPictureView` frame. */
+  setPicture: (picture: SkPicture | null) => void;
+  /** Hands the view the recording of a `Canvas` commit, which it then owns. */
+  setRecorder: (recorder: JsiRecorder) => void;
+  dispose: () => void;
+}
+
 export interface ISkiaViewApi {
   web?: boolean;
   /**
@@ -94,7 +111,8 @@ export interface ISkiaViewApi {
    * while the new bundle is already mounting.
    */
   allocateNativeId: () => number;
-  setJsiProperty: <T>(nativeId: number, name: string, value: T) => void;
+  /** The handle of the view of an id, see {@link SkiaViewHandle}. */
+  makeViewHandle: (nativeId: number) => SkiaViewHandle;
   requestRedraw: (nativeId: number) => void;
   /**
    * Reads the shared values into the recording held for the view and

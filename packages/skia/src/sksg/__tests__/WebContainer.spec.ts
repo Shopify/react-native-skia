@@ -1,3 +1,7 @@
+// A module: a script shares its top-level names with every other script
+// TypeScript checks, and the other container spec declares the same ones.
+export {};
+
 // The web Reanimated container records the scene on the JS thread and draws it
 // on the UI thread. These tests pin down that it schedules that work through
 // worklets' scheduleOnUI, not the deprecated runOnUI, and that a recording is
@@ -92,7 +96,12 @@ const flushUIQueue = () => {
 };
 
 const setup = () => {
-  const SkiaViewApi = { setJsiProperty: jest.fn() };
+  const handle = {
+    setPicture: jest.fn(),
+    setRecorder: jest.fn(),
+    dispose: jest.fn(),
+  };
+  const SkiaViewApi = { makeViewHandle: jest.fn(() => handle) };
   (globalThis as unknown as { SkiaViewApi: unknown }).SkiaViewApi = SkiaViewApi;
   // The module reads SkiaViewApi from globalThis when it loads.
   jest.isolateModules(() => {
@@ -100,7 +109,7 @@ const setup = () => {
     setup.createContainer = createContainer;
   });
   const container = setup.createContainer(Skia as never, 7);
-  return { SkiaViewApi, container };
+  return { SkiaViewApi, handle, container };
 };
 setup.createContainer = null as unknown as (
   Skia: never,
@@ -122,16 +131,13 @@ beforeEach(() => {
 
 describe("ReanimatedContainer on the web", () => {
   it("draws each recording on the UI thread through scheduleOnUI", () => {
-    const { SkiaViewApi, container } = setup();
+    const { SkiaViewApi, handle, container } = setup();
     container.redraw();
     expect(mockEvents).toEqual([]);
     flushUIQueue();
     expect(mockEvents).toEqual(["draw recording 1"]);
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledWith(
-      7,
-      "picture",
-      expect.anything()
-    );
+    expect(SkiaViewApi.makeViewHandle).toHaveBeenCalledWith(7);
+    expect(handle.setPicture).toHaveBeenCalledWith(expect.anything());
     expect(mockCalls).toEqual({ scheduleOnUI: 1, deprecatedRunOnUI: 0 });
   });
 

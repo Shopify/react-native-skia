@@ -1,3 +1,7 @@
+// A module: a script shares its top-level names with every other script
+// TypeScript checks, and the other container spec declares the same ones.
+export {};
+
 // The native container records the scene into the native recorder. On
 // screen it hands the recording to the view (which owns it) and drives
 // animations through the view id only. These tests pin down that no recorder
@@ -69,6 +73,7 @@ const mockRecorder = (): MockRecorder => {
 const mockSkia = { Recorder: mockRecorder };
 
 type TestContainer = {
+  mount: () => void;
   redraw: () => void;
   recordAfterCommit: () => void;
   unmount: () => void;
@@ -76,9 +81,21 @@ type TestContainer = {
   readSharedValues: () => void;
 };
 
+// The handle of the view, made by SkiaViewApi.makeViewHandle (see setup).
+let handle = {
+  setRecorder: jest.fn(),
+  setPicture: jest.fn(),
+  dispose: jest.fn(),
+};
+
 const setup = (nativeId = 7) => {
+  handle = {
+    setRecorder: jest.fn(),
+    setPicture: jest.fn(),
+    dispose: jest.fn(),
+  };
   const SkiaViewApi = {
-    setJsiProperty: jest.fn(),
+    makeViewHandle: jest.fn(() => handle),
     applyUpdates: jest.fn(),
   };
   (globalThis as unknown as { SkiaViewApi: unknown }).SkiaViewApi = SkiaViewApi;
@@ -114,24 +131,20 @@ const withDev = (dev: boolean, fn: () => void) => {
 
 describe("NativeContainer", () => {
   it("hands the recorder to the view and starts no mapper for a static scene", () => {
-    const { SkiaViewApi, container } = setup();
+    const { container } = setup();
     container.redraw();
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledWith(
-      7,
-      "recorder",
-      mockRecorders[0]
-    );
+    expect(handle.setRecorder).toHaveBeenCalledWith(mockRecorders[0]);
     expect(mockStartMapper).not.toHaveBeenCalled();
   });
 
   it("disposes the wrapper once the view owns the recording", () => {
-    const { SkiaViewApi, container } = setup();
+    const { container } = setup();
     container.redraw();
     const { dispose } = mockRecorders[0];
     expect(dispose).toHaveBeenCalledTimes(1);
     // The view must hold the recording before the wrapper lets go of it.
     expect(dispose.mock.invocationCallOrder[0]).toBeGreaterThan(
-      SkiaViewApi.setJsiProperty.mock.invocationCallOrder[0]
+      handle.setRecorder.mock.invocationCallOrder[0]
     );
   });
 
@@ -156,7 +169,7 @@ describe("NativeContainer", () => {
     );
     // No recorder or picture reaches the worklet: the only view call it
     // makes is applyUpdates.
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+    expect(handle.setRecorder).toHaveBeenCalledTimes(1);
   });
 
   it("reads the shared values on the UI thread only, through the mapper", () => {
@@ -171,37 +184,51 @@ describe("NativeContainer", () => {
     // The recorder hands its shared values out before the view owns it.
     expect(
       mockRecorders[0].getSharedValues.mock.invocationCallOrder[0]
-    ).toBeLessThan(SkiaViewApi.setJsiProperty.mock.invocationCallOrder[0]);
+    ).toBeLessThan(handle.setRecorder.mock.invocationCallOrder[0]);
   });
 
   it("stops the previous mapper and replaces the recorder on redraw", () => {
     mockSharedValues = [{ value: 0 }];
-    const { SkiaViewApi, container } = setup();
+    const { container } = setup();
     container.redraw();
     container.redraw();
     expect(mockStopMapper).toHaveBeenCalledWith(42);
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenLastCalledWith(
-      7,
-      "recorder",
-      mockRecorders[1]
-    );
+    expect(handle.setRecorder).toHaveBeenLastCalledWith(mockRecorders[1]);
   });
 
   it("stops the mapper and keeps the last frame on the view on unmount", () => {
     mockSharedValues = [{ value: 0 }];
-    const { SkiaViewApi, container } = setup();
+    const { container } = setup();
     container.redraw();
     container.unmount();
     expect(mockStopMapper).toHaveBeenCalledWith(42);
     // The native view can outlive the React tree (exit animations, screen
     // transitions) and keeps drawing its last frame until it is torn down,
     // which is when it releases the recording: unmount must not clear it.
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+    expect(handle.setRecorder).toHaveBeenCalledTimes(1);
+    // The handle is let go of with the container's claim on the view.
+    expect(handle.dispose).toHaveBeenCalledTimes(1);
     // The unmount commit triggers a last redraw: it must not resurrect a
     // recording for the view.
     container.redraw();
     expect(mockRecorders).toHaveLength(1);
     expect(mockStartMapper).toHaveBeenCalledTimes(1);
+  });
+
+  it("makes the view handle on the first frame and again after a remount", () => {
+    const { SkiaViewApi, container } = setup();
+    expect(SkiaViewApi.makeViewHandle).not.toHaveBeenCalled();
+    container.redraw();
+    container.redraw();
+    expect(SkiaViewApi.makeViewHandle).toHaveBeenCalledTimes(1);
+    expect(SkiaViewApi.makeViewHandle).toHaveBeenCalledWith(7);
+    // React's StrictMode mounts the container again after its simulated
+    // unmount: the next frame goes through a new handle.
+    container.unmount();
+    container.mount();
+    container.redraw();
+    expect(SkiaViewApi.makeViewHandle).toHaveBeenCalledTimes(2);
+    expect(handle.setRecorder).toHaveBeenCalledWith(mockRecorders[2]);
   });
 
   it("reads the shared values on this thread for a snapshot", () => {
@@ -288,10 +315,10 @@ describe("NativeContainer", () => {
         // The recording still reaches the view, with the current values, and
         // the commit completes.
         container.recordAfterCommit();
-        expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+        expect(handle.setRecorder).toHaveBeenCalledTimes(1);
         // No mapper will read the shared values: they are read once, here,
         // into the recording the view already owns (the update would find
-        // no recording before setJsiProperty).
+        // no recording before setRecorder).
         expect(SkiaViewApi.applyUpdates).toHaveBeenCalledTimes(1);
         expect(SkiaViewApi.applyUpdates).toHaveBeenCalledWith(
           7,
@@ -300,9 +327,7 @@ describe("NativeContainer", () => {
         );
         expect(
           SkiaViewApi.applyUpdates.mock.invocationCallOrder[0]
-        ).toBeGreaterThan(
-          SkiaViewApi.setJsiProperty.mock.invocationCallOrder[0]
-        );
+        ).toBeGreaterThan(handle.setRecorder.mock.invocationCallOrder[0]);
         expect(mockStartMapper).not.toHaveBeenCalled();
         expect(error).toHaveBeenCalledTimes(1);
       });
@@ -313,7 +338,7 @@ describe("NativeContainer", () => {
 
   it("reports a recording that fails on screen and keeps the last frame", () => {
     mockSharedValues = [{ value: 0 }];
-    const { SkiaViewApi, container } = setup();
+    const { container } = setup();
     container.recordAfterCommit();
     const failure = new Error("Invalid shader type: skBlurImageFilter");
     mockVisit.mockImplementationOnce(() => {
@@ -330,17 +355,13 @@ describe("NativeContainer", () => {
     }
     // The view keeps the recording it has; the failed one is let go of, and
     // its mapper was stopped with the recording it belonged to.
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenCalledTimes(1);
+    expect(handle.setRecorder).toHaveBeenCalledTimes(1);
     expect(mockRecorders).toHaveLength(2);
     expect(mockRecorders[1].dispose).toHaveBeenCalledTimes(1);
     expect(mockStopMapper).toHaveBeenCalledWith(42);
     // The next commit records again.
     container.recordAfterCommit();
-    expect(SkiaViewApi.setJsiProperty).toHaveBeenLastCalledWith(
-      7,
-      "recorder",
-      mockRecorders[2]
-    );
+    expect(handle.setRecorder).toHaveBeenLastCalledWith(mockRecorders[2]);
     expect(mockStartMapper).toHaveBeenCalledTimes(2);
   });
 
@@ -398,7 +419,7 @@ describe("NativeContainer", () => {
     mockSharedValues = [{ value: 0 }];
     const { SkiaViewApi, container } = setup(-1);
     container.redraw();
-    expect(SkiaViewApi.setJsiProperty).not.toHaveBeenCalled();
+    expect(SkiaViewApi.makeViewHandle).not.toHaveBeenCalled();
     expect(mockStartMapper).not.toHaveBeenCalled();
     // makePicture() reads the shared values itself, on this thread: the
     // recorder must still hold them, so they are not taken from it first.

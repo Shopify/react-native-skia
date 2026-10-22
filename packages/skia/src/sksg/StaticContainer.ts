@@ -1,4 +1,5 @@
 import type { Skia, SkCanvas } from "../skia/types";
+import type { SkiaViewHandle } from "../views/types";
 
 import type { Node } from "./Node";
 import type { Recording } from "./Recorder/Recorder";
@@ -18,6 +19,7 @@ export abstract class Container {
   private _root: Node[] = [];
   protected unmounted = false;
   private recordingError: { error: unknown } | null = null;
+  private viewHandle: SkiaViewHandle | null = null;
 
   constructor(
     protected Skia: Skia,
@@ -39,6 +41,24 @@ export abstract class Container {
 
   unmount() {
     this.unmounted = true;
+    this.viewHandle?.dispose();
+    this.viewHandle = null;
+  }
+
+  /**
+   * The handle of the view the frames go to (see SkiaViewHandle), made on
+   * first use and let go of on unmount: React's StrictMode mounts the
+   * container again after its simulated unmount, and the next frame makes a
+   * new one. Not for an offscreen container.
+   */
+  protected getViewHandle() {
+    if (this.nativeId === -1) {
+      throw new Error("An offscreen container has no view");
+    }
+    if (this.viewHandle === null) {
+      this.viewHandle = SkiaViewApi.makeViewHandle(this.nativeId);
+    }
+    return this.viewHandle;
   }
 
   /**
@@ -140,7 +160,7 @@ export class StaticContainer extends JsContainer {
       this.drawFrame(canvas);
       const picture = rec.finishRecordingAsPicture();
       rec.dispose();
-      SkiaViewApi.setJsiProperty(this.nativeId, "picture", picture);
+      this.getViewHandle().setPicture(picture);
       // The view keeps its own reference to the picture it displays; this
       // one is renderer-owned and disposed with the recording.
       this.recording.lastPicture = picture;
