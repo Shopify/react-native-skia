@@ -17,7 +17,37 @@
 
 namespace RNSkia {
 
-RNSkGraphiteProducer::~RNSkGraphiteProducer() = default;
+namespace {
+
+/**
+ The render thread pool, set up on first use to trim the recorders of its
+ threads once GPU resources went away (see DawnContext::trimThreadRecorders):
+ a view torn down with its content, or textures the image cache let go of.
+ A thread that ran no job for RNSkThreadPool::kIdleDelay lets go of all it
+ can; one still recording, of what went unused that long.
+ */
+RNSkThreadPool &renderPool() {
+  static RNSkThreadPool &pool = []() -> RNSkThreadPool & {
+    auto &threads = RNSkThreadPool::getInstance();
+    threads.setIdleTask([](bool idle) {
+      // What went away with the request is older than this by the time the
+      // task runs, what the views still drawing use is not.
+      DawnContext::trimThreadRecorders(RNSkThreadPool::kIdleDelay / 2, idle);
+    });
+    ImageProvider::setReleaseListener(
+        []() { RNSkThreadPool::getInstance().requestIdleTask(); });
+    return threads;
+  }();
+  return pool;
+}
+
+} // namespace
+
+RNSkGraphiteProducer::~RNSkGraphiteProducer() {
+  // The content goes away with the view: what the recorders of the render
+  // threads still cache for it is freed once they are idle.
+  renderPool().requestIdleTask();
+}
 
 void RNSkGraphiteProducer::drawContent(SkCanvas *canvas, Recorder *recorder,
                                        const sk_sp<SkPicture> &picture,
@@ -159,7 +189,7 @@ void RNSkGraphiteProducer::kickLocked() {
   }
   _inFlight = true;
   std::weak_ptr<RNSkGraphiteProducer> weakThis = weak_from_this();
-  RNSkThreadPool::getInstance().post([weakThis]() {
+  renderPool().post([weakThis]() {
     if (auto self = weakThis.lock()) {
       self->produce();
     }

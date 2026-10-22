@@ -56,7 +56,9 @@ namespace RNSkia {
  *
  * The cache is bounded by bytes, least recently used first out, and a thread
  * of its own releases the entries not drawn for a while, so that the
- * textures of a screen that is gone do not wait for the next lookup. Every
+ * textures of a screen that is gone do not wait for the next lookup. A
+ * released texture goes back to the upload recorder it was made on, which
+ * frees it on its own thread once asked to (see setReleaseListener). Every
  * entry carries the generation of the GPU device it was uploaded on (see
  * DawnContext::generation()): a recorder only gets textures of its own
  * device, an entry of a device since lost is released when a newer recorder
@@ -112,6 +114,18 @@ public:
    which the new one refuses. Any thread.
    */
   static void invalidateAll() { cache().clear(); }
+
+  /**
+   What to call after the cache let go of textures: entries not drawn for
+   kMaxUnusedAge, evicted for the budget, or all of them (invalidateAll).
+   Called on the thread that let go of them, outside the cache lock. A texture
+   goes back to the recorder that uploaded it, which only frees it on its own
+   thread (see DawnContext::trimThreadRecorders): the listener asks for that.
+   Any thread.
+   */
+  static void setReleaseListener(std::function<void()> listener) {
+    cache().setReleaseListener(std::move(listener));
+  }
 
   sk_sp<SkImage>
   findOrCreate(skgpu::graphite::Recorder *recorder, const SkImage *image,
@@ -265,11 +279,69 @@ private:
      it would upload it again every frame.
      */
     sk_sp<SkImage> endUpload(const Key &key, Upload upload) {
-      const auto now = Clock::now();
       // The textures evicted (and the one that lost out) are released
-      // outside the lock.
+      // outside the lock, and the listener told after.
       std::vector<sk_sp<SkImage>> released;
+      sk_sp<SkImage> texture;
+      std::function<void()> listener;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        texture = endUploadLocked(key, std::move(upload), released);
+        if (!released.empty()) {
+          listener = _releaseListener;
+        }
+      }
+      released.clear();
+      if (listener) {
+        listener();
+      }
+      return texture;
+    }
+
+    void clear() {
+      std::function<void()> listener;
+      {
+        List entries;
+        {
+          std::lock_guard<std::mutex> lock(_mutex);
+          entries.swap(_entries);
+          _index.clear();
+          _failures.clear();
+          _bytes = 0;
+          if (!entries.empty()) {
+            listener = _releaseListener;
+          }
+        }
+        // Released outside the lock.
+      }
+      if (listener) {
+        listener();
+      }
+    }
+
+    void setReleaseListener(std::function<void()> listener) {
       std::lock_guard<std::mutex> lock(_mutex);
+      _releaseListener = std::move(listener);
+    }
+
+    size_t bytesUsed() {
+      std::lock_guard<std::mutex> lock(_mutex);
+      return _bytes;
+    }
+
+    size_t count() {
+      std::lock_guard<std::mutex> lock(_mutex);
+      return _entries.size();
+    }
+
+  private:
+    // Most recently used first.
+    using List = std::list<Entry>;
+
+    /** See endUpload(). Under the lock. */
+    sk_sp<SkImage> endUploadLocked(const Key &key, Upload upload,
+                                   std::vector<sk_sp<SkImage>> &released) {
+      const auto now = Clock::now();
       _uploading.erase(key);
       _uploaded.notify_all();
       if (upload.texture == nullptr) {
@@ -303,32 +375,6 @@ private:
       _reaperWakeup.notify_one();
       return upload.texture;
     }
-
-    void clear() {
-      List entries;
-      {
-        std::lock_guard<std::mutex> lock(_mutex);
-        entries.swap(_entries);
-        _index.clear();
-        _failures.clear();
-        _bytes = 0;
-      }
-      // Released outside the lock.
-    }
-
-    size_t bytesUsed() {
-      std::lock_guard<std::mutex> lock(_mutex);
-      return _bytes;
-    }
-
-    size_t count() {
-      std::lock_guard<std::mutex> lock(_mutex);
-      return _entries.size();
-    }
-
-  private:
-    // Most recently used first.
-    using List = std::list<Entry>;
 
     /**
      The entry of the key, for a recorder of the device of `generation`. An
@@ -441,8 +487,12 @@ private:
         _reaperWakeup.wait_until(lock, deadline);
         releaseUnusedLocked(Clock::now(), released);
         if (!released.empty()) {
+          auto listener = _releaseListener;
           lock.unlock();
           released.clear();
+          if (listener) {
+            listener();
+          }
           lock.lock();
         }
       }
@@ -459,6 +509,8 @@ private:
     std::unordered_map<Key, Failure, KeyHash> _failures;
     bool _reaperStarted = false;
     std::condition_variable _reaperWakeup;
+    // See ImageProvider::setReleaseListener.
+    std::function<void()> _releaseListener;
   };
 
   static Cache &cache() {

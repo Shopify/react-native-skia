@@ -161,6 +161,22 @@ int main() {
   if (ImageProvider::count() != 0 || ImageProvider::bytesUsed() != 0) {
     return fail("failed uploads left entries in the cache");
   }
+  // The release listener asks the recorders to free the textures the cache
+  // let go of: a failed upload, or clearing an empty cache, lets go of none.
+  std::atomic<int> releases{0};
+  ImageProvider::setReleaseListener([&releases]() { releases++; });
+  int fourth = 0;
+  const auto *unseen = reinterpret_cast<const SkImage *>(&fourth);
+  if (after->findOrCreate(nullptr, unseen, {false}) != nullptr ||
+      uploads != 7) {
+    return fail("a miss does not upload through the uploader");
+  }
+  ImageProvider::invalidateAll();
+  if (releases != 0) {
+    return fail("the release listener was told of a release that did not "
+                "happen");
+  }
+  ImageProvider::setReleaseListener(nullptr);
   std::printf("ImageProviderTest: passed\n");
   return 0;
 }

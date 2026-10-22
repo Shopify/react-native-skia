@@ -402,6 +402,47 @@ public:
   }
 
   /**
+   Frees the GPU memory the recorders of the calling thread hold without
+   using it, on that thread (a recorder belongs to the thread it records
+   on): what went unused for `unusedFor`, or, with `everything`, all they
+   can let go of, the pages of their atlases included. `everything` is for a
+   thread that records nothing for now (a render thread once idle, see
+   RNSkGraphiteProducer): the atlases lose no content by it, as Graphite
+   empties them at every snap when recordings may be inserted in any order.
+   The upload recorder lets go of everything either way: what it made
+   belongs to the image cache (see makeRecorderLocked). The GPU work that
+   finished releases its resources first, and Dawn runs the deletions it
+   deferred after. Never makes a recorder. Any thread.
+   */
+  static void trimThreadRecorders(std::chrono::milliseconds unusedFor,
+                                  bool everything) {
+    auto *instance = tryGetInstance();
+    if (instance == nullptr) {
+      return;
+    }
+    auto &drawing = threadSlot();
+    auto &uploads = uploadSlot();
+    if (drawing.recorder == nullptr && uploads.recorder == nullptr) {
+      return;
+    }
+    instance->checkFinishedWork();
+    if (drawing.recorder != nullptr) {
+      if (everything) {
+        drawing.recorder->freeGpuResources();
+      } else {
+        drawing.recorder->performDeferredCleanup(unusedFor);
+      }
+    }
+    if (uploads.recorder != nullptr) {
+      // Not performDeferredCleanup(0): a resource it takes back from the
+      // return queue counts as used at that moment, so it would keep every
+      // texture the image cache let go of since the last call.
+      uploads.recorder->freeGpuResources();
+    }
+    instance->checkFinishedWork();
+  }
+
+  /**
    Snaps what the recorder recorded and runs it on the GPU. `recorder` is a
    thread's (see getRecorder), also behind the surfaces made on it; any
    other submits nothing. A recording made for a lost device (see
@@ -960,12 +1001,22 @@ private:
 
   // Recorders ----------------------------------------------------------------
 
-  /** Called with the context lock held. */
+  /**
+   A recorder for the device in use; `forUploads` for the upload recorder of
+   a thread (see upload()). Called with the context lock held.
+   */
   std::unique_ptr<skgpu::graphite::Recorder>
-  makeRecorderLocked(bool useImageProvider = true) {
+  makeRecorderLocked(bool forUploads = false) {
     auto *current = _current.load(std::memory_order_acquire);
-    if (!useImageProvider) {
-      return current->context->makeRecorder();
+    if (forUploads) {
+      // Skia's default image provider, and no budget: the textures it makes
+      // belong to the image cache, or to whoever asked for one. Graphite
+      // keeps a texture that comes back to its recorder, for reuse, until the
+      // recorder goes over budget (256 MB by default): with a budget, the
+      // textures the image cache lets go of would stay on the GPU.
+      skgpu::graphite::RecorderOptions options;
+      options.fGpuBudgetInBytes = 0;
+      return current->context->makeRecorder(options);
     }
     skgpu::graphite::RecorderOptions options;
     // The provider uploads through upload() (see ImageProvider), and serves
@@ -998,10 +1049,10 @@ private:
     // submit what the offscreen surfaces of this thread recorded so far. It
     // only uploads, so it keeps Skia's default image provider rather than
     // the image cache, which uploads through here.
-    static thread_local ThreadRecorder uploadRecorder;
-    auto *recorder = currentRecorder(uploadRecorder, false);
+    auto &slot = uploadSlot();
+    auto *recorder = currentRecorder(slot, /* forUploads= */ true);
     ImageProvider::Upload result;
-    result.generation = uploadRecorder.generation;
+    result.generation = slot.generation;
     auto texture =
         SkImages::TextureFromImage(recorder, image.get(), {mipmapped});
     if (texture == nullptr || !submitRecording(recorder)) {
@@ -1019,14 +1070,14 @@ private:
    submitRecording). Throws when none can be made.
    */
   skgpu::graphite::Recorder *currentRecorder(ThreadRecorder &slot,
-                                             bool useImageProvider = true) {
+                                             bool forUploads = false) {
     if (slot.recorder != nullptr &&
         slot.generation == _current.load(std::memory_order_acquire)->id) {
       return slot.recorder.get();
     }
     std::lock_guard<std::mutex> lock(_mutex);
     auto *current = _current.load(std::memory_order_acquire);
-    auto recorder = makeRecorderLocked(useImageProvider);
+    auto recorder = makeRecorderLocked(forUploads);
     if (recorder == nullptr) {
       throw std::runtime_error("Failed to create graphite context");
     }
@@ -1050,6 +1101,12 @@ private:
 
   /** The slot of the calling thread's recorder (see getRecorder). */
   static ThreadRecorder &threadSlot() {
+    static thread_local ThreadRecorder slot;
+    return slot;
+  }
+
+  /** The slot of the calling thread's upload recorder (see upload()). */
+  static ThreadRecorder &uploadSlot() {
     static thread_local ThreadRecorder slot;
     return slot;
   }
@@ -1108,6 +1165,18 @@ private:
         std::this_thread::sleep_for(interval);
       }
     }
+  }
+
+  /**
+   Lets the GPU work that finished release its resources (command buffers
+   hold on to what they use until the context sees them done), and Dawn run
+   the deletions it deferred until its next tick. Takes the context lock.
+   */
+  void checkFinishedWork() {
+    std::lock_guard<std::mutex> lock(_mutex);
+    tick();
+    _current.load(std::memory_order_acquire)
+        ->context->checkAsyncWorkCompletion();
   }
 
   // Processes the instance's events: the completions of every device on it.
