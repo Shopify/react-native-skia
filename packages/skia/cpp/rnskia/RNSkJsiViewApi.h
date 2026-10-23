@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -42,6 +43,15 @@ public:
 
   ViewRegistry(const ViewRegistry &) = delete;
   ViewRegistry &operator=(const ViewRegistry &) = delete;
+
+  // The id of a view about to mount. Ids are handed out here, once for the
+  // life of the process, rather than counted by each JS runtime from the
+  // same start: this registry outlives a reload, and the views of the bundle
+  // being replaced leave it (as tombstones, see removeViewInfo) while the
+  // new bundle is already mounting. A view counted from the same start as
+  // its predecessor would hand its first picture to the predecessor's
+  // tombstone and show nothing until its next one (#4312).
+  size_t allocateId() { return _nextId.fetch_add(1); }
 
   void removeViewInfo(size_t id) {
     std::unique_lock<std::shared_mutex> lock(_mutex);
@@ -109,11 +119,21 @@ private:
   mutable std::shared_mutex _mutex;
   std::unordered_map<size_t, std::shared_ptr<RNSkViewInfo>> _registry;
   std::unordered_set<size_t> _unregistered;
+  std::atomic<size_t> _nextId{1000};
 };
 
 class RNSkJsiViewApi : public JsiSkNativeObject<RNSkJsiViewApi> {
 public:
   static constexpr const char *CLASS_NAME = "ViewApi";
+
+  /**
+   Returns the id for a view about to mount, unique for the life of the
+   process (see ViewRegistry::allocateId).
+   */
+  JSI_HOST_FUNCTION(allocateNativeId) {
+    return jsi::Value(
+        static_cast<double>(ViewRegistry::getInstance().allocateId()));
+  }
 
   /**
    Sets a custom property on a view given a view id. The property name/value
@@ -390,6 +410,8 @@ public:
   }
 
   static void definePrototype(jsi::Runtime &runtime, jsi::Object &prototype) {
+    installHostMethod(runtime, prototype, "allocateNativeId",
+                      &RNSkJsiViewApi::allocateNativeId);
     installHostMethod(runtime, prototype, "setJsiProperty",
                       &RNSkJsiViewApi::setJsiProperty);
     installHostMethod(runtime, prototype, "requestRedraw",

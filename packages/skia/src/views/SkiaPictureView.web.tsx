@@ -14,7 +14,6 @@ import type {
 } from "../specs/NativeSkiaModule.web";
 
 import type { SkiaPictureViewNativeProps } from "./types";
-import { SkiaViewNativeId } from "./SkiaViewNativeId";
 import { useSkiaWebRenderer } from "./SkiaWebRenderer";
 import type { Renderer } from "./SkiaWebRenderer";
 
@@ -172,8 +171,8 @@ export const SkiaPictureView = (props: SkiaPictureViewProps) => {
   );
 
   useEffect(() => {
-    const nativeID = props.nativeID ?? `${SkiaViewNativeId.current++}`;
     const api = global.SkiaViewApi as ISkiaViewApiWeb;
+    const nativeID = props.nativeID ?? `${api.allocateNativeId()}`;
     api.registerView(nativeID, {
       setPicture,
       getSize,

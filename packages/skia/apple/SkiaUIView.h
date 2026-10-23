@@ -17,7 +17,7 @@
 
 @interface SkiaUIView : RCTViewComponentView
 
-- (void)initCommon:(RNSkia::RNSkManager *)manager
+- (void)initCommon:(std::shared_ptr<RNSkia::RNSkManager>)manager
            factory:(std::function<std::shared_ptr<RNSkBaseAppleView>(
                         std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory;
 - (std::shared_ptr<RNSkBaseAppleView>)impl;

@@ -30,6 +30,14 @@ RNSkManager::RNSkManager(
 }
 
 RNSkManager::~RNSkManager() {
+  // The runtime is going away, with the views of its bundle. Fabric tears
+  // those views down with no ordering against this destructor, and their late
+  // unregistrations are no-ops (the views only hold the manager weakly).
+  // Dropped here, the entries of views torn down after this point, and the
+  // tombstones of the ones torn down before it, do not stay for the life of
+  // the process (the next bundle's views get ids of their own, see
+  // ViewRegistry::allocateId).
+  ViewRegistry::getInstance().clear();
   // Free up any references
   _viewApi = nullptr;
   _jsRuntime = nullptr;

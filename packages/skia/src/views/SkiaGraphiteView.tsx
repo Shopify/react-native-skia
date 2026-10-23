@@ -5,7 +5,6 @@ import SkiaGraphiteViewNativeComponent from "../specs/SkiaGraphiteViewNativeComp
 
 import { SkiaViewApi } from "./api";
 import type { SkiaGraphiteViewNativeProps } from "./types";
-import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 export interface SkiaGraphiteViewRef {
   /**
@@ -32,7 +31,7 @@ export const SkiaGraphiteView = ({
   ref,
   ...viewProps
 }: SkiaGraphiteViewProps) => {
-  const nativeId = useMemo(() => SkiaViewNativeId.current++, []);
+  const nativeId = useMemo(() => SkiaViewApi.allocateNativeId(), []);
   const viewRef =
     useRef<React.ComponentRef<typeof SkiaGraphiteViewNativeComponent>>(null);
   useImperativeHandle(

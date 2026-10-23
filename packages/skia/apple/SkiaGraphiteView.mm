@@ -29,8 +29,8 @@ using namespace facebook::react;
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
-    // Pass SkManager as a raw pointer to avoid circular dependencies
-    auto skManager = [RNSkiaModule latestActiveSkManager].get();
+    // The view keeps the manager weakly (see SkiaUIView).
+    auto skManager = [RNSkiaModule latestActiveSkManager];
     [self initCommon:skManager
              factory:[](std::shared_ptr<RNSkia::RNSkPlatformContext> context) {
                return std::make_shared<RNSkAppleView<RNSkia::RNSkGraphiteView>>(

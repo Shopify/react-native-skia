@@ -5,7 +5,6 @@ import SkiaPictureViewNativeComponent from "../specs/SkiaPictureViewNativeCompon
 
 import { SkiaViewApi } from "./api";
 import type { SkiaPictureViewNativeProps } from "./types";
-import { SkiaViewNativeId } from "./SkiaViewNativeId";
 
 const NativeSkiaPictureView = SkiaPictureViewNativeComponent;
 
@@ -19,10 +18,10 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
 
   constructor(props: SkiaPictureViewProps) {
     super(props);
-    this._nativeId = SkiaViewNativeId.current++;
+    assertSkiaViewApi();
+    this._nativeId = SkiaViewApi.allocateNativeId();
     const { picture } = props;
     if (picture) {
-      assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
     }
     this.tick();
