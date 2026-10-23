@@ -153,7 +153,7 @@ public:
     if (_surface == nullptr) {
       return false;
     }
-    _surface->getCanvas()->drawImage(image, 0, 0);
+    drawOnto(_surface->getCanvas(), image, _width, _height);
     return true;
   }
 

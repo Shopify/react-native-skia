@@ -127,10 +127,10 @@ protected:
   }
 
   // The Java view's frame scheduler, on the thread the view presents on:
-  // presents the queued recordings, returns whether more are already
-  // waiting. The Java view keeps this object alive for the call (see
-  // SkiaView.dropInstance).
-  bool presentFrame() { return _view->presentFrame(); }
+  // presents the queued recordings, says whether a frame went to the window
+  // and whether more are waiting (see RNSkView::presentFrame). The Java view
+  // keeps this object alive for the call (see SkiaView.dropInstance).
+  int presentFrame() { return _view->presentFrame(); }
 
 private:
   friend HybridBase;
@@ -159,15 +159,16 @@ private:
       method(javaPart, jni::JNativeRunnable::newObjectCxxArgs(std::move(task)));
     });
     // A submitted recording arms the Java view's frame callback, on the
-    // present thread.
-    _view->setFrameScheduler([javaView]() {
+    // present thread (or presents on the spot, for a window resized since
+    // the frame it shows: see FrameScheduler.requestFrame).
+    _view->setFrameScheduler([javaView](bool forResizedWindow) {
       auto javaPart = javaView->weak->lockLocal();
       if (!javaPart) {
         return;
       }
       static const auto method =
-          javaPart->getClass()->getMethod<void()>("scheduleFrame");
-      method(javaPart);
+          javaPart->getClass()->getMethod<void(jboolean)>("scheduleFrame");
+      method(javaPart, static_cast<jboolean>(forResizedWindow));
     });
   }
 
@@ -199,6 +200,9 @@ private:
                     bool highBitDepth) {
     // Release the old surface and its window first.
     _surface->detach();
+    // A TextureView draws the latest frame presented to it; a SurfaceView's
+    // frames show in turn (see RNSkView::setWindowTakesLatestFrame).
+    _view->setWindowTakesLatestFrame(!isSurface);
     JNIEnv *env = jni::Environment::current();
     jobject jSurface = surface;
     // The Surface created over a TextureView's SurfaceTexture; it lives as

@@ -103,26 +103,31 @@ void RNSkWindowSurface::attach(void *nativeHandle, int width, int height,
           "it, falling back to the 8-bit format");
     }
   }
-  configureSurface();
+  _usage = supportedSurfaceUsage();
+  _needsConfigure = true;
+  {
+    std::lock_guard<std::mutex> infoLock(_targetInfoMutex);
+    _hasPendingSize = false;
+  }
   updateTargetInfo();
   requestRedraw();
 }
 
 void RNSkWindowSurface::resize(int width, int height) {
-  std::lock_guard<std::mutex> lock(_mutex);
-  if (_nativeHandle == nullptr) {
-    return;
+  {
+    std::lock_guard<std::mutex> lock(_targetInfoMutex);
+    if (!_hasTargetInfo) {
+      return;
+    }
+    // What frames are recorded for from now. The window follows on the
+    // presenting thread, by its next present (see takePendingSizeLocked):
+    // the main thread does not wait for a present in flight.
+    _targetInfo.width = width;
+    _targetInfo.height = height;
+    _pendingWidth = width;
+    _pendingHeight = height;
+    _hasPendingSize = true;
   }
-  _width = width;
-  _height = height;
-  // A surface on a replaced device is made again at this size on the next
-  // frame (see ensureDeviceLocked) rather than configured on a device that
-  // is gone.
-  if (_surface && _generation.load(std::memory_order_acquire) ==
-                      DawnContext::generation()) {
-    configureSurface();
-  }
-  updateTargetInfo();
   requestRedraw();
 }
 
@@ -134,6 +139,11 @@ void RNSkWindowSurface::detach() {
 void RNSkWindowSurface::detachLocked() {
   // The surface goes before the window it draws into.
   _surface = nullptr;
+  _needsConfigure = false;
+  {
+    std::lock_guard<std::mutex> infoLock(_targetInfoMutex);
+    _hasPendingSize = false;
+  }
   _generation.store(0, std::memory_order_release);
   updateTargetInfo();
   if (_releaser && _nativeHandle != nullptr) {
@@ -207,6 +217,12 @@ void RNSkWindowSurface::updateTargetInfo() {
     return;
   }
   _targetInfo = describeLocked();
+  // A size resize() noted and the presenting thread has not taken yet is
+  // what frames are recorded for.
+  if (_hasPendingSize) {
+    _targetInfo.width = _pendingWidth;
+    _targetInfo.height = _pendingHeight;
+  }
   _hasTargetInfo = true;
   // What the surface granted, kept once the window is detached: it is what
   // the window comes back with.
@@ -231,6 +247,28 @@ skgpu::graphite::TextureInfo RNSkWindowSurface::getTextureInfo() const {
                                        wgpu::TextureAspect::All));
 }
 
+void RNSkWindowSurface::takePendingSizeLocked() {
+  std::lock_guard<std::mutex> lock(_targetInfoMutex);
+  if (!_hasPendingSize) {
+    return;
+  }
+  _hasPendingSize = false;
+  if (_pendingWidth == _width && _pendingHeight == _height) {
+    return;
+  }
+  _width = _pendingWidth;
+  _height = _pendingHeight;
+  _needsConfigure = true;
+}
+
+void RNSkWindowSurface::configureIfNeededLocked() {
+  if (!_needsConfigure) {
+    return;
+  }
+  _needsConfigure = false;
+  configureSurface();
+}
+
 void RNSkWindowSurface::configureSurface() {
   wgpu::SurfaceConfiguration config;
   config.device = _device;
@@ -238,7 +276,6 @@ void RNSkWindowSurface::configureSurface() {
   config.width = _width;
   config.height = _height;
   config.presentMode = wgpu::PresentMode::Fifo;
-  _usage = supportedSurfaceUsage();
   config.usage = _usage;
 #ifdef __APPLE__
   config.alphaMode = wgpu::CompositeAlphaMode::Premultiplied;
@@ -298,8 +335,13 @@ bool RNSkWindowSurface::canPresentLocked() {
          (!_canPresent || _canPresent());
 }
 
-bool RNSkWindowSurface::isTargetLocked(
-    const RNSkGraphiteTargetInfo &target) const {
+bool RNSkWindowSurface::isTargetLocked(const RNSkGraphiteTargetInfo &target) {
+  if (describeLocked() == target) {
+    return true;
+  }
+  // A frame for the size resize() noted: the window moves on to it now. A
+  // frame for the size the window still has goes onto it as it is (above).
+  takePendingSizeLocked();
   return describeLocked() == target;
 }
 
@@ -349,7 +391,9 @@ bool RNSkWindowSurface::ensureDeviceLocked() {
     RNSkLogger::logToConsole("Could not create a surface over the window");
     return false;
   }
+  _usage = supportedSurfaceUsage();
   configureSurface();
+  _needsConfigure = false;
   updateTargetInfo();
   return true;
 }
@@ -373,6 +417,7 @@ bool RNSkWindowSurface::presentRecordings(
   if (!canPresentLocked() || !ensureDeviceLocked() || !isTargetLocked(target)) {
     return false;
   }
+  configureIfNeededLocked();
   wgpu::SurfaceTexture surfaceTexture;
   _surface.GetCurrentTexture(&surfaceTexture);
   auto texture = surfaceTexture.texture;
@@ -410,6 +455,7 @@ bool RNSkWindowSurface::presentImage(const RNSkGraphiteTargetInfo &target,
   if (!canPresentLocked() || !ensureDeviceLocked() || !isTargetLocked(target)) {
     return false;
   }
+  configureIfNeededLocked();
   wgpu::SurfaceTexture surfaceTexture;
   _surface.GetCurrentTexture(&surfaceTexture);
   auto texture = surfaceTexture.texture;
@@ -428,7 +474,7 @@ bool RNSkWindowSurface::presentImage(const RNSkGraphiteTargetInfo &target,
   if (!surface) {
     return false;
   }
-  surface->getCanvas()->drawImage(image, 0, 0);
+  drawOnto(surface->getCanvas(), image, surface->width(), surface->height());
   DawnContext::getInstance().submitRecording(recorder);
 #ifdef __APPLE__
   dawn::native::metal::WaitForCommandsToBeScheduled(_device.Get());

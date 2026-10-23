@@ -35,6 +35,13 @@ namespace RNSkia {
  * A mutex keeps the two apart: the window is never reconfigured or released
  * under a present, and detaching waits for the present in flight before it
  * lets go of the window, so that the platform may destroy it right after.
+ * A resize does not wait: it notes the size, which the presenting thread
+ * takes by its next present (see takePendingSizeLocked), and the swapchain
+ * is configured for it there (see configureIfNeededLocked), not on the main
+ * thread as the window attaches or resizes: a Vulkan swapchain is made again
+ * for every size (about 5 ms on a Pixel 8), which inside the layout would
+ * hold up the traversal, and the presenting thread with it, by that much on
+ * every frame of a view animated in size.
  * A present is made for the target the presenting thread read before it took
  * the mutex; under it, the window checks that it still is that target, and
  * declines a present made for a window resized since (see
@@ -77,8 +84,12 @@ public:
               bool useP3ColorSpace, Releaser releaser);
 
   /**
-   Reconfigures the surface for a new size, in pixels, once the present in
-   flight, if any, is done. Requests a redraw. Main thread.
+   Takes note of a new size, in pixels: what frames are recorded for from
+   now (see getTargetInfo), and what the window is configured for by the
+   first present of a frame made for it, on the presenting thread (see
+   isTargetLocked); until then the window still takes frames made for its
+   previous size, which the platform stretches to the view. Requests a
+   redraw. Main thread; never waits for the presenting thread.
    */
   void resize(int width, int height);
 
@@ -130,9 +141,9 @@ public:
 
   /**
    Installed by the view owning the surface: asks it for a frame when the
-   window appears or changes size. Called with the window's mutex held, so
-   it must not present on the spot: the view posts the redraw to the thread
-   it presents on.
+   window appears or changes size. Called from the main thread, with the
+   window's mutex held when it appears, so it must not present on the spot:
+   the view posts the redraw to the thread it presents on.
    */
   void setRequestRedraw(std::function<void()> requestRedraw) {
     _requestRedraw = std::move(requestRedraw);
@@ -195,11 +206,13 @@ private:
   // Whether a window is attached and can show a frame (see canPresent()).
   // Called with the mutex held.
   bool canPresentLocked();
-  // Whether the window is still the target the caller read (see
-  // getTargetInfo): the main thread may have resized it, or a device
-  // replacement configured it again (see ensureDeviceLocked), between the
-  // read and the present. Called with the mutex held.
-  bool isTargetLocked(const RNSkGraphiteTargetInfo &target) const;
+  // Whether the window is the target the caller read (see getTargetInfo):
+  // as it is, or as resize() noted it should be (the size is taken then,
+  // see takePendingSizeLocked). It is neither when the main thread resized
+  // it again, or a device replacement configured it again (see
+  // ensureDeviceLocked), between the read and the present. Called with the
+  // mutex held.
+  bool isTargetLocked(const RNSkGraphiteTargetInfo &target);
   // Lets go of the surfaces made on the GPU device this window was
   // configured on when that device was lost and replaced since (see
   // DawnContext), the window's own included, and destroys the device: the
@@ -228,6 +241,15 @@ private:
   // Configures the swapchain for the current size, format and usage. Called
   // with the mutex held.
   void configureSurface();
+  // Configures the swapchain when the window attached or resized since it
+  // was last configured (see attach, takePendingSizeLocked), on the
+  // presenting thread, by the present that follows. Called with the mutex
+  // held.
+  void configureIfNeededLocked();
+  // Takes the size resize() noted, if any: the window's size from now, and
+  // the swapchain's by the next present (see configureIfNeededLocked).
+  // Called with the mutex held, on the presenting thread.
+  void takePendingSizeLocked();
   // Copies the window's target description where any thread can read it.
   // Called with the mutex held.
   void updateTargetInfo();
@@ -272,6 +294,9 @@ private:
   int _height = 0;
   wgpu::TextureFormat _format = wgpu::TextureFormat::Undefined;
   wgpu::TextureUsage _usage = wgpu::TextureUsage::RenderAttachment;
+  // The window attached or resized since the swapchain was configured (see
+  // configureIfNeededLocked).
+  bool _needsConfigure = false;
   SkColorType _colorType = kUnknown_SkColorType;
   bool _useP3ColorSpace = false;
 
@@ -282,6 +307,11 @@ private:
   bool _hasTargetInfo = false;
   int _layoutWidth = 0;
   int _layoutHeight = 0;
+  // The size resize() noted, for the presenting thread to take (see
+  // takePendingSizeLocked).
+  int _pendingWidth = 0;
+  int _pendingHeight = 0;
+  bool _hasPendingSize = false;
   // The bit depth the window has, or will have (see getHighBitDepth).
   bool _knownHighBitDepth = false;
   bool _hasKnownHighBitDepth = false;
