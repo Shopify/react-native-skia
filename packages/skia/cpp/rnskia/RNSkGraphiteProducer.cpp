@@ -113,6 +113,11 @@ bool RNSkGraphiteProducer::hasContent() {
   return hasContentLocked();
 }
 
+bool RNSkGraphiteProducer::hasFrameComing() {
+  std::lock_guard<std::mutex> lock(_mutex);
+  return _inFlight || (_dirty && _target != nullptr && hasContentLocked());
+}
+
 bool RNSkGraphiteProducer::hasContentLocked() const {
   // A recording whose shared values have not been read yet is not content:
   // its animated properties are unset, and replaying it would draw them wrong.
