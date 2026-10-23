@@ -36,7 +36,7 @@ const BUTTON_RIGHT_SIDES = [
 const lineBottom = require("./line-bottom.png") as string;
 const lineTop = require("./line-top.png") as string;
 
-const imgFactory = Skia.Image.MakeImageFromEncoded.bind(Skia.Image);
+const imgFactory = Skia.Image.MakeFromEncoded.bind(Skia.Image);
 
 class SkiaImageCache {
   isCaching: boolean = false;
