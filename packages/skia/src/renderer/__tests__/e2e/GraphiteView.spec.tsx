@@ -67,22 +67,10 @@ describe("SkiaGraphiteView", () => {
         // Hermes evaluates the code at the top level, where Metro's `global`
         // module parameter is out of scope.
         const { SkiaViewApi } = globalThis;
-        const kept = SkiaViewApi.makeGraphiteContext(
-          nativeId,
-          16,
-          16,
-          false,
-          false
-        );
+        const kept = SkiaViewApi.makeGraphiteContext(nativeId, 16, 16, false);
         kept.beginRecording();
         SkiaViewApi.destroyGraphiteContext(nativeId);
-        const next = SkiaViewApi.makeGraphiteContext(
-          nativeId,
-          16,
-          16,
-          false,
-          false
-        );
+        const next = SkiaViewApi.makeGraphiteContext(nativeId, 16, 16, false);
         let outcome = "opened its own recording";
         try {
           next.beginRecording();
