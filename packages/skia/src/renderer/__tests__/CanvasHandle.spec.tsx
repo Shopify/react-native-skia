@@ -7,6 +7,11 @@ import { createRoot } from "react-dom/client";
 
 import type { Canvas as CanvasComponent, CanvasRef } from "../Canvas";
 
+let nextNativeId = 1000;
+global.SkiaViewApi = {
+  allocateNativeId: () => nextNativeId++,
+} as unknown as typeof global.SkiaViewApi;
+
 jest.doMock("../../specs/SkiaPictureViewNativeComponent", () => ({
   __esModule: true,
   default: () => null,

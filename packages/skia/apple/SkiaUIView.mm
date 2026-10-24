@@ -10,7 +10,13 @@
 
 @implementation SkiaUIView {
   std::shared_ptr<RNSkBaseAppleView> _impl;
-  RNSkia::RNSkManager *_manager;
+  // Owned by the module (see finalizeUpdates:). A view can outlive its
+  // manager: on a reload the module is invalidated on the JS thread while
+  // Fabric still holds the views of the old bundle, which it deallocates
+  // afterwards on the main thread. The weak reference makes that late
+  // unregistration a no-op, and a concurrent one keep the manager alive for
+  // the duration of the call.
+  std::weak_ptr<RNSkia::RNSkManager> _manager;
   std::function<std::shared_ptr<RNSkBaseAppleView>(
       std::shared_ptr<RNSkia::RNSkPlatformContext>)>
       _factory;
@@ -23,7 +29,7 @@
 
 #pragma mark Initialization and destruction
 
-- (void)initCommon:(RNSkia::RNSkManager *)manager
+- (void)initCommon:(std::shared_ptr<RNSkia::RNSkManager>)manager
            factory:(std::function<std::shared_ptr<RNSkBaseAppleView>(
                         std::shared_ptr<RNSkia::RNSkPlatformContext>)>)factory {
   _manager = manager;
@@ -41,15 +47,16 @@
 #endif // !TARGET_OS_OSX
   if (newSuperView != nullptr) {
     // Create implementation view when the parent view is set
-    if (_impl == nullptr && _manager != nullptr) {
-      _impl = _factory(_manager->getPlatformContext());
+    auto manager = _manager.lock();
+    if (_impl == nullptr && manager != nullptr) {
+      _impl = _factory(manager->getPlatformContext());
       if (_impl == nullptr) {
         throw std::runtime_error(
             "Expected Skia view implementation, got nullptr.");
       }
       [self.layer addSublayer:_impl->getLayer()];
       if (_nativeId != 0) {
-        _manager->setSkiaView(_nativeId, _impl->getDrawView());
+        manager->setSkiaView(_nativeId, _impl->getDrawView());
       }
       _impl->getDrawView()->setShowDebugOverlays(_debugMode);
       _impl->setUseP3ColorSpace(_useP3ColorSpace);
@@ -63,8 +70,9 @@
   if (_impl != nullptr) {
     [_impl->getLayer() removeFromSuperlayer];
 
-    if (_nativeId != 0 && _manager != nullptr) {
-      _manager->setSkiaView(_nativeId, nullptr);
+    auto manager = _manager.lock();
+    if (_nativeId != 0 && manager != nullptr) {
+      manager->setSkiaView(_nativeId, nullptr);
     }
 
     _impl = nullptr;
@@ -88,13 +96,14 @@
     // this flag is only set when the view is inserted and we want to set the
     // manager here since the view could be recycled or the app could be
     // refreshed and we would have a stale manager then
-    _manager = [RNSkiaModule latestActiveSkManager].get();
+    _manager = [RNSkiaModule latestActiveSkManager];
   }
 }
 
 - (void)unregisterView {
-  if (_manager != nullptr && _nativeId != 0) {
-    _manager->unregisterSkiaView(_nativeId);
+  auto manager = _manager.lock();
+  if (manager != nullptr && _nativeId != 0) {
+    manager->unregisterSkiaView(_nativeId);
   }
 }
 
@@ -136,8 +145,9 @@
 - (void)setNativeId:(size_t)nativeId {
   _nativeId = nativeId;
 
-  if (_impl != nullptr) {
-    _manager->registerSkiaView(nativeId, _impl->getDrawView());
+  auto manager = _manager.lock();
+  if (_impl != nullptr && manager != nullptr) {
+    manager->registerSkiaView(nativeId, _impl->getDrawView());
   }
 }
 

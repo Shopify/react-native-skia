@@ -42,6 +42,7 @@ const hasContext = (view: SkiaWebViewHandle): view is SkiaGraphiteViewHandle =>
   "getContext" in view;
 
 export type ISkiaViewApiWeb = ISkiaViewApi & {
+  nextNativeId: number;
   views: Record<string, SkiaWebViewHandle>;
   deferedPictures: Record<string, SkPicture>;
   unregisteredViews: Set<string>;
@@ -50,6 +51,10 @@ export type ISkiaViewApiWeb = ISkiaViewApi & {
 };
 
 global.SkiaViewApi = {
+  nextNativeId: 1000,
+  allocateNativeId() {
+    return this.nextNativeId++;
+  },
   views: {},
   deferedPictures: {},
   unregisteredViews: new Set<string>(),

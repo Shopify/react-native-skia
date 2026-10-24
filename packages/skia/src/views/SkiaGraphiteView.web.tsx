@@ -23,7 +23,6 @@ import type {
 } from "../specs/NativeSkiaModule.web";
 
 import type { SkiaGraphiteViewNativeProps } from "./types";
-import { SkiaViewNativeId } from "./SkiaViewNativeId";
 import { useSkiaWebRenderer } from "./SkiaWebRenderer";
 import type { Renderer } from "./SkiaWebRenderer";
 
@@ -158,7 +157,7 @@ export const SkiaGraphiteView = (props: SkiaGraphiteViewProps) => {
     () =>
       props.nativeID !== undefined
         ? Number(props.nativeID)
-        : SkiaViewNativeId.current++,
+        : (global.SkiaViewApi as ISkiaViewApiWeb).allocateNativeId(),
     [props.nativeID]
   );
 
