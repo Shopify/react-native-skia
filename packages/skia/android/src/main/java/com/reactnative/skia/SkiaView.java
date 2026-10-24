@@ -18,7 +18,7 @@ import com.facebook.react.uimanager.PointerEvents;
 import com.facebook.react.views.view.ReactViewGroup;
 
 /**
- * The Android view behind <Canvas>, <SkiaPictureView> and <SkiaGraphiteView>.
+ * The Android view behind <Canvas> and <SkiaGraphiteView>.
  * It is backed by a TextureView or a SurfaceView, named by the
  * androidBackingView prop and created once, from the props of the first
  * transaction, for the life of the view (see updateView()), that the native

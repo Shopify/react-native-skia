@@ -28,7 +28,6 @@ export const apiScreenPaths: Record<keyof Routes, string> = {
   BlendModes: "blend-modes",
   FontMgr: "font-mgr",
   Data: "data",
-  PictureView: "picture-view",
   Picture: "picture",
   Checker: "checker",
   UseCanvas: "use-canvas",

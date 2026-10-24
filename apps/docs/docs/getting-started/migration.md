@@ -164,6 +164,17 @@ The following APIs were removed in favor of it:
 | `ref.current.makeImageSnapshotAsync()` on a `Canvas` | `makeImageSnapshot()`: with Graphite the snapshot is taken on the calling thread and returns a GPU image. To encode it or read its pixels without blocking, read it back with `image.makeRasterImage()`. See [snapshots](/docs/canvas/overview#getting-a-canvas-snapshot). |
 | `useCanvasSize()` returning `{ ref, size }` | It returns `{ size, onLayout }` and no longer takes a ref: pass `onLayout` to the canvas instead of `ref`, and `size` follows every layout change instead of being measured once. Keep `useCanvasRef()` for the ref: its `size` property reads the layout synchronously. See [canvas size](/docs/canvas/overview#canvas-size). |
 
+`<SkiaPictureView picture={picture} />` was removed as well. Draw the picture in a canvas instead, which renders it the same way:
+
+```diff
+- <SkiaPictureView style={style} picture={picture} />
++ <Canvas style={style}>
++   <Picture picture={picture} />
++ </Canvas>
+```
+
+Its `mode="continuous"` prop has no replacement: to animate the picture, pass a shared value to `picture` (see [pictures](/docs/shapes/pictures)).
+
 When an image cannot be decoded, `useImage()` now calls `onError` with the message `Could not decode the image` (it was `Could not load data`).
 
 A few methods were renamed so that the name says whether the result lives on the CPU or on the GPU: "raster" is a CPU surface or image, "texture" a GPU one (see [GPU and CPU images](/docs/images#gpu-and-cpu-images)).
