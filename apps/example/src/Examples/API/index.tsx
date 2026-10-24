@@ -21,7 +21,6 @@ import { ImageFilters } from "./ImageFilters";
 import { UseCanvas } from "./UseCanvas";
 import { FreezeExample } from "./Freeze";
 import { Touch } from "./Touch";
-import { PictureViewExample } from "./PictureView";
 import { OnLayoutDemo } from "./OnLayout";
 import { CanvasSize } from "./CanvasSize";
 import { CanvasResize } from "./CanvasResize";
@@ -228,13 +227,6 @@ export const API = () => {
         component={PictureExample}
         options={{
           title: "🖼 Picture",
-        }}
-      />
-      <Stack.Screen
-        name="PictureView"
-        component={PictureViewExample}
-        options={{
-          title: "🖼 Picture View",
         }}
       />
       <Stack.Screen
