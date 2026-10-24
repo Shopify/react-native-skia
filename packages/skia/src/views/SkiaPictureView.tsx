@@ -46,25 +46,30 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
 
   componentDidUpdate(prevProps: SkiaPictureViewProps) {
     warnBackingViewChange(this.mountProps, prevProps, this.props);
-    const { picture } = this.props;
+    const { picture, mode } = this.props;
+    // The native view records a new picture and presents it; a render with
+    // the same one has nothing new to draw.
     if (picture !== prevProps.picture) {
       assertSkiaViewApi();
       SkiaViewApi.setJsiProperty(this._nativeId, "picture", picture);
     }
-    this.tick();
+    if ((mode === "continuous") !== (prevProps.mode === "continuous")) {
+      // A frame still pending belongs to the loop of the mode that ended.
+      cancelAnimationFrame(this.requestId);
+      this.tick();
+    }
   }
 
   componentWillUnmount() {
-    if (this.requestId) {
-      cancelAnimationFrame(this.requestId);
-    }
+    cancelAnimationFrame(this.requestId);
   }
 
   private tick() {
     this.redraw();
-    if (this.props.mode === "continuous") {
-      this.requestId = requestAnimationFrame(this.tick.bind(this));
-    }
+    this.requestId =
+      this.props.mode === "continuous"
+        ? requestAnimationFrame(this.tick.bind(this))
+        : 0;
   }
 
   /**
@@ -90,6 +95,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
       mode: _mode,
       picture: _picture,
       highBitDepth = false,
+      static: staticPresentation = false,
       android,
       ...viewProps
     } = this.props;
@@ -98,6 +104,7 @@ export class SkiaPictureView extends React.Component<SkiaPictureViewProps> {
         collapsable={false}
         nativeID={`${this._nativeId}`}
         highBitDepth={highBitDepth}
+        staticPresentation={staticPresentation}
         {...androidNativeProps({ highBitDepth, android })}
         {...viewProps}
       />
