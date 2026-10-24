@@ -191,7 +191,7 @@ describe("Skottie", () => {
     );
     const { Skia } = importSkia();
     const rData = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    const image = Skia.Image.MakeFromEncoded(rData)!;
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/lego.png"));
   });
@@ -322,7 +322,7 @@ describe("Skottie", () => {
     );
     const { Skia } = importSkia();
     const rData = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    const image = Skia.Image.MakeFromEncoded(rData)!;
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/basic_slots.png"));
   });
@@ -355,7 +355,7 @@ describe("Skottie", () => {
     );
     const { Skia } = importSkia();
     const rData = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    const image = Skia.Image.MakeFromEncoded(rData)!;
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/basic_slots-with-colors.png"));
   });
@@ -398,7 +398,7 @@ describe("Skottie", () => {
     );
     const { Skia } = importSkia();
     const rData = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    const image = Skia.Image.MakeFromEncoded(rData)!;
     expect(rData).toBeDefined();
     checkImage(image, docPath("skottie/fingerprint-color1.png"));
   });
@@ -456,7 +456,7 @@ describe("Skottie", () => {
     );
     const { Skia } = importSkia();
     const rData = Skia.Data.fromBase64(raw);
-    const image = Skia.Image.MakeImageFromEncoded(rData)!;
+    const image = Skia.Image.MakeFromEncoded(rData)!;
     expect(rData).toBeDefined();
     if (surface.OS === "node" || surface.OS === "web") {
       checkImage(image, docPath("skottie/text-prop-web.png"));
